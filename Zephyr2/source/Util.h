@@ -9,15 +9,13 @@
 #include <map>
 #include <algorithm>
 
-enum class ASSET_TYPE
-{
+enum class ASSET_TYPE {
 	TEXTURE, MODEL, DATA, MUSIC, SOUND, SHADER
 };
 
-inline std::string getAssetPrefixPath(ASSET_TYPE assetType)
-{
-	switch (assetType)
-	{
+inline std::string getAssetPrefixPath(ASSET_TYPE assetType) {
+
+	switch (assetType) {
 	case ASSET_TYPE::TEXTURE:
 		return std::string("assets/textures/");
 	case ASSET_TYPE::MODEL:
@@ -25,11 +23,11 @@ inline std::string getAssetPrefixPath(ASSET_TYPE assetType)
 	case ASSET_TYPE::DATA:
 		return std::string("assets/data/");
 	case ASSET_TYPE::SOUND:
-		return std::string("assets/sounds/");
+		return std::string("assets/sfx/");
 	case ASSET_TYPE::MUSIC:
 		return std::string("assets/music/");
 	case ASSET_TYPE::SHADER:
-		return std::string("assets/shader/");
+		return std::string("assets/shaders/");
 	}
 
 	return std::string("assets/");
@@ -70,16 +68,13 @@ inline std::string openFile(std::string fileName) {
 	return output;
 }
 
-inline std::string openFileFromAsset(std::string assetName, ASSET_TYPE assetType, bool removeSpaces)
-{
+inline std::string openFileFromAsset(std::string assetName, ASSET_TYPE assetType, bool removeSpaces) {
 	std::string fullPath = getAssetPrefixPath(assetType) + assetName;
 
-	if (removeSpaces)
-	{
+	if (removeSpaces) {
 		return openFileRemoveSpaces(fullPath);
 	}
-	else
-	{
+	else {
 		return openFile(fullPath);
 	}
 }
