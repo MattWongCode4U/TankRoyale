@@ -75,8 +75,22 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib32;$(SolutionDir)Dependencies/sdl/lib32;$(SolutionDir)Dependencies/glew/lib32;$(SolutionDir)Dependencies/freeglut/lib32;$(SolutionDir)Dependencies/fmod/lib32;%(Additionallib32raryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y  "$(SolutionDir)Dependencies\fmod\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\freeglut\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\glew\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\sdl\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\sdl_image\dll32\*.dll" "$(OutDir)"
+xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -107,12 +121,24 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib32;$(SolutionDir)Dependencies/sdl/lib32;$(SolutionDir)Dependencies/glew/lib32;$(SolutionDir)Dependencies/freeglut/lib32;$(SolutionDir)Dependencies/fmod/lib32;%(Additionallib32raryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y  "$(SolutionDir)Dependencies\fmod\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\freeglut\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\glew\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\sdl\dll32\*.dll" "$(OutDir)"
+xcopy /y  "$(SolutionDir)Dependencies\sdl_image\dll32\*.dll" "$(OutDir)"
+xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
