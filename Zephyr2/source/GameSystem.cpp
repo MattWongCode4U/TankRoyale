@@ -11,8 +11,8 @@ GameSystem::~GameSystem() {
 //reads gameobjects from a file. instantiates them and adds them to the list of active objects
 void GameSystem::addGameObjects(string fileName) {
 
-	std::string data = openFileRemoveSpaces(fileName);
-
+	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
+	
 	vector<string> splitDataVector = split(data, ';');//split gameobjects by
 
 	GameObject* g; //new gameobject to be created
@@ -20,7 +20,7 @@ void GameSystem::addGameObjects(string fileName) {
 	for (int j = 0; j < splitDataVector.size(); j++) {
 
 		vector<string> splitObjData = split(splitDataVector[j], ',');
-
+		
 		std::map<std::string, std::string> gameObjDataMap;
 		//loop through elements of each GameObject and add them to the object parameter map
 		for (int i = 0; i < splitObjData.size(); i++) {

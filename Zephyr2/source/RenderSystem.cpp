@@ -466,7 +466,8 @@ GLuint RenderSystem::getTexture(string path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	SDL_Surface *temp = IMG_Load(path.c_str());
+	std::string fullPath = getAssetPrefixPath(ASSET_TYPE::TEXTURE) + path;
+	SDL_Surface *temp = IMG_Load(fullPath.c_str());
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, temp->w, temp->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, temp->pixels);
 	glGenerateMipmap(GL_TEXTURE_2D);

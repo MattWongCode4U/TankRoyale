@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 	//////////////////////////////////////////////////////////////////
 	//int numberOfWorkerThreads = 16; // Default to 16
 
-	std::string rawConfigData = openFileRemoveSpaces("config.txt");
+	std::string rawConfigData = openFileFromAsset("config.txt", ASSET_TYPE::DATA, true);
 	
 	// Temporary config file is structured to only list the time frames for
 	// GameSystem, RenderThread, and ioThread
