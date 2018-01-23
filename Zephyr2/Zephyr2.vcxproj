@@ -179,6 +179,10 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\Msg.cpp" />
     <ClCompile Include="source\NetworkSystem.cpp" />
     <ClCompile Include="source\ObjectData.cpp" />
+    <ClCompile Include="source\renderer\GlobalPrefs.cpp" />
+    <ClCompile Include="source\renderer\OBJImport.cpp" />
+    <ClCompile Include="source\renderer\RenderPipeline.cpp" />
+    <ClCompile Include="source\renderer\Shaders.cpp" />
     <ClCompile Include="source\RenderSystem.cpp" />
     <ClCompile Include="source\ShipObj.cpp" />
     <ClCompile Include="source\System.cpp" />
@@ -197,6 +201,14 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\Msg.h" />
     <ClInclude Include="source\NetworkSystem.h" />
     <ClInclude Include="source\ObjectData.h" />
+    <ClInclude Include="source\renderer\Cube.h" />
+    <ClInclude Include="source\renderer\GlobalPrefs.h" />
+    <ClInclude Include="source\renderer\OBJImport.h" />
+    <ClInclude Include="source\renderer\Quad.h" />
+    <ClInclude Include="source\renderer\RenderableTypes.h" />
+    <ClInclude Include="source\renderer\RendererInternalTypes.h" />
+    <ClInclude Include="source\renderer\RenderPipeline.h" />
+    <ClInclude Include="source\renderer\Shaders.h" />
     <ClInclude Include="source\RenderSystem.h" />
     <ClInclude Include="source\ShipObj.h" />
     <ClInclude Include="source\System.h" />
