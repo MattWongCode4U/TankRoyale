@@ -16,13 +16,6 @@ private:
 	//resource lists
 	std::map<std::string, ModelData> *_models_p;
 	std::map<std::string, TextureData> *_textures_p;
-	std::vector<ModelLoadingData> *_modelLoadQueue_p;
-	std::vector<TextureLoadingData> *_textureLoadQueue_p;
-	std::vector<ModelLoadingData> *_modelAwaitQueue_p;
-	std::vector<TextureLoadingData> *_textureAwaitQueue_p;
-
-	//threading stuff
-	bool _isRunning;
 
 	//shader stuff
 	GLuint _programID = 0;
@@ -136,6 +129,10 @@ private:
 	void drawLightingPointLight(RenderableLight light, RenderableScene * scene);
 	void drawLightingSpotLight(RenderableLight light, RenderableScene * scene);
 
+	void setupWindow();
+	void setupProgram();
+	void cleanupProgram();
+
 	void setupFallbacks();
 	void cleanupFallbacks();
 	void setupFramebuffers();
@@ -148,18 +145,15 @@ private:
 	void cleanupPostProcessing();
 
 public:
-	RenderPipeline();
+	RenderPipeline(SDL_Window *window_p);
 	~RenderPipeline();
 
 	void setupGLOnThread();
 	void setupSceneOnThread();
 	void cleanupSceneOnThread();
 	void cleanupGLOnThread();
-
-	void setupWindow();
-	void setupProgram();
-	void cleanupProgram();
-	
+		
+	void loadAllResources();
 	void loadOneModel(std::string modelName);
 	void loadOneTexture(std::string textureName);
 

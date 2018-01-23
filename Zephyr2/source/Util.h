@@ -8,6 +8,7 @@
 #include <chrono>
 #include <map>
 #include <algorithm>
+#include <filesystem>
 
 enum class ASSET_TYPE {
 	TEXTURE, MODEL, DATA, MUSIC, SOUND, SHADER
@@ -85,4 +86,17 @@ inline void writeToFile(std::string fileName, std::string data) {
 	myfile.open(fileName);
 	myfile << data;
 	myfile.close();
+}
+
+inline std::vector<std::string> listFilesInPath(std::string path) {
+	namespace fs = std::experimental::filesystem;
+	std::vector<std::string> filesInPath;
+
+	for (auto &p : fs::directory_iterator(path))
+	{
+		filesInPath.push_back(p.path().stem().string());
+	}
+
+	//will return filenames WITHOUT extension
+	return filesInPath;
 }

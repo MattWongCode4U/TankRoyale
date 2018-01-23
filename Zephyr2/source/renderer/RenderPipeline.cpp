@@ -19,10 +19,11 @@ const std::string TEXTURE_EXTENSION_CONST = ".png";
 
 const int_least64_t IDLE_DELAY_CONST = 10;
 
-RenderPipeline::RenderPipeline()
+RenderPipeline::RenderPipeline(SDL_Window *window_p)
 {
 	_models_p = new std::map<std::string, ModelData>();
 	_textures_p = new std::map<std::string, TextureData>();
+	_window_p = window_p;
 }
 
 RenderPipeline::~RenderPipeline()
@@ -448,6 +449,26 @@ void RenderPipeline::cleanupPostProcessing()
 	glDeleteFramebuffers(1, &_postSmearbufferTexID);
 
 	glDeleteProgram(_postProgramID);
+}
+
+/// <summary>
+/// Primary method for resource loading
+/// Loads, binds, and registers all available models and textures
+/// </summary>
+void RenderPipeline::loadAllResources()
+{
+	//TODO implementation
+	std::vector<std::string> textureNames = listFilesInPath(getAssetPrefixPath(ASSET_TYPE::TEXTURE));
+	for (auto textureName : textureNames) {
+		loadOneTexture(textureName);
+	}
+
+	std::vector<std::string> modelNames = listFilesInPath(getAssetPrefixPath(ASSET_TYPE::MODEL));
+	for (auto modelName : modelNames) {
+		loadOneModel(modelName);
+	}
+
+	//TODO use a list instead of loading everything?
 }
 
 /// <summary>
