@@ -167,6 +167,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HexTile.cpp" />
     <ClCompile Include="source\AudioEngine.cpp" />
     <ClCompile Include="source\AudioSystem.cpp" />
     <ClCompile Include="source\Cannonball.cpp" />
@@ -185,6 +186,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\Vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HexTile.h" />
     <ClInclude Include="source\AudioEngine.h" />
     <ClInclude Include="source\AudioSystem.h" />
     <ClInclude Include="source\Cannonball.h" />

@@ -454,7 +454,12 @@ void GameSystem::lvl1Handler(Msg * msg) {
 
 		switch (msg->type) {
 		case DOWN_ARROW_PRESSED: 
-			reticle->y -= 10;
+			reticle->y -= hexSize * 2;
+			reticleYGrid--;
+
+			if(reticleYGrid % 2 == 0)
+
+			 
 			sendUpdatePosMessage(reticle);
 			break;
 

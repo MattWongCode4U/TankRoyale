@@ -69,4 +69,7 @@ private:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
+	int hexSize = 10; //"radias" of a single hexagon in the grid
+	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
+
 };
