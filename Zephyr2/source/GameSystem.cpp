@@ -452,29 +452,37 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	vector<string> playersArray;
 	vector<string> playerAction;
 
+	
+	float hexHeight = hexSize * 2.0f; //height of a single hex tile
+	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
+	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
+
 		switch (msg->type) {
 		case DOWN_ARROW_PRESSED: 
-			reticle->y -= hexSize * 2;
+			reticle->y -= vertDist;
 			reticleYGrid--;
-
-			if(reticleYGrid % 2 == 0)
-
+			handleGridOffset(reticle, hexWidth);
 			 
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case UP_ARROW_PRESSED:
-			reticle->y += 10;
+			reticle->y += vertDist;
+			reticleYGrid++;
+			handleGridOffset(reticle, hexWidth);
+
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case LEFT_ARROW_PRESSED:
-			reticle->x -= 10;
+			reticle->x -= hexWidth;
+			reticleXGrid--;
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case RIGHT_ARROW_PRESSED:
-			reticle->x += 10;
+			reticle->x += hexWidth;
+			reticleXGrid++;
 			sendUpdatePosMessage(reticle);
 			break;
 
@@ -669,4 +677,13 @@ void GameSystem::executeAction(int a) {
 		}
 	}
 
+}
+
+void GameSystem::handleGridOffset(GameObject* reticle, float hexWidth) {
+	if (reticleYGrid % 2 != 0) {
+		reticle->x += hexWidth / 2;
+	}
+	else {
+		reticle->x -= hexWidth / 2;
+	}
 }

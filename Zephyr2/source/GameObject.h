@@ -9,8 +9,8 @@ using namespace std;
 class GameObject {
 public:
 	std::string id;
-	int x;
-	int y;
+	float x;
+	float y;
 	int z;
 	int width;
 	int length;

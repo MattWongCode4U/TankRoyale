@@ -56,6 +56,7 @@ private:
 	void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
+	void handleGridOffset(GameObject* reticle, float hexWidth);
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
@@ -69,7 +70,7 @@ private:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
-	int hexSize = 10; //"radias" of a single hexagon in the grid
+	int hexSize = 20; //"radius" of a single hexagon in the grid
 	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
 
 };
