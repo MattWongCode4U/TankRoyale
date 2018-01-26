@@ -452,37 +452,32 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	vector<string> playersArray;
 	vector<string> playerAction;
 
+	Vector2 reticleWorldPos;
 	
-	float hexHeight = hexSize * 2.0f; //height of a single hex tile
-	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
-	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
+	
 
 		switch (msg->type) {
 		case DOWN_ARROW_PRESSED: 
-			reticle->y -= vertDist;
 			reticleYGrid--;
-			handleGridOffset(reticle, hexWidth);
-			 
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case UP_ARROW_PRESSED:
-			reticle->y += vertDist;
 			reticleYGrid++;
-			handleGridOffset(reticle, hexWidth);
-
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case LEFT_ARROW_PRESSED:
-			reticle->x -= hexWidth;
 			reticleXGrid--;
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case RIGHT_ARROW_PRESSED:
-			reticle->x += hexWidth;
 			reticleXGrid++;
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
@@ -679,11 +674,18 @@ void GameSystem::executeAction(int a) {
 
 }
 
-void GameSystem::handleGridOffset(GameObject* reticle, float hexWidth) {
-	if (reticleYGrid % 2 != 0) {
-		reticle->x += hexWidth / 2;
-	}
-	else {
-		reticle->x -= hexWidth / 2;
-	}
+//converts grid coordinates to world coordinates
+Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
+	float hexHeight = hexSize * 2.0f; //height of a single hex tile
+	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
+	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
+
+	Vector2 worldPos;
+
+	worldPos.x = hexWidth * gridX;
+	worldPos.y = vertDist * gridY;
+	if (gridY % 2 != 0) 
+		worldPos.x += hexWidth / 2;
+
+	return worldPos;
 }

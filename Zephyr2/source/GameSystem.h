@@ -17,6 +17,8 @@
 #include "ObjectData.h"
 
 
+
+
 extern volatile bool malive;
 
 class GameSystem : public System {
@@ -56,7 +58,9 @@ private:
 	void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
-	void handleGridOffset(GameObject* reticle, float hexWidth);
+
+	//converts grid coordinates to world coordinates
+	Vector2 gridToWorldCoord(int gridX, int gridY);
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
@@ -71,6 +75,8 @@ private:
 	int framesSinceTurnStart = 0;
 
 	int hexSize = 20; //"radius" of a single hexagon in the grid
+
 	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
+
 
 };
