@@ -78,5 +78,6 @@ private:
 
 	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
 
-
+	//maximumNumber of actions per turn
+	int maxActions = 4;
 };

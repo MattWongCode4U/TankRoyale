@@ -481,8 +481,11 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			sendUpdatePosMessage(reticle);
 			break;
 
-		case SPACEBAR_PRESSED:
+		case SPACEBAR_PRESSED: {
 			//send messsage with the confirmed action
+
+			if (currentAction >= maxActions) break;
+				
 
 			//message format: playerID,actionName,actionNumber,targetX,targetY
 			oss << player->id << ","//playerID
@@ -490,13 +493,31 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				<< currentAction << ","//the action number 0 to <number of actions/turn>
 				<< reticle->x << "," //target x pos
 				<< reticle->y; //target y pos
-				
+
 			mm->type = NETWORK_R_ACTION;
 			mm->data = oss.str();
-			msgBus->postMessage(mm, this);	
-			currentAction++;
-			break;
+			msgBus->postMessage(mm, this);
 
+			GameObject* indicator = NULL;
+
+			string indicatorId = "TileIndicator" + to_string(currentAction);
+
+			for (GameObject* g : gameObjects) {
+				if (g->id == indicatorId) {
+					indicator = g;
+				}
+			}
+
+			indicator->x = reticle->x;
+			indicator->y = reticle->y;
+			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
+			sendUpdatePosMessage(indicator);
+
+			currentAction++;
+
+
+			break;
+		}
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
 			//OutputDebugString(actionsToExecute[0].c_str());
@@ -655,6 +676,17 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
+	//clear Indicators
+	for (GameObject* g : gameObjects) {
+		if (g->id.find("TileIndicator") != std::string::npos) {
+			g->renderable = "nothing.png";
+			//move object out side of camera instead of changing renderable. Temp Solution
+			g->x = 1000;
+			sendUpdatePosMessage(g);
+		}
+	}
+
+
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
@@ -667,12 +699,12 @@ void GameSystem::executeAction(int a) {
 				g->x = stoi(playerAction[2]);
 				g->y = stoi(playerAction[3]);
 				sendUpdatePosMessage(g);
-			}
-			
+			}			
 		}
 	}
 
 }
+
 
 //converts grid coordinates to world coordinates
 Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
