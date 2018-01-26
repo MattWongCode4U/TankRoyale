@@ -504,7 +504,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
-			OutputDebugString(actionsToExecute[0].c_str());
+			//OutputDebugString(actionsToExecute[0].c_str());
 	/*		playersArray = split(actionsToExecute[0], ']');
 			playerAction = split(playersArray[0], ',');
 			player->x = stoi(playerAction[2]);
