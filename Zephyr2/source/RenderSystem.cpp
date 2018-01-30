@@ -36,8 +36,20 @@ RenderSystem::~RenderSystem() {
 void RenderSystem::init() {
 
 	//TEMPORARY: setup initial camera rig and main light	
-		
+	RenderableCamera cam;
+	cam.farPlane = 1000;
+	cam.nearPlane = 1;
+	cam.clearColor = glm::vec3(0.25f, 0.25f, 0.25f);
+	cam.viewAngle = 60.0f;
+	cam.position = glm::vec3(0, 0, 100.0f);
+	cam.rotation = glm::vec3(0, 0, 0);
+	scene->camera = cam;
 
+	RenderableLight mainLight;
+	mainLight.type = RenderableLightType::AMBIENT;
+	mainLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
+	mainLight.intensity = 1.0f;
+	scene->lights.push_back(mainLight);
 }
 
 /*
@@ -56,6 +68,7 @@ void RenderSystem::startSystemLoop() {
 
 	//TEMPORARY: set state
 	state = RendererState::rendering;
+	running = true;
 
 	while (running) { //TODO change to "alive"?
 		
@@ -170,15 +183,40 @@ void RenderSystem::handleMessage(Msg *msg) {
 }
 
 /*
-	Parse message and create a RenderableObject
+	Parse message and create an id/RenderableObject pair
 */
-RenderableObject RenderSystem::parseObject(std::string data)
+std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string data)
 {
+	vector<string> objectData = split(data, ',');
+
 	RenderableObject obj;
+	std::string id;
 
 	//derived from old renderObject implementation, could be optimized
+	//TODO need to redefine object data message
+	std::string sprite;
+	float x, y, z, orientation, w, h;
+	int frames = 1;
 
-	return obj;
+	id = objectData[0];
+	sprite = objectData[1];
+	std::string spriteName = std::string(sprite, 0, sprite.find_last_of('.')); //strip file extension
+	x = (float)(atof(objectData[2].c_str()));
+	y = (float)(atof(objectData[3].c_str()));
+	z = (float)(atof(objectData[4].c_str()));
+	orientation = (float)(atof(objectData[5].c_str()));
+	w = (float)(atof(objectData[6].c_str()));
+	h = (float)(atof(objectData[7].c_str()));
+	frames = atoi(objectData[10].c_str());
+
+	//set obj data
+	obj.position = glm::vec3(x, y, z);
+	obj.rotation = glm::vec3(0, 0, orientation);
+	obj.scale = glm::vec3(w, h, 1);
+	obj.modelName = "cube"; //TODO change to quad, TODO render type
+	obj.albedoName = spriteName;
+
+	return std::make_pair(id, obj);
 }
 
 /*
@@ -196,28 +234,47 @@ void RenderSystem::positionUpdated() {
 	Remove object from the list of objects to render.
 */
 void RenderSystem::removeObjectFromRenderList(Msg* m) {
-	
+	std::string keyToRemove = m->data;
+	objects->erase(keyToRemove);
 }
 
 /*
 	Add object to the list of objects to render.
 */
 void RenderSystem::addObjectToRenderList(Msg* m) {
-	
+	auto objectPair = parseObject(m->data);
+	objects->emplace(objectPair);
+	//that's more like it!
 }
 
 /*
 	Update the position of an object given in the message.
 */
 void RenderSystem::updateObjPosition(Msg* m) {
-	
+	//best way I figure is parse, find, replace-in-place
+	auto objectPair = parseObject(m->data);
+	auto newObj = objectPair.second;
+
+	RenderableObject *obj = &objects->at(objectPair.first);
+	obj->position = newObj.position;
+	obj->rotation = newObj.rotation;
+	//update scale?
 }
 
 /*
 	Update the sprite of an object
 */
 void RenderSystem::updateObjSprite(Msg* m) {
-	
+	std::vector<std::string> dataVector = split(m->data, ',');
+	std::string id = dataVector.at(0);
+	std::string sprite = dataVector.at(2);
+
+	//strip file extension
+	std::string spriteName = std::string(sprite, 0, sprite.find_last_of('.')); 
+
+	RenderableObject *obj = &objects->at(id); //TODO handle if missing
+	obj->albedoName = spriteName; //TODO handling swapping normal maps and models
+
 }
 
 /*
@@ -274,8 +331,10 @@ void RenderSystem::cameraToPlayer() {
 	Handle message when the level is loaded.
 */
 void RenderSystem::levelLoaded(Msg* m) {
+	//TODO purge objects?
+
 	state = RendererState::rendering;
-	loadedLevel = atoi(m->data.c_str());
+	loadedLevel = atoi(m->data.c_str()); //what does this do?
 	if (loadedLevel != 2) { //Reset camera when not in game
 		cameraX = 0.0f;
 		cameraY = 0.0f;

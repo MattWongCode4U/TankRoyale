@@ -20,7 +20,7 @@ inline std::string getAssetPrefixPath(ASSET_TYPE assetType) {
 	case ASSET_TYPE::TEXTURE:
 		return std::string("assets/textures/");
 	case ASSET_TYPE::MODEL:
-		return std::string("assets/model/");
+		return std::string("assets/models/");
 	case ASSET_TYPE::DATA:
 		return std::string("assets/data/");
 	case ASSET_TYPE::SOUND:

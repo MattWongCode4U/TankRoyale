@@ -481,10 +481,9 @@ void RenderPipeline::loadOneModel(std::string modelName)
 	ModelData md;
 
 	std::string path = getAssetPrefixPath(ASSET_TYPE::MODEL) + modelName + MODEL_EXTENSION_CONST;
-	std::string *data_p = &openFile(path);
+	std::string data = openFile(path);
 
-	auto objData = OBJImport::importObjInfo(*data_p);
-	delete data_p;
+	auto objData = OBJImport::importObjInfo(data);
 
 	GLuint numVertices = (GLuint)objData.size() / 8;
 	GLfloat *objPtr = &objData[0];
@@ -524,7 +523,7 @@ void RenderPipeline::loadOneTexture(std::string textureName)
 
 	GLint mode = GL_RGB;
 
-	std::string texturePath = getAssetPrefixPath(ASSET_TYPE::TEXTURE) + "default" + TEXTURE_EXTENSION_CONST;
+	std::string texturePath = getAssetPrefixPath(ASSET_TYPE::TEXTURE) + textureName + TEXTURE_EXTENSION_CONST;
 	SDL_Surface *image_p = IMG_Load(texturePath.c_str()); //TODO move to an internal helper function
 
 	if (image_p->format->BytesPerPixel == 4)
@@ -813,7 +812,7 @@ void RenderPipeline::drawObject(RenderableObject *object)
 	objectMVM = glm::translate(objectMVM, object->position);
 	//SDL_Log("%f, %f, %f", object->position.x, object->position.y, object->position.z);
 	objectMVM = glm::scale(objectMVM, object->scale);
-	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
 	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
 	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
 	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;

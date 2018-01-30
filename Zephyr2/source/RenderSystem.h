@@ -64,5 +64,5 @@ private:
 	void positionUpdated();
 
 	void levelLoaded(Msg*m);
-	RenderableObject parseObject(std::string data);
+	std::pair<std::string,RenderableObject> parseObject(std::string data);
 };

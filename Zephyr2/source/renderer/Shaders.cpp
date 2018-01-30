@@ -25,20 +25,20 @@
 /*========================================================================================
 	Class Fields
 ========================================================================================*/
-std::string Shaders::VSH_01_PATH = "ResourceFiles/Shaders/shader01.vsh";
-std::string Shaders::FSH_01_PATH = "ResourceFiles/Shaders/shader01.fsh";
-std::string Shaders::VSH_02_PATH = "ResourceFiles/Shaders/shader02.vsh";
-std::string Shaders::FSH_02_PATH = "ResourceFiles/Shaders/shader02.fsh";
-std::string Shaders::VSH_SHADOW_PATH = "ResourceFiles/Shaders/shadow.vsh";
-std::string Shaders::FSH_SHADOW_PATH = "ResourceFiles/Shaders/shadow.fsh";
-std::string Shaders::VSH_POINT_PATH = "ResourceFiles/Shaders/light_point.vsh";
-std::string Shaders::FSH_POINT_PATH = "ResourceFiles/Shaders/light_point.fsh";
-std::string Shaders::VSH_SPOT_PATH = "ResourceFiles/Shaders/light_spot.vsh";
-std::string Shaders::FSH_SPOT_PATH = "ResourceFiles/Shaders/light_spot.fsh";
-std::string Shaders::VSH_POST_PATH = "ResourceFiles/Shaders/postprocessing.vsh";
-std::string Shaders::FSH_POST_PATH = "ResourceFiles/Shaders/postprocessing.fsh";
-std::string Shaders::VSH_COPY_PATH = "ResourceFiles/Shaders/sbcopy.vsh";
-std::string Shaders::FSH_COPY_PATH = "ResourceFiles/Shaders/sbcopy.fsh";
+std::string Shaders::VSH_01_PATH = "assets/shaders/shader01.vsh";
+std::string Shaders::FSH_01_PATH = "assets/shaders/shader01.fsh";
+std::string Shaders::VSH_02_PATH = "assets/shaders/shader02.vsh";
+std::string Shaders::FSH_02_PATH = "assets/shaders/shader02.fsh";
+std::string Shaders::VSH_SHADOW_PATH = "assets/shaders/shadow.vsh";
+std::string Shaders::FSH_SHADOW_PATH = "assets/shaders/shadow.fsh";
+std::string Shaders::VSH_POINT_PATH = "assets/shaders/light_point.vsh";
+std::string Shaders::FSH_POINT_PATH = "assets/shaders/light_point.fsh";
+std::string Shaders::VSH_SPOT_PATH = "assets/shaders/light_spot.vsh";
+std::string Shaders::FSH_SPOT_PATH = "assets/shaders/light_spot.fsh";
+std::string Shaders::VSH_POST_PATH = "assets/shaders/postprocessing.vsh";
+std::string Shaders::FSH_POST_PATH = "assets/shaders/postprocessing.fsh";
+std::string Shaders::VSH_COPY_PATH = "assets/shaders/sbcopy.vsh";
+std::string Shaders::FSH_COPY_PATH = "assets/shaders/sbcopy.fsh";
 
 /*----------------------------------------------------------------------------------------
 	Class Methods
