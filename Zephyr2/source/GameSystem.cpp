@@ -452,29 +452,40 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	vector<string> playersArray;
 	vector<string> playerAction;
 
+	Vector2 reticleWorldPos;
+	
+	
+
 		switch (msg->type) {
 		case DOWN_ARROW_PRESSED: 
-			reticle->y -= 10;
+			reticleYGrid--;
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case UP_ARROW_PRESSED:
-			reticle->y += 10;
+			reticleYGrid++;
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case LEFT_ARROW_PRESSED:
-			reticle->x -= 10;
+			reticleXGrid--;
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case RIGHT_ARROW_PRESSED:
-			reticle->x += 10;
+			reticleXGrid++;
+			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
 			sendUpdatePosMessage(reticle);
 			break;
 
-		case SPACEBAR_PRESSED:
+		case SPACEBAR_PRESSED: {
 			//send messsage with the confirmed action
+
+			if (currentAction >= maxActions) break;
+				
 
 			//message format: playerID,actionName,actionNumber,targetX,targetY
 			oss << player->id << ","//playerID
@@ -482,16 +493,34 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				<< currentAction << ","//the action number 0 to <number of actions/turn>
 				<< reticle->x << "," //target x pos
 				<< reticle->y; //target y pos
-				
+
 			mm->type = NETWORK_R_ACTION;
 			mm->data = oss.str();
-			msgBus->postMessage(mm, this);	
-			currentAction++;
-			break;
+			msgBus->postMessage(mm, this);
 
+			GameObject* indicator = NULL;
+
+			string indicatorId = "TileIndicator" + to_string(currentAction);
+
+			for (GameObject* g : gameObjects) {
+				if (g->id == indicatorId) {
+					indicator = g;
+				}
+			}
+
+			indicator->x = reticle->x;
+			indicator->y = reticle->y;
+			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
+			sendUpdatePosMessage(indicator);
+
+			currentAction++;
+
+
+			break;
+		}
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
-			OutputDebugString(actionsToExecute[0].c_str());
+			//OutputDebugString(actionsToExecute[0].c_str());
 	/*		playersArray = split(actionsToExecute[0], ']');
 			playerAction = split(playersArray[0], ',');
 			player->x = stoi(playerAction[2]);
@@ -647,6 +676,17 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
+	//clear Indicators
+	for (GameObject* g : gameObjects) {
+		if (g->id.find("TileIndicator") != std::string::npos) {
+			g->renderable = "nothing.png";
+			//move object out side of camera instead of changing renderable. Temp Solution
+			g->x = 1000;
+			sendUpdatePosMessage(g);
+		}
+	}
+
+
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
@@ -659,9 +699,25 @@ void GameSystem::executeAction(int a) {
 				g->x = stoi(playerAction[2]);
 				g->y = stoi(playerAction[3]);
 				sendUpdatePosMessage(g);
-			}
-			
+			}			
 		}
 	}
 
+}
+
+
+//converts grid coordinates to world coordinates
+Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
+	float hexHeight = hexSize * 2.0f; //height of a single hex tile
+	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
+	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
+
+	Vector2 worldPos;
+
+	worldPos.x = hexWidth * gridX;
+	worldPos.y = vertDist * gridY;
+	if (gridY % 2 != 0) 
+		worldPos.x += hexWidth / 2;
+
+	return worldPos;
 }

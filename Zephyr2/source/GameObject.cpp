@@ -63,3 +63,9 @@ void GameObject::onCollide(GameObject* otherObj) {
 
 	//objData->toDestroyVector.push_back(this);
 }
+
+//sets the object's (x,y) position to the coordinates specified by the vector2 parameter
+void GameObject::setPostion(Vector2 posVector) {
+	x = posVector.x;
+	y = posVector.y;
+}

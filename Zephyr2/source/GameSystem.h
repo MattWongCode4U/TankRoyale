@@ -17,6 +17,8 @@
 #include "ObjectData.h"
 
 
+
+
 extern volatile bool malive;
 
 class GameSystem : public System {
@@ -57,6 +59,9 @@ private:
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
 
+	//converts grid coordinates to world coordinates
+	Vector2 gridToWorldCoord(int gridX, int gridY);
+
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
 	// The position of the marker, goes from 0 to 2, 0 being the top
@@ -69,4 +74,10 @@ private:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
+	int hexSize = 20; //"radius" of a single hexagon in the grid
+
+	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
+
+	//maximumNumber of actions per turn
+	int maxActions = 4;
 };

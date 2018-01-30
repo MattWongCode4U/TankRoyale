@@ -73,6 +73,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\renderer\OBJImport.cpp">
+    <ClCompile Include="HexTile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,6 +129,7 @@
     <ClInclude Include="source\Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="source\renderer\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -150,6 +152,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\renderer\OBJImport.h">
+=======
+    <ClInclude Include="HexTile.h">
+>>>>>>> origin/develop
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

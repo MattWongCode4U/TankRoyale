@@ -1,16 +1,17 @@
 #pragma once
-#include "Msg.h"
+//#include "Msg.h"
 #include <map>
 #include <iostream>
 #include "ObjectData.h"
 #include <Windows.h>
+#include "Vector2.h"
 using namespace std;
 
 class GameObject {
 public:
 	std::string id;
-	int x;
-	int y;
+	float x;
+	float y;
 	int z;
 	int width;
 	int length;
@@ -34,7 +35,13 @@ public:
 	virtual void midUpdate();
 	void lateUpdate();
 	virtual void onCollide(GameObject* otherObj);
+
+	//sets the object's (x,y) position to the coordinates specified by the vector2 parameter
+	void setPostion(Vector2 posVector); 
+	
+
 	GameObject* parentObject;
+
 protected:
 
 private:
