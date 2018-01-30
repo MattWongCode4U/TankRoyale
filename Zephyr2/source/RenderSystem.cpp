@@ -46,7 +46,7 @@ const GLchar *inGameFragmentShaderSource = "#version 330 core\n"
 "darkness *= gl_FragCoord.y / center.y;\n"
 "}\n"
 "\n"
-"color = texture(ourTexture1, TexCoord) * vec4(darkness, darkness, darkness, 1.0f);\n"
+"color = texture(ourTexture1, TexCoord) * vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 "}";
 
 /*
