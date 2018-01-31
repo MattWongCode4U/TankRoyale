@@ -167,7 +167,8 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="HexTile.cpp" />
+    <ClCompile Include="source\GridObject.cpp" />
+    <ClCompile Include="source\HexTile.cpp" />
     <ClCompile Include="source\AudioEngine.cpp" />
     <ClCompile Include="source\AudioSystem.cpp" />
     <ClCompile Include="source\Cannonball.cpp" />
@@ -184,9 +185,11 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\ShipObj.cpp" />
     <ClCompile Include="source\System.cpp" />
     <ClCompile Include="source\Vector2.cpp" />
+    <ClCompile Include="source\TankObject.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HexTile.h" />
+    <ClInclude Include="source\GridObject.h" />
+    <ClInclude Include="source\HexTile.h" />
     <ClInclude Include="source\AudioEngine.h" />
     <ClInclude Include="source\AudioSystem.h" />
     <ClInclude Include="source\Cannonball.h" />
@@ -204,6 +207,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\System.h" />
     <ClInclude Include="source\Util.h" />
     <ClInclude Include="source\Vector2.h" />
+    <ClInclude Include="source\TankObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

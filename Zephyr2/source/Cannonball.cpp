@@ -9,7 +9,7 @@ Cannonball::Cannonball(string _id, std::string renderableName, int xpos, int ypo
 	orientation = _orientation;
 	width = _width;
 	length = _length;
-	physicsEnabled = 1;
+	//physicsEnabled = 1;
 }
 
 Cannonball::Cannonball(map <string, string> paramsMap, ObjectData* objData) : GameObject(paramsMap, objData) {

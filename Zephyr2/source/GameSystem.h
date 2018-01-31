@@ -3,7 +3,7 @@
 //#include "GameObject.h"
 #include "FullscreenObj.h"
 #include "Cannonball.h"
-#include "ShipObj.h"
+#include "TankObject.h"
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -76,7 +76,7 @@ private:
 
 	int hexSize = 20; //"radius" of a single hexagon in the grid
 
-	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
+	//int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;

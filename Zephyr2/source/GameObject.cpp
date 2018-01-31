@@ -10,14 +10,14 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 	try {
 		id = paramsMap.find("id")->second;
 		renderable = paramsMap.find("renderable")->second;
-		x = stoi(paramsMap.find("xPos")->second);
-		y = stoi(paramsMap.find("yPos")->second);
+		x = stof(paramsMap.find("xPos")->second);
+		y = stof(paramsMap.find("yPos")->second);
 		z = stoi(paramsMap.find("zPos")->second);
 		orientation = stoi(paramsMap.find("orientation")->second);
 		width = stoi(paramsMap.find("width")->second);
 		length = stoi(paramsMap.find("length")->second);
-		physicsEnabled = stoi(paramsMap.find("physicsEnabled")->second);
-		windScale = stoi(paramsMap.find("windScale")->second);
+		//physicsEnabled = stoi(paramsMap.find("physicsEnabled")->second);
+		//windScale = stoi(paramsMap.find("windScale")->second);
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);
 	}
 	catch (const exception& e) {
@@ -33,8 +33,8 @@ string GameObject::toString() {
 	output += "\norientation: " + to_string(orientation) + ",";
 	output += "\nwidth: " + to_string(width) + ",";
 	output += "\nlength: " + to_string(length) + ",";
-	output += "\nphysicsEnabled: " + to_string(physicsEnabled) + ",";
-	output += "\nwindScale: " + to_string(windScale) + ",";
+	//output += "\nphysicsEnabled: " + to_string(physicsEnabled) + ",";
+	//output += "\nwindScale: " + to_string(windScale) + ",";
 	output += "\nimageFrames: " + to_string(imageFrames) + ",";
 	return output;
 }

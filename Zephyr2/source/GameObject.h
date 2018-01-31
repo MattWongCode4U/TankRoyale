@@ -16,8 +16,8 @@ public:
 	int width;
 	int length;
 	int orientation; // in degrees, 0 pointing up on the screen, clockwise rotation = positive
-	int physicsEnabled; // 0 or 1.
-	int windScale; //how effected the object is by wind 0-1
+	//int physicsEnabled; // 0 or 1.
+	//int windScale; //how effected the object is by wind 0-1
 	int imageFrames;
 	
 	// in degrees, same as orientation; difference is that orientation is used for rendering, direction is the direction of movement

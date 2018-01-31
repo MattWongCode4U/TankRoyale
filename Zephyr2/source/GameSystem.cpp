@@ -32,14 +32,18 @@ void GameSystem::addGameObjects(string fileName) {
 		string gameObjectType = gameObjDataMap.find("gameObjectType")->second;
 		g = NULL;
 		//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
-		if (gameObjectType.compare("ShipObj") == 0) {
-			g = new ShipObj(gameObjDataMap, &objData);
+		if (gameObjectType.compare("GridObject") == 0) {
+			g = new GridObject(gameObjDataMap, &objData);
+			//OutputDebugString(g->toString().c_str());
 		}
 		else if (gameObjectType.compare("GameObject") == 0) {
 			g = new GameObject(gameObjDataMap, &objData);
 		}
 		else if (gameObjectType.compare("FullscreenObj") == 0) {
 			g = new FullscreenObj(gameObjDataMap, &objData);
+		}
+		else if (gameObjectType.compare("TankObject") == 0) {
+			g = new TankObject(gameObjDataMap, &objData);
 		}
 
 		if (g != NULL) {
@@ -74,7 +78,7 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< g->x << ',' << g->y << ',' << g->z << ','
 		<< g->orientation << ','
 		<< g->width << ',' << g->length << ','
-		<< g->physicsEnabled << ','
+		//<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
 		<< g->imageFrames;
 	//<< g->renderable;
@@ -137,8 +141,8 @@ void GameSystem::startSystemLoop() {
 			break;
 		case 2: { // Game loaded
 			//execute actions
-			OutputDebugString("\n");
-			OutputDebugString(to_string(framesSinceTurnStart).c_str());
+			//OutputDebugString("\n");
+			//OutputDebugString(to_string(framesSinceTurnStart).c_str());
 			if (framesSinceTurnStart == 0) {
 				executeAction(0);	
 			}
@@ -288,7 +292,7 @@ void GameSystem::handleMessage(Msg *msg) {
 void GameSystem::mainMenuHandler(Msg * msg) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	GameObject* g;
+	//GameObject* g;
 
 	switch (msg->type) {
 	case DOWN_ARROW_PRESSED:
@@ -433,19 +437,19 @@ void GameSystem::settingsMenuHandler(Msg * msg) {
 void GameSystem::lvl1Handler(Msg * msg) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	GameObject* g;
+	//GameObject* g;
 
-	GameObject* reticle = nullptr;
+	GridObject* reticle = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "reticle") {
-			reticle = g;
+		if (g->id == "reticle"&& g->getObjectType() =="GridObject") {
+			reticle = (GridObject*)g;
 		}
 	}
 
-	GameObject* player = nullptr;
+	TankObject* player = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "player1") {
-			player = g;
+		if (g->id == "player1" && g->getObjectType() == "TankObject") {
+			player = (TankObject*)g;
 		}
 	}
 	//vector<string> actionsArray;
@@ -458,26 +462,26 @@ void GameSystem::lvl1Handler(Msg * msg) {
 
 		switch (msg->type) {
 		case DOWN_ARROW_PRESSED: 
-			reticleYGrid--;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
+			reticle->gridY--;
+			reticle->updateWorldCoords();
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case UP_ARROW_PRESSED:
-			reticleYGrid++;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
+			reticle->gridY++;
+			reticle->updateWorldCoords();
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case LEFT_ARROW_PRESSED:
-			reticleXGrid--;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
+			reticle->gridY++;
+			reticle->updateWorldCoords();
 			sendUpdatePosMessage(reticle);
 			break;
 
 		case RIGHT_ARROW_PRESSED:
-			reticleXGrid++;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
+			reticle->gridX++;
+			reticle->updateWorldCoords();
 			sendUpdatePosMessage(reticle);
 			break;
 
@@ -582,9 +586,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				//OutputDebugString(g->id.c_str());
 
 				if (g->id == data[0]) {
-					g->x = atof(data[2].c_str());
-					g->y = atof(data[3].c_str());
-					g->orientation = atof(data[5].c_str());
+					g->x = stof(data[2].c_str());
+					g->y = stof(data[3].c_str());
+					g->orientation = stoi(data[5].c_str());
 				}
 
 			}
@@ -666,7 +670,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 		<< g->orientation << ","
 		<< g->width << ","
 		<< g->length << ","
-		<< g->physicsEnabled << ","
+		//<< g->physicsEnabled << ","
 		<< g->getObjectType();
 
 	mm->type = UPDATE_OBJECT_POSITION;
@@ -696,8 +700,8 @@ void GameSystem::executeAction(int a) {
 		//display player actions for players whose id's are found
 		for (GameObject* g : gameObjects) {
 			if (g->id == playerAction[0]) {
-				g->x = stoi(playerAction[2]);
-				g->y = stoi(playerAction[3]);
+				g->x = stof(playerAction[2]);
+				g->y = stof(playerAction[3]);
 				sendUpdatePosMessage(g);
 			}			
 		}
