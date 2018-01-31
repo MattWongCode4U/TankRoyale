@@ -35,6 +35,9 @@ public:
 	void GameSystem::gameObjectRemoved(GameObject* g);
 	std::vector<GameObject*> gameObjects;
 	
+	//returns the tile distance in between two tiles on the grid;
+	int getGridDistance(int aX, int aY, int bx, int bY);
+
 	ObjectData objData;
 	void removeAllGameObjects();
 
@@ -75,7 +78,11 @@ private:
 
 	int hexSize = 20; //"radius" of a single hexagon in the grid
 
-	//int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
+	//the reticle controlled by the arrow keys. used for aiming and queing up actions
+	GridObject* reticle;
+
+	//the origin of the current action. (The Tank's expected position at the start of the action)
+	GridObject* actionOrigin;
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;

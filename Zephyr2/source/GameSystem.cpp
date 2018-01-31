@@ -159,7 +159,7 @@ void GameSystem::startSystemLoop() {
 
 			bool endgame = false;
 
-
+			//getGridDistance(reticle->gridX)
 
 			for (GameObject* obj : gameObjects) {
 				obj->earlyUpdate();
@@ -439,7 +439,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
 	//GameObject* g;
 
-	GridObject* reticle = nullptr;
+	//GridObject* reticle = nullptr;
 	for (GameObject* g : gameObjects) {
 		if (g->id == "reticle"&& g->getObjectType() =="GridObject") {
 			reticle = (GridObject*)g;
@@ -461,12 +461,16 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	
 
 		switch (msg->type) {
-		case DOWN_ARROW_PRESSED: 
+		case DOWN_ARROW_PRESSED: {
 			reticle->gridY--;
 			reticle->updateWorldCoords();
 			sendUpdatePosMessage(reticle);
-			break;
 
+			int dist = getGridDistance(reticle->gridX, reticle->gridY, 0, 0);
+			OutputDebugString("\n");
+			OutputDebugString(to_string(dist).c_str());
+			break;
+		}
 		case UP_ARROW_PRESSED:
 			reticle->gridY++;
 			reticle->updateWorldCoords();
@@ -474,7 +478,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 
 		case LEFT_ARROW_PRESSED:
-			reticle->gridY++;
+			reticle->gridX--;
 			reticle->updateWorldCoords();
 			sendUpdatePosMessage(reticle);
 			break;
@@ -486,11 +490,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 
 		case SPACEBAR_PRESSED: {
-			//send messsage with the confirmed action
-
 			if (currentAction >= maxActions) break;
 				
-
+			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
 			oss << player->id << ","//playerID
 				<< "MOVE" << ","//action type just MOVE for now
@@ -502,23 +504,25 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			mm->data = oss.str();
 			msgBus->postMessage(mm, this);
 
-			GameObject* indicator = NULL;
+			GridObject* indicator = NULL;
 
 			string indicatorId = "TileIndicator" + to_string(currentAction);
 
 			for (GameObject* g : gameObjects) {
 				if (g->id == indicatorId) {
-					indicator = g;
+					indicator = (GridObject*)g;
 				}
 			}
 
-			indicator->x = reticle->x;
-			indicator->y = reticle->y;
+			indicator->gridX = reticle->gridX;
+			indicator->gridY = reticle->gridY;
+			indicator->updateWorldCoords();
 			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			sendUpdatePosMessage(indicator);
 
 			currentAction++;
 
+			
 
 			break;
 		}
@@ -724,4 +728,29 @@ Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
 		worldPos.x += hexWidth / 2;
 
 	return worldPos;
+}
+
+//function cube_to_oddr(cube) :
+//	col = cube.x + (cube.z - (cube.z & 1)) / 2
+//	row = cube.z
+//	return Hex(col, row)
+//
+//	function oddr_to_cube(hex) :
+//	x = hex.col - (hex.row - (hex.row & 1)) / 2
+//	z = hex.row
+//	y = -x - z
+//	return Cube(x, y, z)
+//
+//	return (abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z)) / 2
+
+int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
+	int aXCube = aX - (aY - (aY & 1)) / 2;
+	int aZCube = aY;
+	int aYCube = -aXCube - aZCube;
+
+	int bXCube = bX - (bY - (bY & 1)) / 2;
+	int bZCube = bY;
+	int bYCube = -bXCube - bZCube;
+
+	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
 }
