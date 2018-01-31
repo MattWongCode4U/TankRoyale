@@ -70,21 +70,37 @@ void RenderSystem::startSystemLoop() {
 	state = RendererState::rendering;
 	running = true;
 
-	while (running) { //TODO change to "alive"?
+
+
+	while (running)
+	{ //TODO change to "alive"?
 		
 
 		handleMsgQ();
 
-		//TODO eliminate this copy operation
-		scene->objects.clear();
+		//TODO can we do this without copying?
+		//TODO pointers?!
 		for (auto el : *objects)
 		{
-			scene->objects.push_back(el.second);
+			RenderableObject &obj = el.second;
+
+			switch (obj.type)
+			{
+			case RenderableType::OBJECT3D:
+				scene->objects.push_back(obj);
+				break;
+			case RenderableType::OVERLAY:
+				overlay->elements.push_back(obj);
+				break;
+			}			
+			
+			
 		}
 
 		pipeline->doRender(scene, overlay);
 		
 		SDL_GL_SwapWindow(window);
+
 	}
 
 	//TODO cleaner shutdown?
@@ -207,11 +223,12 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	orientation = (float)(atof(objectData[5].c_str()));
 	w = (float)(atof(objectData[6].c_str()));
 	h = (float)(atof(objectData[7].c_str()));
-	frames = atoi(objectData[10].c_str());
+	//frames = atoi(objectData[8].c_str()); //TODO animation data
 
 	//set obj data
+	obj.type = RenderableType::OBJECT3D; //TODO parse instead of default
 	obj.position = glm::vec3(x, y, z);
-	obj.rotation = glm::vec3(0, 0, orientation);
+	obj.rotation = glm::vec3(0, 0, glm::radians(orientation)); //TODO deg/rad conversion
 	obj.scale = glm::vec3(w, h, 1);
 	obj.modelName = "cube"; //TODO change to quad, TODO render type
 	obj.albedoName = spriteName;
@@ -257,7 +274,7 @@ void RenderSystem::updateObjPosition(Msg* m) {
 
 	RenderableObject *obj = &objects->at(objectPair.first);
 	obj->position = newObj.position;
-	obj->rotation = newObj.rotation;
+	obj->rotation = newObj.rotation; //deg/rad?
 	//update scale?
 }
 

@@ -59,6 +59,8 @@ class Shaders
 		static std::string FSH_POST_PATH;
 		static std::string VSH_COPY_PATH;
 		static std::string FSH_COPY_PATH;
+		static std::string VSH_OVERLAY_PATH;
+		static std::string FSH_OVERLAY_PATH;
 		
     /*------------------------------------------------------------------------------------
 		Class Methods
@@ -71,6 +73,7 @@ class Shaders
 		static GLuint LoadShadersSpotPass();
 		static GLuint LoadShadersPostProcessing();
 		static GLuint LoadShadersSBCopy();
+		static GLuint LoadShadersOverlay();
 	private:
 		static GLuint LoadShadersGeneric(std::string vshPath, std::string fshPath);
 };

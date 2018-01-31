@@ -73,6 +73,7 @@ void RenderPipeline::setupSceneOnThread()
 	setupFramebufferDraw();
 	setupShadowMapping();
 	setupPostProcessing();
+	setupOverlay();
 	setupFallbacks();
 }
 
@@ -87,6 +88,7 @@ void RenderPipeline::cleanupSceneOnThread()
 	cleanupFramebufferDraw();
 	cleanupShadowMapping();
 	cleanupPostProcessing();
+	cleanupOverlay();
 	cleanupFallbacks();
 }
 
@@ -146,6 +148,51 @@ void RenderPipeline::cleanupProgram()
 	//delete shaders/program
 	if (_programID > 0)
 		glDeleteProgram(_programID);
+}
+
+/// <summary>
+/// Helper method initial setup
+/// Set up shaders and quad for overlay
+/// </summary>
+void RenderPipeline::setupOverlay()
+{
+	//set up shader
+	_overlayDrawData.program = Shaders::LoadShadersOverlay();
+	_overlayDrawData.programMVPM = glGetUniformLocation(_overlayDrawData.program, "iMVPM");
+	_overlayDrawData.programTexture = glGetUniformLocation(_overlayDrawData.program, "iTexture");
+
+	//set up base MVPm
+	_overlayDrawData.MVPM = glm::ortho(0, 1280, 0, 720); //TODO config, adjust as needed
+
+	//set up quad
+	glGenVertexArrays(1, &_overlayDrawData.vao);
+	glBindVertexArray(_overlayDrawData.vao);
+
+	glGenBuffers(1, &_overlayDrawData.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _overlayDrawData.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data_tex), g_quad_vertex_buffer_data_tex, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+/// <summary>
+/// Helper method initial setup
+/// Cleans up shaders and quad for overlay
+/// </summary>
+void RenderPipeline::cleanupOverlay()
+{
+	// delete VBOs/VAOs
+	glDeleteBuffers(1, &_overlayDrawData.vbo);
+	glDeleteVertexArrays(1, &_overlayDrawData.vao);
+
+	//delete programs
+	glDeleteProgram(_overlayDrawData.program);
 }
 
 /// <summary>
@@ -1298,6 +1345,48 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 	//TODO draw overlay
 
 	//need to make sure right framebuffer is set, clear depth but not color
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	//bind program, vertex array, some matrix stuff
+	glBindVertexArray(_overlayDrawData.vao);
+	glUseProgram(_overlayDrawData.program);
+
+	glBindVertexArray(0);
+
+}
+
+/// <summary>
+/// Draws a single overlay element
+/// </summary>
+void RenderPipeline::drawOverlayElement(RenderableObject * element)
+{
+	//get texture
+	GLuint texture;
+	auto texData = _textures_p->find(element->albedoName)->second;
+	if (texData.texID != 0)
+	{
+		texture = texData.texID;
+	}
+	else
+	{
+		texture = _fallbackTextureID;
+	}
+
+	//compute matrix
+	glm::mat4 objectMVM = glm::mat4();
+	objectMVM = glm::translate(objectMVM, element->position);
+	objectMVM = glm::scale(objectMVM, element->scale);
+	objectMVM = glm::rotate(objectMVM, element->rotation.z, glm::vec3(0, 0, 1));
+	glm::mat4 objectMVPM = _overlayDrawData.MVPM * objectMVM;	
+
+	//bind texture, bind matrix, draw
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _overlayDrawData.programTexture);
+	glUniform1i(_overlayDrawData.programTexture, 0);
+	glUniformMatrix4fv(_overlayDrawData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 /// <summary>

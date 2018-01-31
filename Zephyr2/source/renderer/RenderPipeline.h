@@ -107,6 +107,9 @@ private:
 	GLuint _postCopyProgramLastTexID = 0;
 	GLuint _postCopyProgramSmearTexID = 0;
 
+	//overlay draw program and buffers (TODO move all to structs)
+	OverlaySetup _overlayDrawData;
+
 	//the texture of shame
 	GLuint _fallbackTextureID = 0;
 
@@ -129,6 +132,8 @@ private:
 	void drawLightingPointLight(RenderableLight light, RenderableScene * scene);
 	void drawLightingSpotLight(RenderableLight light, RenderableScene * scene);
 
+	void drawOverlayElement(RenderableObject * element);
+
 	void setupWindow();
 	void setupProgram();
 	void cleanupProgram();
@@ -143,6 +148,8 @@ private:
 	void cleanupShadowMapping();
 	void setupPostProcessing();
 	void cleanupPostProcessing();
+	void setupOverlay();
+	void cleanupOverlay();
 
 public:
 	RenderPipeline(SDL_Window *window_p);

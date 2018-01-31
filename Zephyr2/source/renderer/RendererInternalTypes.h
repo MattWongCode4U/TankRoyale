@@ -41,3 +41,14 @@ struct TextureLoadingData
 	size_t hash;
 	std::string name;
 };
+
+struct OverlaySetup
+{
+	GLuint vao;
+	GLuint vbo;
+
+	GLuint program;
+	GLuint programMVPM;
+	GLuint programTexture;
+	glm::mat4 MVPM;
+};

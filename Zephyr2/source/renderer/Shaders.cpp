@@ -39,6 +39,8 @@ std::string Shaders::VSH_POST_PATH = "assets/shaders/postprocessing.vsh";
 std::string Shaders::FSH_POST_PATH = "assets/shaders/postprocessing.fsh";
 std::string Shaders::VSH_COPY_PATH = "assets/shaders/sbcopy.vsh";
 std::string Shaders::FSH_COPY_PATH = "assets/shaders/sbcopy.fsh";
+std::string Shaders::VSH_OVERLAY_PATH = "assets/shaders/overlay.vsh";
+std::string Shaders::FSH_OVERLAY_PATH = "assets/shaders/overlay.fsh";
 
 /*----------------------------------------------------------------------------------------
 	Class Methods
@@ -97,6 +99,14 @@ GLuint Shaders::LoadShadersPostProcessing()
 GLuint Shaders::LoadShadersSBCopy()
 {
 	return Shaders::LoadShadersGeneric(Shaders::VSH_COPY_PATH, Shaders::FSH_COPY_PATH);
+}
+
+///
+///
+///
+GLuint Shaders::LoadShadersOverlay()
+{
+	return Shaders::LoadShadersGeneric(Shaders::VSH_OVERLAY_PATH, Shaders::FSH_OVERLAY_PATH);
 }
 
 ///

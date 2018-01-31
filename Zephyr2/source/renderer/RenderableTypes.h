@@ -1,14 +1,20 @@
 #pragma once
-#ifdef __APPLE__
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#elif defined _WIN32 || defined _WIN64
+
 #include <glew.h>
 #include <glm.hpp>
-#endif
 #include <string>
 #include <vector>
 #include <map>
+
+//TODO move some of these into RendererInternalTypes.h
+
+/// <summary>
+/// Types of lights that can be rendered
+/// </summary>
+enum class RenderableType : int_fast8_t
+{
+	OBJECT3D, FORWARD3D, BILLBOARD, OVERLAY
+};
 
 /// <summary>
 /// Types of lights that can be rendered
@@ -23,6 +29,8 @@ enum class RenderableLightType : int_fast8_t
 /// </summary>
 struct RenderableObject
 {
+	RenderableType type;
+
 	glm::vec3 position;
 	glm::vec3 rotation;
 	glm::vec3 scale;
@@ -104,7 +112,7 @@ struct RenderableScene
 /// </summary>
 struct RenderableOverlay
 {
-
+	std::vector<RenderableObject> elements;
 };
 
 
