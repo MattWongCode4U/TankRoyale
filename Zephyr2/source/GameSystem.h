@@ -66,6 +66,10 @@ private:
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
+
+	//updates the reticle spright, and postion.
+	void updateReticle();
+
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
 
@@ -83,6 +87,8 @@ private:
 
 	//the origin of the current action. (The Tank's expected position at the start of the action)
 	GridObject* actionOrigin;
+
+	bool validMove = false;
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;

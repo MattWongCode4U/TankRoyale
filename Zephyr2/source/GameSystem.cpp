@@ -452,6 +452,10 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			player = (TankObject*)g;
 		}
 	}
+
+	if (actionOrigin == nullptr) {
+		actionOrigin = player;
+	}
 	//vector<string> actionsArray;
 	vector<string> playersArray;
 	vector<string> playerAction;
@@ -459,38 +463,30 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	Vector2 reticleWorldPos;
 	
 	
-
+	int dist;
 		switch (msg->type) {
 		case DOWN_ARROW_PRESSED: {
 			reticle->gridY--;
-			reticle->updateWorldCoords();
-			sendUpdatePosMessage(reticle);
-
-			int dist = getGridDistance(reticle->gridX, reticle->gridY, 0, 0);
-			OutputDebugString("\n");
-			OutputDebugString(to_string(dist).c_str());
+			updateReticle();
 			break;
 		}
 		case UP_ARROW_PRESSED:
 			reticle->gridY++;
-			reticle->updateWorldCoords();
-			sendUpdatePosMessage(reticle);
+			updateReticle();
 			break;
 
 		case LEFT_ARROW_PRESSED:
 			reticle->gridX--;
-			reticle->updateWorldCoords();
-			sendUpdatePosMessage(reticle);
+			updateReticle();
 			break;
 
 		case RIGHT_ARROW_PRESSED:
 			reticle->gridX++;
-			reticle->updateWorldCoords();
-			sendUpdatePosMessage(reticle);
+			updateReticle();
 			break;
 
 		case SPACEBAR_PRESSED: {
-			if (currentAction >= maxActions) break;
+			if (currentAction >= maxActions || !validMove) break;
 				
 			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
@@ -520,6 +516,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			sendUpdatePosMessage(indicator);
 
+			actionOrigin = indicator;
 			currentAction++;
 
 			
@@ -684,6 +681,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
+
 	//clear Indicators
 	for (GameObject* g : gameObjects) {
 		if (g->id.find("TileIndicator") != std::string::npos) {
@@ -753,4 +751,29 @@ int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
 	int bYCube = -bXCube - bZCube;
 
 	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
+}
+
+void GameSystem::updateReticle() {
+	reticle->updateWorldCoords();
+	sendUpdatePosMessage(reticle);
+
+	int dist = getGridDistance(reticle->gridX, reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
+
+	if (dist > 1) {
+		reticle->renderable = "TileIndicatorRed.png";
+		validMove = false;
+	}
+	else {
+		reticle->renderable = "TileIndicator.png";
+		validMove = true;
+	}
+
+	std::ostringstream oss;
+	Msg* mm = new Msg(EMPTY_MESSAGE, "");
+
+	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
+	oss << reticle->id << ",1," << reticle->renderable;
+	mm->type = UPDATE_OBJ_SPRITE;
+	mm->data = oss.str();
+	msgBus->postMessage(mm, this);
 }
