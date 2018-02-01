@@ -19,6 +19,8 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		physicsEnabled = stoi(paramsMap.find("physicsEnabled")->second);
 		windScale = stoi(paramsMap.find("windScale")->second);
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);
+		//renderType = static_cast<RenderableType>(stoi(paramsMap.find("renderType")->second));
+
 	}
 	catch (const exception& e) {
 		cout << e.what(); // information from length_error printed
@@ -68,4 +70,9 @@ void GameObject::onCollide(GameObject* otherObj) {
 void GameObject::setPostion(Vector2 posVector) {
 	x = posVector.x;
 	y = posVector.y;
+}
+
+RenderableType GameObject::getRenderableTypeFromName(std::string name)
+{
+	return RenderableType();
 }

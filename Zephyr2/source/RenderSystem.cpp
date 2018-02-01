@@ -203,6 +203,8 @@ void RenderSystem::handleMessage(Msg *msg) {
 */
 std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string data)
 {
+	SDL_Log(data.c_str());
+
 	vector<string> objectData = split(data, ',');
 
 	RenderableObject obj;
@@ -226,7 +228,7 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	//frames = atoi(objectData[8].c_str()); //TODO animation data
 
 	//set obj data
-	obj.type = RenderableType::OBJECT3D; //TODO parse instead of default
+	obj.type = RenderableType::OVERLAY; //TODO parse instead of default
 	obj.position = glm::vec3(x, y, z);
 	obj.rotation = glm::vec3(0, 0, glm::radians(orientation)); //TODO deg/rad conversion
 	obj.scale = glm::vec3(w, h, 1);
@@ -281,7 +283,9 @@ void RenderSystem::updateObjPosition(Msg* m) {
 /*
 	Update the sprite of an object
 */
-void RenderSystem::updateObjSprite(Msg* m) {
+void RenderSystem::updateObjSprite(Msg* m)
+{
+	SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 	std::string id = dataVector.at(0);
 	std::string sprite = dataVector.at(2);

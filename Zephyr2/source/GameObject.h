@@ -5,6 +5,7 @@
 #include "ObjectData.h"
 #include <Windows.h>
 #include "Vector2.h"
+#include "renderer\RenderableTypes.h"
 using namespace std;
 
 class GameObject {
@@ -25,6 +26,10 @@ public:
 	int direction; 
 	ObjectData* objData;
 	std::string renderable; // name of a file/sprite? probably needs to be changed
+	RenderableType renderType;
+	std::string model;
+	std::string normalMap;
+	float shininess;
 
 	GameObject();
 	~GameObject();
@@ -43,6 +48,7 @@ public:
 	GameObject* parentObject;
 
 protected:
+	static RenderableType getRenderableTypeFromName(std::string name);
 
 private:
 

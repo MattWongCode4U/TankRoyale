@@ -161,8 +161,10 @@ void RenderPipeline::setupOverlay()
 	_overlayDrawData.programMVPM = glGetUniformLocation(_overlayDrawData.program, "iMVPM");
 	_overlayDrawData.programTexture = glGetUniformLocation(_overlayDrawData.program, "iTexture");
 
-	//set up base MVPm
-	_overlayDrawData.MVPM = glm::ortho(0, 1280, 0, 720); //TODO config, adjust as needed
+	//set up base MVPm /TODO config, adjust as needed
+	glm::mat4 projection = glm::ortho(0, 1280, 0, 720, 1, 1000);
+	glm::mat4 look = glm::lookAt(glm::vec3(0, 0, 100), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+	_overlayDrawData.MVPM = projection * look;
 
 	//set up quad
 	glGenVertexArrays(1, &_overlayDrawData.vao);
@@ -170,14 +172,20 @@ void RenderPipeline::setupOverlay()
 
 	glGenBuffers(1, &_overlayDrawData.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _overlayDrawData.vbo);
+	/*
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data_tex), g_quad_vertex_buffer_data_tex, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), 0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+	*/
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); 
 	glBindVertexArray(0);
 }
 
@@ -1346,11 +1354,18 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 
 	//need to make sure right framebuffer is set, clear depth but not color
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, _renderWidth, _renderHeight);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	//bind program, vertex array, some matrix stuff
 	glBindVertexArray(_overlayDrawData.vao);
 	glUseProgram(_overlayDrawData.program);
+
+	//actually draw the stuff
+	for (RenderableObject &el : overlay->elements)
+	{
+		drawOverlayElement(&el);
+	}
 
 	glBindVertexArray(0);
 
@@ -1382,7 +1397,7 @@ void RenderPipeline::drawOverlayElement(RenderableObject * element)
 
 	//bind texture, bind matrix, draw
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _overlayDrawData.programTexture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(_overlayDrawData.programTexture, 0);
 	glUniformMatrix4fv(_overlayDrawData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
 
