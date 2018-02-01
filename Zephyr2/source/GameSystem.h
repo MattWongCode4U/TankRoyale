@@ -42,6 +42,7 @@ public:
 	void removeAllGameObjects();
 
 	const int timeFrame = 20;
+	int turnStartTime = 0;
 
 	// -1	= no level loaded
 	// 0	= Main Menu
