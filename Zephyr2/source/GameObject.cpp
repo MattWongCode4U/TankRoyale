@@ -19,7 +19,16 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		physicsEnabled = stoi(paramsMap.find("physicsEnabled")->second);
 		windScale = stoi(paramsMap.find("windScale")->second);
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);
-		//renderType = static_cast<RenderableType>(stoi(paramsMap.find("renderType")->second));
+		if (!(paramsMap.find("renderType") == paramsMap.end()))
+			renderType = getRenderableTypeFromName(paramsMap.find("renderType")->second);
+		else
+			renderType = RenderableType::OBJECT3D;
+		if (!(paramsMap.find("model") == paramsMap.end()))
+			model = paramsMap.find("model")->second;
+		if (!(paramsMap.find("normalMap") == paramsMap.end()))
+			normalMap = paramsMap.find("normalMap")->second;
+		if (!(paramsMap.find("smoothness") == paramsMap.end()))
+			smoothness = stof(paramsMap.find("smoothness")->second);
 
 	}
 	catch (const exception& e) {
@@ -38,6 +47,10 @@ string GameObject::toString() {
 	output += "\nphysicsEnabled: " + to_string(physicsEnabled) + ",";
 	output += "\nwindScale: " + to_string(windScale) + ",";
 	output += "\nimageFrames: " + to_string(imageFrames) + ",";
+	output += "\nrenderType: " + to_string((int)renderType) + ",";
+	output += "\nmodel: " + model + ",";
+	output += "\nnormalMap: " + normalMap + ",";
+	output += "\nsmoothness: " + to_string(smoothness) + ",";
 	return output;
 }
 
@@ -74,5 +87,24 @@ void GameObject::setPostion(Vector2 posVector) {
 
 RenderableType GameObject::getRenderableTypeFromName(std::string name)
 {
-	return RenderableType();
+	//TODO find a better way to do this
+
+	if (name == "object3d" || name == "OBJECT3D" || name == "Object3D")
+	{
+		return RenderableType::OBJECT3D;
+	}
+	else if (name == "forward3d" || name == "FORWARD3D" || name == "Forward3D" || name == "forward" || name == "FORWARD")
+	{
+		return RenderableType::FORWARD3D;
+	}
+	else if (name == "billboard" || name == "BILLBOARD" || name == "Billboard")
+	{
+		return RenderableType::BILLBOARD;
+	}
+	else if (name == "overlay" || name == "OVERLAY" || name == "Overlay")
+	{
+		return RenderableType::OVERLAY;
+	}
+
+	return RenderableType::OBJECT3D;
 }

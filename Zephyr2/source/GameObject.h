@@ -25,11 +25,12 @@ public:
 	// this CAN BE DIFFERENT from orientation; eg: cannon ball orientated one direction, but affecteed by the wind will curve.
 	int direction; 
 	ObjectData* objData;
+
 	std::string renderable; // name of a file/sprite? probably needs to be changed
 	RenderableType renderType;
 	std::string model;
 	std::string normalMap;
-	float shininess;
+	float smoothness;
 
 	GameObject();
 	~GameObject();
@@ -47,8 +48,10 @@ public:
 
 	GameObject* parentObject;
 
-protected:
 	static RenderableType getRenderableTypeFromName(std::string name);
+
+protected:
+	
 
 private:
 

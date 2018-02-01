@@ -68,7 +68,7 @@ void GameSystem::createGameObject(GameObject* g) {
 		}
 	}
 	gameObjects.push_back(g);
-	std::ostringstream oss;
+	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
 	oss << g->id << ','
 		<< g->renderable << ','
 		<< g->x << ',' << g->y << ',' << g->z << ','
@@ -76,7 +76,11 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< g->width << ',' << g->length << ','
 		<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
-		<< g->imageFrames;
+		<< g->imageFrames << ","
+		<< (int)g->renderType << ","
+		<< g->model << ","
+		<< g->normalMap << ","
+		<< g->smoothness;
 	//<< g->renderable;
 	// maybe add the rest of the variables into the oss as well, but can decide later depending on
 	// what physics needs
@@ -657,7 +661,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,physEnabled,type
+	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,physEnabled,type,
 	oss << g->id << ","
 		<< g->renderable << ","
 		<< g->x << ","

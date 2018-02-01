@@ -50,11 +50,12 @@ private:
 	RenderableScene *scene;
 	RenderableOverlay *overlay;
 
-	void addObjectToRenderList(Msg* m);
-	void removeObjectFromRenderList(Msg* m);
-	void updateObjPosition(Msg* m);
-	void updateObjSprite(Msg*m);
-	void updateHealthHUD(Msg*m);
+	void addObjectToRenderList(Msg *m);
+	void removeObjectFromRenderList(Msg *m);
+	void updateObjPosition(Msg *m);
+	void updateObjSprite(Msg *m);
+	void updateObjRender(Msg *m);
+	void updateHealthHUD(Msg *m);
 
 	void panLeft();
 	void panRight();

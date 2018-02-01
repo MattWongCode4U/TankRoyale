@@ -156,6 +156,9 @@ void RenderSystem::handleMessage(Msg *msg) {
 	case UPDATE_OBJ_SPRITE:
 		updateObjSprite(msg);
 		break;
+	case UPDATE_OBJ_RENDER:
+		updateObjRender(msg);
+		break;
 	case UPDATE_HP_BAR:
 		updateHealthHUD(msg);
 		break;
@@ -270,14 +273,15 @@ void RenderSystem::addObjectToRenderList(Msg* m) {
 	Update the position of an object given in the message.
 */
 void RenderSystem::updateObjPosition(Msg* m) {
-	//best way I figure is parse, find, replace-in-place
-	auto objectPair = parseObject(m->data);
-	auto newObj = objectPair.second;
+	SDL_Log(m->data.c_str());
+	std::vector<std::string> dataVector = split(m->data, ',');
 
-	RenderableObject *obj = &objects->at(objectPair.first);
-	obj->position = newObj.position;
-	obj->rotation = newObj.rotation; //deg/rad?
-	//update scale?
+	//id,renderable,x,y,z,orientation,width,length,physEnabled,type
+	std::string id = dataVector[0];
+
+	RenderableObject *obj = &objects->at(id);
+	obj->position = glm::vec3((float)(atof(dataVector[2].c_str())), (float)(atof(dataVector[3].c_str())), (float)(atof(dataVector[4].c_str())));
+	obj->rotation = glm::vec3(0, 0, glm::radians((float)(atof(dataVector[5].c_str()))));
 }
 
 /*
@@ -296,6 +300,31 @@ void RenderSystem::updateObjSprite(Msg* m)
 	RenderableObject *obj = &objects->at(id); //TODO handle if missing
 	obj->albedoName = spriteName; //TODO handling swapping normal maps and models
 
+}
+
+/*
+	Update the sprite, model, other rendering data of an object
+*/
+void RenderSystem::updateObjRender(Msg * m)
+{
+	SDL_Log(m->data.c_str());
+	
+	//id,renderable,renderType,model,normalMap,smoothness
+	vector<string> objectData = split(m->data, ',');
+	std::string id = objectData[0];
+
+	RenderableObject *obj = &objects->at(id);
+
+	if (!objectData[1].empty())
+		obj->albedoName = objectData[1];
+	if (!objectData[2].empty())
+		obj->type = GameObject::getRenderableTypeFromName(objectData[2]);
+	if (!objectData[3].empty())
+		obj->modelName = objectData[3];
+	if (!objectData[4].empty())
+		obj->normalName = objectData[4];
+	if (!objectData[5].empty())
+		obj->smoothness = stof(objectData[5]);
 }
 
 /*
