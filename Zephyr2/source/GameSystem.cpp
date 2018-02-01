@@ -93,7 +93,7 @@ void GameSystem::createGameObject(GameObject* g) {
 void GameSystem::startSystemLoop() {
 	//clocks for limiting gameloop speed
 	clock_t thisTime = clock();
-
+	
 	int enemySpawnCooldownCounter = 0;
 
 	int currentGameTime = 0;
@@ -144,7 +144,8 @@ void GameSystem::startSystemLoop() {
 			//OutputDebugString("\n");
 			//OutputDebugString(to_string(framesSinceTurnStart).c_str());
 			if (framesSinceTurnStart == 0) {
-				executeAction(0);	
+				executeAction(0);
+				turnStartTime = clock();
 			}
 			else if (framesSinceTurnStart == 100) {
 				executeAction(1);
@@ -156,6 +157,11 @@ void GameSystem::startSystemLoop() {
 				executeAction(3);
 			}
 			framesSinceTurnStart++;
+
+			displayTimeLeft(30 - ((clock() - turnStartTime) / 1000));
+									
+			//OutputDebugString("\n");
+			//OutputDebugString(to_string(framesSinceTurnStart/timeFrame).c_str());
 
 			bool endgame = false;
 
@@ -473,19 +479,16 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		case UP_ARROW_PRESSED:
 			reticle->gridY++;
 			updateReticle();
-			displayTimeLeft(33);
 			break;
 
 		case LEFT_ARROW_PRESSED:
 			reticle->gridX--;
 			updateReticle();
-			displayTimeLeft(12);
 			break;
 
 		case RIGHT_ARROW_PRESSED:
 			reticle->gridX++;
 			updateReticle();
-			displayTimeLeft(13);
 			break;
 
 		case SPACEBAR_PRESSED: {
@@ -782,11 +785,16 @@ void GameSystem::updateReticle() {
 }
 
 void GameSystem::displayTimeLeft(int time) {
-
-
-	int p0 = time / 10;
-	// position 1
-	int p1 = time % 10;
+	int p0, p1;
+	if (time < 0) {
+		p0 = 0;
+		p1 = 0;
+	}
+	else {
+		p0 = time % 100;
+		p0 /= 10;
+		p1 = time % 10;
+	}
 
 	std::ostringstream oss;
 	Msg* mm = new Msg(UPDATE_OBJ_SPRITE, "");
