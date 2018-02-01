@@ -643,7 +643,7 @@ void RenderSystem::removeObjectFromRenderList(Msg* m) {
 void RenderSystem::addObjectToRenderList(Msg* m) {
 	//mtx.lock();
 	gameObjectsToRender.push_back(&m->data);
-//	mtx.unlock();
+    //mtx.unlock();
 }
 
 /*

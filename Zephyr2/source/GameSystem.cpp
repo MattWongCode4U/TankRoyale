@@ -114,7 +114,7 @@ void GameSystem::startSystemLoop() {
 		//							OK to Run							   //
 		/////////////////////////////////////////////////////////////////////
 
-		Msg* m = new Msg(EMPTY_MESSAGE, "");
+		m = new Msg(EMPTY_MESSAGE, "");
 
 		switch (levelLoaded) {
 		case -1: // First launch
@@ -238,6 +238,7 @@ void GameSystem::startSystemLoop() {
 			break;
 		}
 	}
+
 }
 
 // wrapper that removes all game objects by sending a message for each object.

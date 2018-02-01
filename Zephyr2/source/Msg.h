@@ -48,6 +48,7 @@ enum MSG_TYPE {
 class Msg {
 public:
 	Msg(MSG_TYPE t, std::string d);
+	Msg(const Msg *m) { this->data = m->data; this->type = m->type; };
 	~Msg();
 
 	MSG_TYPE type;

@@ -69,4 +69,5 @@ private:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
+	Msg *m;
 };

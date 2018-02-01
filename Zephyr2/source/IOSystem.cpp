@@ -20,14 +20,14 @@ void IOSystem::startSystemLoop() {
 			Sleep(currentGameTime - thisTime);
 		}
 
-		currentGameTime = thisTime + timeFrame;
-
 		//std::string s = std::to_string(std::hash<std::thread::id>()(std::this_thread::get_id()));
 		//OutputDebugString("IO Loop on thread: ");
 		//OutputDebugString(s.c_str());
 		//OutputDebugString("\n");
-
+		handleMsgQ();
 		checkKeyPresses();
+
+		currentGameTime = thisTime + timeFrame;
 	}
 }
 

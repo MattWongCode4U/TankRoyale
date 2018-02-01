@@ -22,7 +22,7 @@ void System::handleMessage(Msg *msg) {
 
 void System::addToMsgQ(Msg *msg) {
 	mtx.lock();
-	msgQ.push(msg);
+	msgQ.push(new Msg(msg));
 	mtx.unlock();
 }
 
@@ -30,7 +30,8 @@ void System::handleMsgQ() {
 	mtx.lock();
 	while (!msgQ.empty()) {
 		handleMessage(msgQ.front());
-		msgQ.pop();	
+		delete(msgQ.front());
+		msgQ.pop();
 	}
 	mtx.unlock();
 }
