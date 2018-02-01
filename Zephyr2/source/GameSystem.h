@@ -60,6 +60,7 @@ private:
 	void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
+	void displayTimeLeft(int time);
 
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);

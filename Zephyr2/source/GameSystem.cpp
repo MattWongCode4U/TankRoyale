@@ -473,16 +473,19 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		case UP_ARROW_PRESSED:
 			reticle->gridY++;
 			updateReticle();
+			displayTimeLeft(33);
 			break;
 
 		case LEFT_ARROW_PRESSED:
 			reticle->gridX--;
 			updateReticle();
+			displayTimeLeft(12);
 			break;
 
 		case RIGHT_ARROW_PRESSED:
 			reticle->gridX++;
 			updateReticle();
+			displayTimeLeft(13);
 			break;
 
 		case SPACEBAR_PRESSED: {
@@ -662,7 +665,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,physEnabled,type
+	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
 	oss << g->id << ","
 		<< g->renderable << ","
 		<< g->x << ","
@@ -776,4 +779,24 @@ void GameSystem::updateReticle() {
 	mm->type = UPDATE_OBJ_SPRITE;
 	mm->data = oss.str();
 	msgBus->postMessage(mm, this);
+}
+
+void GameSystem::displayTimeLeft(int time) {
+
+
+	int p0 = time / 10;
+	// position 1
+	int p1 = time % 10;
+
+	std::ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJ_SPRITE, "");
+	oss << "timeLeftpos0,1," << p0 << ".png,";
+	mm->data = oss.str();
+	msgBus->postMessage(mm, this);
+
+	std::ostringstream osss;
+	Msg* m = new Msg(UPDATE_OBJ_SPRITE, "");
+	osss << "timeLeftpos1,1," << p1 << ".png,";
+	m->data = osss.str();
+	msgBus->postMessage(m, this);
 }
