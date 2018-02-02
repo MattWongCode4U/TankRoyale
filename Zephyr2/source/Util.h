@@ -3,8 +3,8 @@
 #include <sstream>
 #include <vector>
 #include <iterator>
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 #include <chrono>
 #include <map>
 #include <algorithm>
@@ -55,7 +55,7 @@ inline std::string openFileRemoveSpaces(std::string fileName) {
 	std::string output((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 	t.close();
 
-	output.erase(std::remove_if(output.begin(), output.end(), isspace), output.end());//remove spaces from data
+	output.erase(std::remove_if(output.begin(), output.end(), ::isspace), output.end());//remove spaces from data
 
 	return output;
 }

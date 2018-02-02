@@ -1,8 +1,5 @@
 #pragma once
-#include "System.h"
-//#include "GameObject.h"
-#include "FullscreenObj.h"
-#include "TankObject.h"
+#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -11,12 +8,12 @@
 #include <typeinfo>
 #include <cstdlib>
 #include <ctime>
-#include <windows.h>
 #include <thread>
+#include "System.h"
+#include "FullscreenObj.h"
+#include "GridObject.h"
+#include "TankObject.h"
 #include "ObjectData.h"
-
-
-
 
 extern volatile bool malive;
 
@@ -32,7 +29,7 @@ public:
 	void addGameObjects(string fileName);
 	void saveToFIle(string fileName);
 	void createGameObject(GameObject* g);
-	void GameSystem::gameObjectRemoved(GameObject* g);
+	void gameObjectRemoved(GameObject* g);
 	std::vector<GameObject*> gameObjects;
 	
 	//returns the tile distance in between two tiles on the grid;

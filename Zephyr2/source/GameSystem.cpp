@@ -101,7 +101,11 @@ void GameSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
+			#ifdef __APPLE__
+			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime)); // DEBUG: (MAC ONLY) possibly std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime))
+			#elif defined _WIN32 || defined _WIN64
 			Sleep(currentGameTime - thisTime);
+			#endif
 		}
 		currentGameTime = thisTime + timeFrame;
 		
@@ -180,13 +184,13 @@ void GameSystem::startSystemLoop() {
 			}
 
 			//loop through list of objects to create added by the gameobjects
-			for each (GameObject* c in objData.toCreateVector) {
+			for (GameObject* c : objData.toCreateVector) {
 				createGameObject(c);
 			}
 			objData.toCreateVector.clear();
 
 			//loop through list of objects to destroy added by the gameobjects
-			for each (GameObject* g in objData.toDestroyVector) {
+			for (GameObject* g : objData.toDestroyVector) {
 				gameObjectRemoved(g);
 
 				// increase score
@@ -207,7 +211,7 @@ void GameSystem::startSystemLoop() {
 
 
 			//loop through list of messages to send that were added by Game objects
-			for each (Msg* m in objData.toPostVector) {
+			for (Msg* m : objData.toPostVector) {
 				msgBus->postMessage(m, this);
 			}
 			objData.toPostVector.clear();
@@ -702,7 +706,7 @@ void GameSystem::executeAction(int a) {
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
-	for each (string s in players) {
+	for (string s : players) {
 		playerAction = split(s, ',');
 
 		//display player actions for players whose id's are found

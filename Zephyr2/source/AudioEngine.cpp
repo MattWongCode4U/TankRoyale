@@ -45,7 +45,7 @@ void AudioManager::UnMute()
 	}
 }
 
-AudioManager* audioManager = nullptr;
+AudioManager* audioManager = nullptr; //DEBUG: What is this doing here?
 
 //AUDIO ENGINE SECTION
 AudioEngine::AudioEngine()

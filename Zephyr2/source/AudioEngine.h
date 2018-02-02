@@ -1,13 +1,16 @@
 #pragma once
-#include "fmod.hpp"
-#include "fmod_errors.h"
+#pragma once
+#include <windows.h>
+#include <time.h>
 #include <string>
 #include <map>
 #include <vector>
 #include <math.h>
 #include <iostream>
 #include <time.h>
-#include <windows.h>
+#include <thread>
+#include "fmod.hpp"
+#include "fmod_errors.h"
 
 using namespace std;
 
