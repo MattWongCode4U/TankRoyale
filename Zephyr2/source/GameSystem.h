@@ -11,8 +11,8 @@
 #include <thread>
 #include "System.h"
 #include "FullscreenObj.h"
-#include "Cannonball.h"
-#include "ShipObj.h"
+#include "GridObject.h"
+#include "TankObject.h"
 #include "ObjectData.h"
 
 extern volatile bool malive;
