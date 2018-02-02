@@ -9,11 +9,11 @@ public:
 	Cannonball(map<string, string> params, ObjectData* objData);
 	~Cannonball();
 
-	virtual std::string getObjectType();
+	std::string getObjectType() override ;
 	virtual std::string toString();
-	void Cannonball::earlyUpdate();
-	void Cannonball::midUpdate() override;
-	void Cannonball::lateUpdate();
+	void earlyUpdate();
+	void midUpdate() override;
+	void lateUpdate();
 	void onCollide(GameObject* otherObj) override;
 	std::string deathSprite = "WaterSplash.png";
 	int counter = 0;

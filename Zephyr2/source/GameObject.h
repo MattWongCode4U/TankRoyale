@@ -1,9 +1,8 @@
 #pragma once
-//#include "Msg.h"
+#include <Windows.h>
 #include <map>
 #include <iostream>
 #include "ObjectData.h"
-#include <Windows.h>
 #include "Vector2.h"
 using namespace std;
 
@@ -28,7 +27,7 @@ public:
 
 	GameObject();
 	~GameObject();
-	GameObject::GameObject(std::map <std::string, std::string> paramsMap, ObjectData* objData);
+	GameObject(std::map <std::string, std::string> paramsMap, ObjectData* objData);
 	virtual std::string getObjectType();
 	virtual std::string toString();
 	void earlyUpdate();
