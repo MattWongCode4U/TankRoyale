@@ -46,7 +46,7 @@ const GLchar *inGameFragmentShaderSource = "#version 330 core\n"
 "darkness *= gl_FragCoord.y / center.y;\n"
 "}\n"
 "\n"
-"color = texture(ourTexture1, TexCoord) * vec4(darkness, darkness, darkness, 1.0f);\n"
+"color = texture(ourTexture1, TexCoord) * vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 "}";
 
 /*
@@ -431,8 +431,8 @@ void RenderSystem::renderObject(string object) {
 	orientation = (float)(atof(objectData[5].c_str()));
 	w = (float)(atof(objectData[6].c_str()));
 	h = (float)(atof(objectData[7].c_str()));
-	frames = atoi(objectData[10].c_str());
-	if (objectData[9].compare("FullscreenObj") == 0) {
+	frames = atoi(objectData[9].c_str());
+	if (objectData[8].compare("FullscreenObj") == 0) {
 		fso = true;
 	}
 	else if (objectData[9].compare("WindArrowObj") == 0) {
@@ -663,7 +663,7 @@ void RenderSystem::updateObjPosition(Msg* m) {
 			// replace this string's information with new information except the renderable
 			for (std::string ss : obj) {
 				if (position != 1) {
-					if (position == 10) {
+					if (position == 9) {
 						oss << obj.at(position) << ",";
 					} else {
 						oss << dataVector.at(position) << ",";

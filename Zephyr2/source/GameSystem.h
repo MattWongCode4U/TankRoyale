@@ -2,8 +2,7 @@
 #include "System.h"
 //#include "GameObject.h"
 #include "FullscreenObj.h"
-#include "Cannonball.h"
-#include "ShipObj.h"
+#include "TankObject.h"
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -15,6 +14,8 @@
 #include <windows.h>
 #include <thread>
 #include "ObjectData.h"
+
+
 
 
 extern volatile bool malive;
@@ -34,10 +35,14 @@ public:
 	void GameSystem::gameObjectRemoved(GameObject* g);
 	std::vector<GameObject*> gameObjects;
 	
+	//returns the tile distance in between two tiles on the grid;
+	int getGridDistance(int aX, int aY, int bx, int bY);
+
 	ObjectData objData;
 	void removeAllGameObjects();
 
 	const int timeFrame = 20;
+	int turnStartTime = 0;
 
 	// -1	= no level loaded
 	// 0	= Main Menu
@@ -56,9 +61,17 @@ private:
 	void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
+	void displayTimeLeft(int time);
+
+	//converts grid coordinates to world coordinates
+	Vector2 gridToWorldCoord(int gridX, int gridY);
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
+
+	//updates the reticle spright, and postion.
+	void updateReticle();
+
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
 
@@ -69,4 +82,16 @@ private:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
+	int hexSize = 20; //"radius" of a single hexagon in the grid
+
+	//the reticle controlled by the arrow keys. used for aiming and queing up actions
+	GridObject* reticle;
+
+	//the origin of the current action. (The Tank's expected position at the start of the action)
+	GridObject* actionOrigin;
+
+	bool validMove = false;
+
+	//maximumNumber of actions per turn
+	int maxActions = 4;
 };
