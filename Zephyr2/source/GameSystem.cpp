@@ -32,14 +32,18 @@ void GameSystem::addGameObjects(string fileName) {
 		string gameObjectType = gameObjDataMap.find("gameObjectType")->second;
 		g = NULL;
 		//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
-		if (gameObjectType.compare("ShipObj") == 0) {
-			g = new ShipObj(gameObjDataMap, &objData);
+		if (gameObjectType.compare("GridObject") == 0) {
+			g = new GridObject(gameObjDataMap, &objData);
+			//OutputDebugString(g->toString().c_str());
 		}
 		else if (gameObjectType.compare("GameObject") == 0) {
 			g = new GameObject(gameObjDataMap, &objData);
 		}
 		else if (gameObjectType.compare("FullscreenObj") == 0) {
 			g = new FullscreenObj(gameObjDataMap, &objData);
+		}
+		else if (gameObjectType.compare("TankObject") == 0) {
+			g = new TankObject(gameObjDataMap, &objData);
 		}
 
 		if (g != NULL) {
@@ -74,7 +78,7 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< g->x << ',' << g->y << ',' << g->z << ','
 		<< g->orientation << ','
 		<< g->width << ',' << g->length << ','
-		<< g->physicsEnabled << ','
+		//<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
 		<< g->imageFrames;
 	//<< g->renderable;
@@ -89,7 +93,7 @@ void GameSystem::createGameObject(GameObject* g) {
 void GameSystem::startSystemLoop() {
 	//clocks for limiting gameloop speed
 	clock_t thisTime = clock();
-
+	
 	int enemySpawnCooldownCounter = 0;
 
 	int currentGameTime = 0;
@@ -141,13 +145,11 @@ void GameSystem::startSystemLoop() {
 			break;
 		case 2: { // Game loaded
 			//execute actions
-			#ifdef __APPLE__
-			#elif defined _WIN32 || defined _WIN64
-			OutputDebugString("\n");
-			OutputDebugString(to_string(framesSinceTurnStart).c_str());
-			#endif
+			//OutputDebugString("\n");
+			//OutputDebugString(to_string(framesSinceTurnStart).c_str());
 			if (framesSinceTurnStart == 0) {
-				executeAction(0);	
+				executeAction(0);
+				turnStartTime = clock();
 			}
 			else if (framesSinceTurnStart == 100) {
 				executeAction(1);
@@ -160,9 +162,14 @@ void GameSystem::startSystemLoop() {
 			}
 			framesSinceTurnStart++;
 
+			displayTimeLeft(30 - ((clock() - turnStartTime) / 1000));
+									
+			//OutputDebugString("\n");
+			//OutputDebugString(to_string(framesSinceTurnStart/timeFrame).c_str());
+
 			bool endgame = false;
 
-
+			//getGridDistance(reticle->gridX)
 
 			for (GameObject* obj : gameObjects) {
 				obj->earlyUpdate();
@@ -295,7 +302,7 @@ void GameSystem::handleMessage(Msg *msg) {
 void GameSystem::mainMenuHandler(Msg * msg) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	GameObject* g;
+	//GameObject* g;
 
 	switch (msg->type) {
 	case DOWN_ARROW_PRESSED:
@@ -440,20 +447,24 @@ void GameSystem::settingsMenuHandler(Msg * msg) {
 void GameSystem::lvl1Handler(Msg * msg) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	GameObject* g;
+	//GameObject* g;
 
-	GameObject* reticle = nullptr;
+	//GridObject* reticle = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "reticle") {
-			reticle = g;
+		if (g->id == "reticle"&& g->getObjectType() =="GridObject") {
+			reticle = (GridObject*)g;
 		}
 	}
 
-	GameObject* player = nullptr;
+	TankObject* player = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "player1") {
-			player = g;
+		if (g->id == "player1" && g->getObjectType() == "TankObject") {
+			player = (TankObject*)g;
 		}
+	}
+
+	if (actionOrigin == nullptr) {
+		actionOrigin = player;
 	}
 	//vector<string> actionsArray;
 	vector<string> playersArray;
@@ -462,38 +473,32 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	Vector2 reticleWorldPos;
 	
 	
-
+	int dist;
 		switch (msg->type) {
-		case DOWN_ARROW_PRESSED: 
-			reticleYGrid--;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
-			sendUpdatePosMessage(reticle);
+		case DOWN_ARROW_PRESSED: {
+			reticle->gridY--;
+			updateReticle();
 			break;
-
+		}
 		case UP_ARROW_PRESSED:
-			reticleYGrid++;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
-			sendUpdatePosMessage(reticle);
+			reticle->gridY++;
+			updateReticle();
 			break;
 
 		case LEFT_ARROW_PRESSED:
-			reticleXGrid--;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
-			sendUpdatePosMessage(reticle);
+			reticle->gridX--;
+			updateReticle();
 			break;
 
 		case RIGHT_ARROW_PRESSED:
-			reticleXGrid++;
-			reticle->setPostion(gridToWorldCoord(reticleXGrid, reticleYGrid));
-			sendUpdatePosMessage(reticle);
+			reticle->gridX++;
+			updateReticle();
 			break;
 
 		case SPACEBAR_PRESSED: {
-			//send messsage with the confirmed action
-
-			if (currentAction >= maxActions) break;
+			if (currentAction >= maxActions || !validMove) break;
 				
-
+			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
 			oss << player->id << ","//playerID
 				<< "MOVE" << ","//action type just MOVE for now
@@ -505,23 +510,26 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			mm->data = oss.str();
 			msgBus->postMessage(mm, this);
 
-			GameObject* indicator = NULL;
+			GridObject* indicator = NULL;
 
 			string indicatorId = "TileIndicator" + to_string(currentAction);
 
 			for (GameObject* g : gameObjects) {
 				if (g->id == indicatorId) {
-					indicator = g;
+					indicator = (GridObject*)g;
 				}
 			}
 
-			indicator->x = reticle->x;
-			indicator->y = reticle->y;
+			indicator->gridX = reticle->gridX;
+			indicator->gridY = reticle->gridY;
+			indicator->updateWorldCoords();
 			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			sendUpdatePosMessage(indicator);
 
+			actionOrigin = indicator;
 			currentAction++;
 
+			
 
 			break;
 		}
@@ -589,9 +597,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				//OutputDebugString(g->id.c_str());
 
 				if (g->id == data[0]) {
-					g->x = atof(data[2].c_str());
-					g->y = atof(data[3].c_str());
-					g->orientation = atof(data[5].c_str());
+					g->x = stof(data[2].c_str());
+					g->y = stof(data[3].c_str());
+					g->orientation = stoi(data[5].c_str());
 				}
 
 			}
@@ -664,7 +672,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,physEnabled,type
+	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
 	oss << g->id << ","
 		<< g->renderable << ","
 		<< g->x << ","
@@ -673,7 +681,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 		<< g->orientation << ","
 		<< g->width << ","
 		<< g->length << ","
-		<< g->physicsEnabled << ","
+		//<< g->physicsEnabled << ","
 		<< g->getObjectType();
 
 	mm->type = UPDATE_OBJECT_POSITION;
@@ -683,6 +691,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
+
 	//clear Indicators
 	for (GameObject* g : gameObjects) {
 		if (g->id.find("TileIndicator") != std::string::npos) {
@@ -703,8 +712,8 @@ void GameSystem::executeAction(int a) {
 		//display player actions for players whose id's are found
 		for (GameObject* g : gameObjects) {
 			if (g->id == playerAction[0]) {
-				g->x = stoi(playerAction[2]);
-				g->y = stoi(playerAction[3]);
+				g->x = stof(playerAction[2]);
+				g->y = stof(playerAction[3]);
 				sendUpdatePosMessage(g);
 			}			
 		}
@@ -727,4 +736,79 @@ Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
 		worldPos.x += hexWidth / 2;
 
 	return worldPos;
+}
+
+//function cube_to_oddr(cube) :
+//	col = cube.x + (cube.z - (cube.z & 1)) / 2
+//	row = cube.z
+//	return Hex(col, row)
+//
+//	function oddr_to_cube(hex) :
+//	x = hex.col - (hex.row - (hex.row & 1)) / 2
+//	z = hex.row
+//	y = -x - z
+//	return Cube(x, y, z)
+//
+//	return (abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z)) / 2
+
+int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
+	int aXCube = aX - (aY - (aY & 1)) / 2;
+	int aZCube = aY;
+	int aYCube = -aXCube - aZCube;
+
+	int bXCube = bX - (bY - (bY & 1)) / 2;
+	int bZCube = bY;
+	int bYCube = -bXCube - bZCube;
+
+	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
+}
+
+void GameSystem::updateReticle() {
+	reticle->updateWorldCoords();
+	sendUpdatePosMessage(reticle);
+
+	int dist = getGridDistance(reticle->gridX, reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
+
+	if (dist > 1) {
+		reticle->renderable = "TileIndicatorRed.png";
+		validMove = false;
+	}
+	else {
+		reticle->renderable = "TileIndicator.png";
+		validMove = true;
+	}
+
+	std::ostringstream oss;
+	Msg* mm = new Msg(EMPTY_MESSAGE, "");
+
+	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
+	oss << reticle->id << ",1," << reticle->renderable;
+	mm->type = UPDATE_OBJ_SPRITE;
+	mm->data = oss.str();
+	msgBus->postMessage(mm, this);
+}
+
+void GameSystem::displayTimeLeft(int time) {
+	int p0, p1;
+	if (time < 0) {
+		p0 = 0;
+		p1 = 0;
+	}
+	else {
+		p0 = time % 100;
+		p0 /= 10;
+		p1 = time % 10;
+	}
+
+	std::ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJ_SPRITE, "");
+	oss << "timeLeftpos0,1," << p0 << ".png,";
+	mm->data = oss.str();
+	msgBus->postMessage(mm, this);
+
+	std::ostringstream osss;
+	Msg* m = new Msg(UPDATE_OBJ_SPRITE, "");
+	osss << "timeLeftpos1,1," << p1 << ".png,";
+	m->data = osss.str();
+	msgBus->postMessage(m, this);
 }
