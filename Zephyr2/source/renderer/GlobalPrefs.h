@@ -23,5 +23,9 @@ public:
 	static float rDofFactor;
 	static float rFogAmount;
 	static float rFogFactor;
+
+	//UI vars
+	static float uiWidth;
+	static float uiHeight;
 };
 

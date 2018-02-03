@@ -161,8 +161,10 @@ void RenderPipeline::setupOverlay()
 	_overlayDrawData.programMVPM = glGetUniformLocation(_overlayDrawData.program, "iMVPM");
 	_overlayDrawData.programTexture = glGetUniformLocation(_overlayDrawData.program, "iTexture");
 
-	//set up base MVPm /TODO config, adjust as needed
-	glm::mat4 projection = glm::ortho(0, 1280, 0, 720, 1, 1000);
+	//set up base MVPm
+	float halfUIWidth = GlobalPrefs::uiWidth / 2.0f;
+	float halfUIHeight = GlobalPrefs::uiHeight / 2.0f;
+	glm::mat4 projection = glm::ortho<float>(-halfUIWidth, halfUIWidth, -halfUIHeight, halfUIHeight, 0.1f, 1000.0f);
 	glm::mat4 look = glm::lookAt(glm::vec3(0, 0, 100), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 	_overlayDrawData.MVPM = projection * look;
 
@@ -172,18 +174,17 @@ void RenderPipeline::setupOverlay()
 
 	glGenBuffers(1, &_overlayDrawData.vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _overlayDrawData.vbo);
-	/*
+	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data_tex), g_quad_vertex_buffer_data_tex, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), 0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
-	*/
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); 
 	glBindVertexArray(0);
@@ -582,7 +583,7 @@ void RenderPipeline::loadOneTexture(std::string textureName)
 	SDL_Surface *image_p = IMG_Load(texturePath.c_str()); //TODO move to an internal helper function
 
 	if (image_p->format->BytesPerPixel == 4)
-		mode = GL_RGBA;
+		mode = GL_RGBA; 
 
 	GLuint glTexId;
 
@@ -1350,7 +1351,11 @@ void RenderPipeline::drawPostProcessingCopySmearbuffer(float blurFactor, float b
 /// </summary>
 void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 {
-	//TODO draw overlay
+	//draw overlay
+
+	//enable alpha blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//need to make sure right framebuffer is set, clear depth but not color
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1365,8 +1370,10 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 	for (RenderableObject &el : overlay->elements)
 	{
 		drawOverlayElement(&el);
+		glClear(GL_DEPTH_BUFFER_BIT); //a hack because z-indexing was not used
 	}
 
+	glDisable(GL_BLEND);
 	glBindVertexArray(0);
 
 }

@@ -1,5 +1,6 @@
 #include "RenderSystem.h"
 #include "renderer\RenderPipeline.h"
+#include "renderer\GlobalPrefs.h"
 
 /*
 	RenderSystem Constructor.
@@ -8,8 +9,8 @@ RenderSystem::RenderSystem(MessageBus* mbus) : System(mbus) {
 	//Initialize SDL
 	SDL_Init(SDL_INIT_EVERYTHING); //TODO move to main
 
-	aspectRatio = (GLfloat)(WIDTH) / (GLfloat)(HEIGHT);
-	window = SDL_CreateWindow("Zephyr2", RenderSystem::XSTART, RenderSystem::YSTART, RenderSystem::WIDTH, RenderSystem::HEIGHT, SDL_WINDOW_OPENGL);
+	aspectRatio = (GLfloat)(GlobalPrefs::windowWidth) / (GLfloat)(GlobalPrefs::windowHeight);
+	window = SDL_CreateWindow("Zephyr2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, GlobalPrefs::windowWidth, GlobalPrefs::windowHeight, SDL_WINDOW_OPENGL);
 
 	SDL_GL_SwapWindow(window); //needed?
 

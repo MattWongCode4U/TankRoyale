@@ -18,3 +18,7 @@ float GlobalPrefs::rDofAmount = 0.75f;
 float GlobalPrefs::rDofFactor = 0.75f;
 float GlobalPrefs::rFogAmount = 0.0f;
 float GlobalPrefs::rFogFactor = 0.1f;
+
+//UI vars
+float GlobalPrefs::uiWidth = 1280;
+float GlobalPrefs::uiHeight = 720;
