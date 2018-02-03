@@ -16,10 +16,10 @@ static const GLfloat g_quad_vertex_buffer_data[] = {
 };
 
 static const GLfloat g_quad_vertex_buffer_data_tex[] = {
-	-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-	1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-	-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-	-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-	1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+	0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+	-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+	-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+	0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+	0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
 };

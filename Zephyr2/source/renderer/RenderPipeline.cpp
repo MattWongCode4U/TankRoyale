@@ -1353,24 +1353,29 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 {
 	//draw overlay
 
-	//enable alpha blending
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	//need to make sure right framebuffer is set, clear depth but not color
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, _renderWidth, _renderHeight);
+	glDepthMask(GL_TRUE);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glDepthMask(GL_FALSE);
 
 	//bind program, vertex array, some matrix stuff
 	glBindVertexArray(_overlayDrawData.vao);
 	glUseProgram(_overlayDrawData.program);
 
+	//enable alpha blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//turns out we do have to sort elements
+	std::sort(overlay->elements.begin(), overlay->elements.end(), [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; }); //congratulations you found the JS programmer
+
 	//actually draw the stuff
 	for (RenderableObject &el : overlay->elements)
 	{
 		drawOverlayElement(&el);
-		glClear(GL_DEPTH_BUFFER_BIT); //a hack because z-indexing was not used
+		//glClear(GL_DEPTH_BUFFER_BIT); //a hack because z-indexing was not used
 	}
 
 	glDisable(GL_BLEND);

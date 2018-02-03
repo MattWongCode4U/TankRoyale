@@ -81,6 +81,8 @@ void RenderSystem::startSystemLoop() {
 
 		//TODO can we do this without copying?
 		//TODO pointers?!
+		scene->objects.clear();
+		overlay->elements.clear();
 		for (auto el : *objects)
 		{
 			RenderableObject &obj = el.second;
@@ -219,6 +221,7 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	std::string sprite;
 	float x, y, z, orientation, w, h;
 	int frames = 1;
+	int type = (int)RenderableType::OBJECT3D;
 
 	id = objectData[0];
 	sprite = objectData[1];
@@ -228,11 +231,12 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	z = (float)(atof(objectData[4].c_str()));
 	orientation = (float)(atof(objectData[5].c_str()));
 	w = (float)(atof(objectData[6].c_str()));
-	h = (float)(atof(objectData[7].c_str()));
-	//frames = atoi(objectData[8].c_str()); //TODO animation data
+	h = (float)(atof(objectData[7].c_str())); 
+	frames = atoi(objectData[10].c_str()); //TODO animation data
+	type = atoi(objectData[11].c_str());
 
 	//set obj data
-	obj.type = RenderableType::OVERLAY; //TODO parse instead of default
+	obj.type = (RenderableType)type;
 	obj.position = glm::vec3(x, y, z);
 	obj.rotation = glm::vec3(0, 0, glm::radians(orientation)); //TODO deg/rad conversion
 	obj.scale = glm::vec3(w, h, 1);
