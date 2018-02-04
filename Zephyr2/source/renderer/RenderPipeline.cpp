@@ -24,6 +24,7 @@ RenderPipeline::RenderPipeline(SDL_Window *window_p)
 	_models_p = new std::map<std::string, ModelData>();
 	_textures_p = new std::map<std::string, TextureData>();
 	_window_p = window_p;
+	_frameCount = 0;
 }
 
 RenderPipeline::~RenderPipeline()
@@ -160,6 +161,8 @@ void RenderPipeline::setupOverlay()
 	_overlayDrawData.program = Shaders::LoadShadersOverlay();
 	_overlayDrawData.programMVPM = glGetUniformLocation(_overlayDrawData.program, "iMVPM");
 	_overlayDrawData.programTexture = glGetUniformLocation(_overlayDrawData.program, "iTexture");
+	_overlayDrawData.programAnimated = glGetUniformLocation(_overlayDrawData.program, "iAnimated");
+	_overlayDrawData.programOffsets = glGetUniformLocation(_overlayDrawData.program, "iOffsets");
 
 	//set up base MVPm
 	float halfUIWidth = GlobalPrefs::uiWidth / 2.0f;
@@ -661,6 +664,9 @@ void RenderPipeline::drawIdleScreen()
 void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay)
 {
 
+	//used for animation and basically nothing else
+	_frameCount++;
+
 	//will remain in final
 	if (scene == nullptr)
 	{
@@ -681,7 +687,7 @@ void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay
 	}
 	else
 	{
-		drawOverlay(overlay);
+		drawOverlay(overlay); //do the overlay pass
 	}
 
 	//TODO vsync/no vsync
@@ -1405,7 +1411,17 @@ void RenderPipeline::drawOverlayElement(RenderableObject * element)
 	objectMVM = glm::translate(objectMVM, element->position);
 	objectMVM = glm::scale(objectMVM, element->scale);
 	objectMVM = glm::rotate(objectMVM, element->rotation.z, glm::vec3(0, 0, 1));
-	glm::mat4 objectMVPM = _overlayDrawData.MVPM * objectMVM;	
+	glm::mat4 objectMVPM = _overlayDrawData.MVPM * objectMVM;
+
+	//set animation
+	if (element->frameCount <= 1)
+		glUniform1i(_overlayDrawData.programAnimated, GL_FALSE);
+	else
+	{
+		glUniform1i(_overlayDrawData.programAnimated, GL_TRUE);
+		glm::vec4 offsets = computeAnimationOffsets(*element);
+		glUniform4fv(_overlayDrawData.programOffsets, 1, &offsets[0]);
+	}
 
 	//bind texture, bind matrix, draw
 	glActiveTexture(GL_TEXTURE0);
@@ -1414,6 +1430,78 @@ void RenderPipeline::drawOverlayElement(RenderableObject * element)
 	glUniformMatrix4fv(_overlayDrawData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+/// <summary>
+/// Helper function for animations
+/// Computes offsets for animated objects
+/// </summary>
+glm::vec4 RenderPipeline::computeAnimationOffsets(const RenderableObject & object)
+{
+	//crudely adapted from existing code
+	int frames = object.frameCount;
+	int animationCount = _frameCount;
+
+	if (frames == 0) {
+		frames = 1;
+	}
+
+	int numberOfRows = 1;
+	float offset;
+	float yoffset = 0.0f;
+	int xframes = frames;
+
+	float fheight = 1.0f;
+	int currentRow = 1;
+
+	int tempacount = animationCount;
+
+	if (frames <= 20) {
+		offset = (float)(animationCount % frames) + 1.0f;
+	}
+	else {
+		xframes = 20;
+		numberOfRows = (int)(ceil(frames / 20.0f));
+		if (animationCount == 0) {
+			currentRow = 1;
+		}
+		else {
+			if (animationCount > frames) {
+				tempacount = animationCount % frames;
+			}
+			currentRow = (int)(ceil(tempacount / 20.0f));
+		}
+
+		// default
+		offset = (float)(tempacount % 20) - 1;
+
+		if ((tempacount == 0)) {
+			offset = 0;
+		}
+
+		if (((tempacount % 20) == 0) && (tempacount != 0)) {
+			offset = 19;
+		}
+
+		// 0 to 5
+		if (currentRow != 0) {
+			yoffset = (float)(currentRow - 1);// ((currentRow + numberOfRows - 1) % numberOfRows);
+		}
+		else {
+			yoffset = 0.0f;
+		}
+		fheight = (float)(1.0f / ((float)(numberOfRows)));
+	}
+
+	float finalYOffset = (1.0f / (float)numberOfRows) * yoffset;
+
+	if (frames > 20) {
+		std::ostringstream ss;
+		ss << finalYOffset << "\t" << yoffset << "\t" << animationCount << "\t" << tempacount << "\t" << currentRow << "\t" << numberOfRows << "\t" << offset;
+		//SDL_Log(ss.str().c_str());
+	}
+
+	return glm::vec4((1.0f / (float)xframes) * offset, finalYOffset, 1.0f / (float)frames, (float)fheight);
 }
 
 /// <summary>

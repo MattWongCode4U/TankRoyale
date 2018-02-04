@@ -27,6 +27,20 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
+id: aniWaves,
+renderable: Boat_S0.png,
+xPos: -400,
+yPos: 100,
+zPos: 40,
+orientation: 0,
+width: 200,
+length: 200,
+physicsEnabled: 0,
+renderType: overlay,
+windScale: 0,
+imageFrames: 16;
+
+gameObjectType: FullscreenObj,
 id: TitleObj,
 renderable: Z4.png,
 xPos: 0,

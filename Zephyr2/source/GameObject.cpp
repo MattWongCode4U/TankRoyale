@@ -25,10 +25,16 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 			renderType = RenderableType::OBJECT3D;
 		if (!(paramsMap.find("model") == paramsMap.end()))
 			model = paramsMap.find("model")->second;
+		else
+			model = "cube";
 		if (!(paramsMap.find("normalMap") == paramsMap.end()))
 			normalMap = paramsMap.find("normalMap")->second;
+		else
+			normalMap = std::string();
 		if (!(paramsMap.find("smoothness") == paramsMap.end()))
 			smoothness = stof(paramsMap.find("smoothness")->second);
+		else
+			smoothness = 0.5f;
 
 	}
 	catch (const exception& e) {

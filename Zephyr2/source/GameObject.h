@@ -26,7 +26,7 @@ public:
 	int direction; 
 	ObjectData* objData;
 
-	std::string renderable; // name of a file/sprite? probably needs to be changed
+	std::string renderable;
 	RenderableType renderType;
 	std::string model;
 	std::string normalMap;

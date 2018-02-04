@@ -50,6 +50,8 @@ struct OverlaySetup
 	GLuint program;
 	GLuint programMVPM;
 	GLuint programTexture;
+	GLuint programOffsets;
+	GLuint programAnimated;
 	glm::mat4 MVPM;
 };
 
@@ -70,6 +72,7 @@ struct RenderableObject
 	std::string albedoName;
 	std::string normalName;
 	GLfloat smoothness;
+	int frameCount;
 };
 
 /// <summary>

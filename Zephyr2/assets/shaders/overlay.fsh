@@ -4,5 +4,5 @@ in vec2 oTexC;
 
 void main()
 {
-	gl_FragColor = texture(iTexture, vec2(oTexC.x, 1.0-oTexC.y));
+	gl_FragColor = texture(iTexture, vec2(oTexC.x, oTexC.y));
 }

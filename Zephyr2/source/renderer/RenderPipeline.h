@@ -13,6 +13,9 @@ private:
 	SDL_Window * _window_p;
 	SDL_GLContext _context_p;
 
+	//frame count
+	uint_least64_t _frameCount;
+
 	//resource lists
 	std::map<std::string, ModelData> *_models_p;
 	std::map<std::string, TextureData> *_textures_p;
@@ -133,6 +136,7 @@ private:
 	void drawLightingSpotLight(RenderableLight light, RenderableScene * scene);
 
 	void drawOverlayElement(RenderableObject * element);
+	glm::vec4 computeAnimationOffsets(const RenderableObject &object);
 
 	void setupWindow();
 	void setupProgram();
