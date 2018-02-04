@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	// TO DO: Implement 
 	while (malive) {
 		if (thisTime  < currentGameTime) {
-			Sleep(currentGameTime - thisTime);
+			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + 100;
 
@@ -103,15 +103,30 @@ int main(int argc, char *argv[]) {
 	//						Thread Joining							//
 	//////////////////////////////////////////////////////////////////
 	ioThread.join();
+	#ifdef __APPLE__ 
+	#elif defined _WIN32 || defined _WIN64 
 	OutputDebugString("\nIO Ended\n");
+	#endif
 	renderThread.join();
+	#ifdef __APPLE__ 
+	#elif defined _WIN32 || defined _WIN64 
 	OutputDebugString("\nRT Ended\n");
+	#endif
 	gameSystemThread.join();
+	#ifdef __APPLE__ 
+	#elif defined _WIN32 || defined _WIN64 
 	OutputDebugString("\nGS Ended\n");
+	#endif
 	audThread.join();
+	#ifdef __APPLE__ 
+	#elif defined _WIN32 || defined _WIN64 
 	OutputDebugString("\nAudio Ended\n");
+	#endif
 	nsThread.join();
+	#ifdef __APPLE__ 
+	#elif defined _WIN32 || defined _WIN64 
 	OutputDebugString("\nNetwork Ended\n");
+	#endif
 
 	return 1;
 }

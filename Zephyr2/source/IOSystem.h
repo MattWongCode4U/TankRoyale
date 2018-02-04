@@ -1,9 +1,10 @@
 #pragma once
-#include "System.h"
-#include <Windows.h>
+#include <windows.h>
+#include <SDL.h>
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include "System.h"
 
 class IOSystem : public System {
 public:
@@ -22,5 +23,5 @@ public:
 
 	const int timebetweenPresses = 150;
 private:
-
+	
 };

@@ -7,8 +7,6 @@ zPos: 10,
 orientation: 0,
 width: 200,
 length: 200,
-physicsEnabled: 0,
-windScale: 0,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
@@ -20,8 +18,6 @@ zPos: 10,
 orientation: 0,
 width: 200,
 length: 200,
-physicsEnabled: 0,
-windScale: 0,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
@@ -33,8 +29,6 @@ zPos: 10,
 orientation: 0,
 width: 200,
 length: 200,
-physicsEnabled: 0,
-windScale: 0,
 imageFrames: 116;
 
 gameObjectType: FullscreenObj,
@@ -46,8 +40,6 @@ zPos: 10,
 orientation: 0,
 width: 200,
 length: 200,
-physicsEnabled: 0,
-windScale: 0,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
@@ -59,8 +51,6 @@ zPos: 10,
 orientation: 0,
 width: 200,
 length: 200,
-physicsEnabled: 0,
-windScale: 0,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
@@ -72,7 +62,5 @@ zPos: 10,
 orientation: 0,
 width: 200,
 length: 200,
-physicsEnabled: 0,
-windScale: 0,
 imageFrames: 1;
 
