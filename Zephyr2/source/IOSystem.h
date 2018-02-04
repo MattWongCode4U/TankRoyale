@@ -1,6 +1,5 @@
 #pragma once
 #include <windows.h>
-#include <SDL.h>
 #include <iostream>
 #include <chrono>
 #include <thread>

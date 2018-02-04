@@ -115,10 +115,7 @@ void RenderSystem::init() {
 
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		#ifdef __APPLE__ 
-		#elif defined _WIN32 || defined _WIN64 
-		OutputDebugString("DIDNT WORK");
-		#endif
+		//OutputDebugString("DIDNT WORK");
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
@@ -144,10 +141,7 @@ void RenderSystem::init() {
 
 	glGetShaderiv(inGameFragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		#ifdef __APPLE__ 
-		#elif defined _WIN32 || defined _WIN64 
-		OutputDebugString("DIDNT WORK");
-		#endif
+		//OutputDebugString("DIDNT WORK");
 		glGetShaderInfoLog(inGameFragmentShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}

@@ -79,13 +79,7 @@ int main(int argc, char *argv[]) {
 		SDL_Event windowEvent;
 		while (SDL_PollEvent(&windowEvent)) {
 			if (SDL_QUIT == windowEvent.type) {
-				rs->stopSystemLoop();
-				ios->alive = false;
-				gs->alive = false;
-				rs->alive = false;
 				malive = false;
-				aus->alive = false;
-				ns->alive = false;
 			}
 		}
 		//OutputDebugString("outside\n");
@@ -103,30 +97,21 @@ int main(int argc, char *argv[]) {
 	//						Thread Joining							//
 	//////////////////////////////////////////////////////////////////
 	ioThread.join();
-	#ifdef __APPLE__ 
-	#elif defined _WIN32 || defined _WIN64 
-	OutputDebugString("\nIO Ended\n");
-	#endif
+	//OutputDebugString("\nIO Ended\n");
 	renderThread.join();
-	#ifdef __APPLE__ 
-	#elif defined _WIN32 || defined _WIN64 
-	OutputDebugString("\nRT Ended\n");
-	#endif
+	//OutputDebugString("\nRT Ended\n");
 	gameSystemThread.join();
-	#ifdef __APPLE__ 
-	#elif defined _WIN32 || defined _WIN64 
-	OutputDebugString("\nGS Ended\n");
-	#endif
+	//OutputDebugString("\nGS Ended\n");
 	audThread.join();
-	#ifdef __APPLE__ 
-	#elif defined _WIN32 || defined _WIN64 
-	OutputDebugString("\nAudio Ended\n");
-	#endif
+	//OutputDebugString("\nAudio Ended\n");
 	nsThread.join();
-	#ifdef __APPLE__ 
-	#elif defined _WIN32 || defined _WIN64 
-	OutputDebugString("\nNetwork Ended\n");
-	#endif
+	//OutputDebugString("\nNetwork Ended\n");
+
+	delete(ios);
+	delete(rs);
+	delete(gs);
+	delete(aus);
+	delete(ns);
 
 	return 1;
 }

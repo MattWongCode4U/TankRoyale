@@ -101,11 +101,7 @@ void GameSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			#ifdef __APPLE__
-			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime)); // DEBUG: (MAC ONLY) possibly std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime))
-			#elif defined _WIN32 || defined _WIN64
 			Sleep(currentGameTime - thisTime);
-			#endif
 		}
 		currentGameTime = thisTime + timeFrame;
 		
@@ -308,10 +304,9 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 	switch (msg->type) {
 	case LEFT_MOUSE_BUTTON:
 	{
-			POINT p;
-			GetCursorPos(&p);
-			long x = p.x;
-			long y = p.y;
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
 			break;
 	}
 		
@@ -581,24 +576,6 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 		}
 		*/
-		case KEY_W_PRESSED:
-			break;
-
-		case KEY_S_PRESSED:
-			break;
-
-		case KEY_D_PRESSED:
-			break;
-
-		case KEY_A_PRESSED:
-			break;
-
-		case KEY_E_PRESSED:
-			break;
-
-		case KEY_Q_PRESSED:
-			break;
-		
 		case UPDATE_OBJECT_POSITION: {
 
 			vector<string> data = split(msg->data, ',');
