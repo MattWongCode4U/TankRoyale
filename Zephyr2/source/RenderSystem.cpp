@@ -232,11 +232,11 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	orientation = (float)(atof(objectData[5].c_str()));
 	w = (float)(atof(objectData[6].c_str()));
 	h = (float)(atof(objectData[7].c_str())); 
-	frames = atoi(objectData[10].c_str());
-	type = atoi(objectData[11].c_str());
-	model = objectData[12];
-	normal = objectData[13];
-	smoothness = (float)(atof(objectData[14].c_str()));
+	frames = atoi(objectData[9].c_str());
+	type = atoi(objectData[10].c_str());
+	model = objectData[11];
+	normal = objectData[12];
+	smoothness = (float)(atof(objectData[13].c_str()));
 
 	//set obj data
 	obj.type = (RenderableType)type;

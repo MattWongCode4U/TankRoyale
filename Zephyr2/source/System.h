@@ -1,10 +1,11 @@
 #pragma once
-#include "Msg.h"
-#include "MessageBus.h"
+#include <windows.h>
 #include <queue>
 #include <mutex>
-#include <windows.h>
 #include <string>  
+
+#include "Msg.h"
+#include "MessageBus.h"
 
 class MessageBus;
 

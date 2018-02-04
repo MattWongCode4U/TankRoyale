@@ -1,0 +1,27 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "debug launch task",
+            "type": "shell",
+            "osx" : {
+                "command": "g++ -std=c++11 -stdlib=libc++ ${workspaceFolder}/Zephyr2/source/*.cpp -I${workspaceFolder}/Dependencies/fmod/include -I${workspaceFolder}/Dependencies/freeglut/include -I${workspaceFolder}/Dependencies/glew/include -I${workspaceFolder}/Dependencies/glm/include -I${workspaceFolder}/Dependencies/sdl/include -I${workspaceFolder}/Dependencies/sdl_image/include -L${workspaceFolder}/Dependencies/fmod/lib -L${workspaceFolder}/Dependencies/freeglut/lib -L${workspaceFolder}/Dependencies/glew/lib -L${workspaceFolder}/Dependencies/sdl/lib -L${workspaceFolder}/Dependencies/sdl_image/lib -lfmod -lSDL2 -lSDL2_image -lGLEW -framework OpenGL -g -o debug.out",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "publish launch task",
+            "type": "shell",
+            "command": "clang++",
+            "args": [
+                
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

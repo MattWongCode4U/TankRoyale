@@ -1,5 +1,7 @@
 #pragma once
 #include "System.h"
+#include <chrono>
+#include <thread>
 
 class NetworkSystem : public System
 {

@@ -21,7 +21,7 @@ void NetworkSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			Sleep(currentGameTime - thisTime);
+			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
 		}
 		handleMsgQ();
 

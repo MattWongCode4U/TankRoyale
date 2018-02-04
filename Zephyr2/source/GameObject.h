@@ -1,9 +1,8 @@
 #pragma once
-//#include "Msg.h"
+#include <Windows.h>
 #include <map>
 #include <iostream>
 #include "ObjectData.h"
-#include <Windows.h>
 #include "Vector2.h"
 #include "renderer\RenderableTypes.h"
 using namespace std;
@@ -17,8 +16,8 @@ public:
 	int width;
 	int length;
 	int orientation; // in degrees, 0 pointing up on the screen, clockwise rotation = positive
-	int physicsEnabled; // 0 or 1.
-	int windScale; //how effected the object is by wind 0-1
+	//int physicsEnabled; // 0 or 1.
+	//int windScale; //how effected the object is by wind 0-1
 	int imageFrames;
 	
 	// in degrees, same as orientation; difference is that orientation is used for rendering, direction is the direction of movement
@@ -34,7 +33,7 @@ public:
 
 	GameObject();
 	~GameObject();
-	GameObject::GameObject(std::map <std::string, std::string> paramsMap, ObjectData* objData);
+	GameObject(std::map <std::string, std::string> paramsMap, ObjectData* objData);
 	virtual std::string getObjectType();
 	virtual std::string toString();
 	void earlyUpdate();

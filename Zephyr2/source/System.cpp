@@ -30,7 +30,7 @@ void System::handleMsgQ() {
 	mtx.lock();
 	while (!msgQ.empty()) {
 		handleMessage(msgQ.front());
-		msgQ.pop();	
+		msgQ.pop();
 	}
 	mtx.unlock();
 }

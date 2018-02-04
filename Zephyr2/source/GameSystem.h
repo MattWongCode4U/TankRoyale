@@ -1,9 +1,5 @@
 #pragma once
-#include "System.h"
-//#include "GameObject.h"
-#include "FullscreenObj.h"
-#include "Cannonball.h"
-#include "ShipObj.h"
+#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -12,12 +8,12 @@
 #include <typeinfo>
 #include <cstdlib>
 #include <ctime>
-#include <windows.h>
 #include <thread>
+#include "System.h"
+#include "FullscreenObj.h"
+#include "GridObject.h"
+#include "TankObject.h"
 #include "ObjectData.h"
-
-
-
 
 extern volatile bool malive;
 
@@ -33,13 +29,17 @@ public:
 	void addGameObjects(string fileName);
 	void saveToFIle(string fileName);
 	void createGameObject(GameObject* g);
-	void GameSystem::gameObjectRemoved(GameObject* g);
+	void gameObjectRemoved(GameObject* g);
 	std::vector<GameObject*> gameObjects;
 	
+	//returns the tile distance in between two tiles on the grid;
+	int getGridDistance(int aX, int aY, int bx, int bY);
+
 	ObjectData objData;
 	void removeAllGameObjects();
 
 	const int timeFrame = 20;
+	int turnStartTime = 0;
 
 	// -1	= no level loaded
 	// 0	= Main Menu
@@ -58,12 +58,17 @@ private:
 	void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
+	void displayTimeLeft(int time);
 
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
+
+	//updates the reticle spright, and postion.
+	void updateReticle();
+
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
 
@@ -76,8 +81,15 @@ private:
 
 	int hexSize = 20; //"radius" of a single hexagon in the grid
 
-	int reticleXGrid = 0, reticleYGrid = 0; //the hex tile the reticle is over
+	//the reticle controlled by the arrow keys. used for aiming and queing up actions
+	GridObject* reticle;
+
+	//the origin of the current action. (The Tank's expected position at the start of the action)
+	GridObject* actionOrigin;
+
+	bool validMove = false;
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;
+	Msg *m;
 };

@@ -72,20 +72,14 @@ int main(int argc, char *argv[]) {
 	// TO DO: Implement 
 	while (malive) {
 		if (thisTime  < currentGameTime) {
-			Sleep(currentGameTime - thisTime);
+			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + 100;
 
 		SDL_Event windowEvent;
 		while (SDL_PollEvent(&windowEvent)) {
 			if (SDL_QUIT == windowEvent.type) {
-				rs->stopSystemLoop();
-				ios->alive = false;
-				gs->alive = false;
-				rs->alive = false;
 				malive = false;
-				aus->alive = false;
-				ns->alive = false;
 			}
 		}
 		//OutputDebugString("outside\n");
@@ -103,15 +97,24 @@ int main(int argc, char *argv[]) {
 	//						Thread Joining							//
 	//////////////////////////////////////////////////////////////////
 	ioThread.join();
-	OutputDebugString("\nIO Ended\n");
+	//OutputDebugString("\nIO Ended\n");
 	renderThread.join();
-	OutputDebugString("\nRT Ended\n");
+	//OutputDebugString("\nRT Ended\n");
 	gameSystemThread.join();
-	OutputDebugString("\nGS Ended\n");
+	//OutputDebugString("\nGS Ended\n");
 	audThread.join();
-	OutputDebugString("\nAudio Ended\n");
+	//OutputDebugString("\nAudio Ended\n");
 	nsThread.join();
-	OutputDebugString("\nNetwork Ended\n");
+	//OutputDebugString("\nNetwork Ended\n");
+
+	//////////////////////////////////////////////////////////////////
+	//						Thread Deleting							//
+	//////////////////////////////////////////////////////////////////
+	delete(ios);
+	delete(rs);
+	delete(gs);
+	delete(aus);
+	delete(ns);
 
 	return 1;
 }
