@@ -251,8 +251,8 @@ void GameSystem::startSystemLoop() {
 		default:
 			break;
 		}
+		delete(m);
 	}
-
 }
 
 // wrapper that removes all game objects by sending a message for each object.
@@ -306,6 +306,15 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 	//GameObject* g;
 
 	switch (msg->type) {
+	case LEFT_MOUSE_BUTTON:
+	{
+			POINT p;
+			GetCursorPos(&p);
+			long x = p.x;
+			long y = p.y;
+			break;
+	}
+		
 	case DOWN_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition++;

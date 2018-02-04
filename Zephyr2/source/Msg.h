@@ -24,7 +24,7 @@ enum MSG_TYPE {
 	// IO System 
 	CHECK_KEY_PRESSES, TEST_KEY_PRESSED,
 	UP_ARROW_PRESSED, DOWN_ARROW_PRESSED, RIGHT_ARROW_PRESSED, LEFT_ARROW_PRESSED, SPACEBAR_PRESSED, KEY_A_PRESSED, KEY_D_PRESSED, KEY_S_PRESSED, KEY_W_PRESSED, KEY_Q_PRESSED, KEY_E_PRESSED,
-
+	LEFT_MOUSE_BUTTON,
 	// Audio System
 	AUDIO_MUTE, CHANGE_SOUNDTRACK,
 
@@ -48,7 +48,6 @@ enum MSG_TYPE {
 class Msg {
 public:
 	Msg(MSG_TYPE t, std::string d);
-	Msg(const Msg *m) { this->data = m->data; this->type = m->type; };
 	~Msg();
 
 	MSG_TYPE type;
