@@ -61,12 +61,12 @@ struct ForwardSetup
 	GLuint programMVPM;
 	GLuint programTexture;
 	GLuint programCameraPos;
-	GLuint programAmbientLight;
+	GLuint programAmbient;
 	GLuint programDLight;
 	GLuint programDLightFacing;
-	GLuint programDLightPos;
 	GLuint programOffsets;
 	GLuint programAnimated;
+	GLuint programSmoothness;
 };
 
 

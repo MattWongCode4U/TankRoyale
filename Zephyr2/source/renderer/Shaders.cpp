@@ -41,6 +41,10 @@ std::string Shaders::VSH_COPY_PATH = "assets/shaders/sbcopy.vsh";
 std::string Shaders::FSH_COPY_PATH = "assets/shaders/sbcopy.fsh";
 std::string Shaders::VSH_OVERLAY_PATH = "assets/shaders/overlay.vsh";
 std::string Shaders::FSH_OVERLAY_PATH = "assets/shaders/overlay.fsh";
+std::string Shaders::VSH_FORWARD_PATH = "assets/shaders/forward.vsh";
+std::string Shaders::FSH_FORWARD_PATH = "assets/shaders/forward.fsh";
+std::string Shaders::VSH_BILLBOARD_PATH = "assets/shaders/billboard.vsh";
+std::string Shaders::FSH_BILLBOARD_PATH = "assets/shaders/billboard.fsh";
 
 /*----------------------------------------------------------------------------------------
 	Class Methods
@@ -107,6 +111,22 @@ GLuint Shaders::LoadShadersSBCopy()
 GLuint Shaders::LoadShadersOverlay()
 {
 	return Shaders::LoadShadersGeneric(Shaders::VSH_OVERLAY_PATH, Shaders::FSH_OVERLAY_PATH);
+}
+
+///
+///
+///
+GLuint Shaders::LoadShadersForward()
+{
+	return Shaders::LoadShadersGeneric(Shaders::VSH_FORWARD_PATH, Shaders::FSH_FORWARD_PATH);
+}
+
+///
+///
+///
+GLuint Shaders::LoadShadersBillboard()
+{
+	return Shaders::LoadShadersGeneric(Shaders::VSH_BILLBOARD_PATH, Shaders::FSH_BILLBOARD_PATH);
 }
 
 ///
