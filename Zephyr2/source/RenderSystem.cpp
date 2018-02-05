@@ -284,7 +284,7 @@ void RenderSystem::addObjectToRenderList(Msg* m) {
 	Update the position of an object given in the message.
 */
 void RenderSystem::updateObjPosition(Msg* m) {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 
 	//id,renderable,x,y,z,orientation,width,length,physEnabled,type
@@ -300,7 +300,7 @@ void RenderSystem::updateObjPosition(Msg* m) {
 */
 void RenderSystem::updateObjSprite(Msg* m)
 {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 	std::string id = dataVector.at(0);
 	std::string sprite = dataVector.at(2);
