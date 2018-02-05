@@ -41,8 +41,10 @@ enum MSG_TYPE {
 	// NETWOR_R_ACTION is what network system will send to our game system when it receives an action
 	NETWORK_TURN_BROADCAST,
 	NETWORK_R_IDLE, NETWORK_S_IDLE,
-	NETWORK_S_ACTION,//playerID,actionName,actionNumber,targetX,targetY
-	NETWORK_R_ACTION
+	NETWORK_S_ACTION, //playerID,actionName,actionNumber,targetX,targetY
+	NETWORK_R_ACTION,
+	NETWORK_R_PING,
+	NETWORK_CONNECT
 };
 
 class Msg {

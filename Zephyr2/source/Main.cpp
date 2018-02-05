@@ -4,7 +4,7 @@ int main(int argc, char *argv[]) {
 	//////////////////////////////////////////////////////////////////
 	//						Loading Core							//
 	//////////////////////////////////////////////////////////////////
-	
+	std::cout << "\nLoading Core\n";
 	// create ONE message bus that goes to ALL the systems
 	mbus = new MessageBus();
 
