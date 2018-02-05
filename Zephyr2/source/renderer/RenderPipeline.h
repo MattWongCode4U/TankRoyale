@@ -116,17 +116,18 @@ private:
 	//the texture of shame
 	GLuint _fallbackTextureID = 0;
 
-	//base MVP, may keep or remove
-
+	//base MVP, may structify
 	glm::mat4 _baseModelViewMatrix;
 	glm::mat4 _baseModelViewProjectionMatrix;
+	glm::mat4 _baseProjectionMatrix;
 	glm::mat4 _depthModelViewMatrix;
 	glm::mat4 _depthModelViewProjectionMatrix;
 	RenderableLight _mainDirectionalLight;
-
+	glm::vec3 _allAmbientLight;
 
 	void drawNullScene();
 	void drawCamera(RenderableScene * scene);
+
 	void drawObjects(RenderableScene * scene);
 	void drawObject(RenderableObject * object);
 	void drawShadows(RenderableScene * scene);
@@ -134,9 +135,18 @@ private:
 	void drawLightingMainPass(RenderableScene * scene);
 	void drawLightingPointLight(RenderableLight light, RenderableScene * scene);
 	void drawLightingSpotLight(RenderableLight light, RenderableScene * scene);
+	void drawPostProcessing(RenderableScene * scene);
+	void drawPostProcessingCopySmearbuffer(float blurFactor, float blurAmount);
 
+	void drawForward(const RenderableScene &scene);
+	void drawBillboard(const RenderableScene &scene);
+
+	void drawOverlay(RenderableOverlay * overlay);
+	void drawNullOverlay();
 	void drawOverlayElement(RenderableObject * element);
+
 	glm::vec4 computeAnimationOffsets(const RenderableObject &object);
+	glm::vec3 computeAmbientLight(RenderableScene * scene);
 
 	void setupWindow();
 	void setupProgram();
@@ -172,15 +182,6 @@ public:
 	void drawUnloadScreen();
 	void drawIdleScreen();
 	void doRender(RenderableScene * scene, RenderableOverlay * overlay);
-	
-
-	glm::vec3 computeAmbientLight(RenderableScene * scene);
-
-	void drawPostProcessing(RenderableScene * scene);
-	void drawPostProcessingCopySmearbuffer(float blurFactor, float blurAmount);
-
-	void drawOverlay(RenderableOverlay * overlay);
-	void drawNullOverlay();
 
 	bool acquireContext();
 	bool releaseContext();

@@ -55,6 +55,20 @@ struct OverlaySetup
 	glm::mat4 MVPM;
 };
 
+struct ForwardSetup
+{
+	GLuint program;
+	GLuint programMVPM;
+	GLuint programTexture;
+	GLuint programCameraPos;
+	GLuint programAmbientLight;
+	GLuint programDLight;
+	GLuint programDLightFacing;
+	GLuint programDLightPos;
+	GLuint programOffsets;
+	GLuint programAnimated;
+};
+
 
 /// <summary>
 /// Single object data sent to RenderEngine on draw
@@ -136,7 +150,10 @@ struct RenderableSetupData
 struct RenderableScene
 {
 	std::vector<RenderableObject> objects;
+	std::vector<RenderableObject> forwardObjects;
+	std::vector<RenderableObject> billboardObjects;
 	std::vector<RenderableLight> lights;
+	//TODO separate out maincamera and such
 	RenderableCamera camera;
 };
 

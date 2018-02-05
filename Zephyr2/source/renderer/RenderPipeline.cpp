@@ -716,7 +716,7 @@ void RenderPipeline::drawNullScene()
 /// "Draws" the camera
 /// Actually sets up base matrices because in OpenGL you move the whole world
 /// </summary>
-void RenderPipeline::drawCamera(RenderableScene *scene)
+void RenderPipeline::drawCamera(RenderableScene *scene) //TODO rename?
 {
 	RenderableCamera *camera = &scene->camera;
 
@@ -732,6 +732,31 @@ void RenderPipeline::drawCamera(RenderableScene *scene)
 	glm::mat4 view = rotation * translation;
 	_baseModelViewMatrix = view;
 	_baseModelViewProjectionMatrix = projection * view;
+	_baseProjectionMatrix = projection;
+
+	//also get main directional and ambient lighting here since multiple pipeline stages need it
+	bool foundMainDirectionalLight = false;
+	for (int eachLight = 0; eachLight < scene->lights.size(); eachLight++)
+	{
+		if (scene->lights[eachLight].type == RenderableLightType::DIRECTIONAL)
+		{
+			_mainDirectionalLight = (scene->lights[eachLight]);
+			//SDL_Log("Found a directional light!");
+			foundMainDirectionalLight = true;
+			break;
+		}
+	}
+
+	//fallback: black directional light
+	if (!foundMainDirectionalLight)
+	{
+		RenderableLight mdl;
+		mdl.intensity = 0.0f;
+		_mainDirectionalLight = mdl;
+	}
+
+	//and the ambient
+	_allAmbientLight = computeAmbientLight(scene);
 
 }
 
@@ -904,27 +929,6 @@ void RenderPipeline::drawObject(RenderableObject *object)
 /// </summary>
 void RenderPipeline::drawShadows(RenderableScene *scene)
 {
-
-	//grab the main light
-	bool foundMainDirectionalLight = false;
-	for (int eachLight = 0; eachLight < scene->lights.size(); eachLight++)
-	{
-		if (scene->lights[eachLight].type == RenderableLightType::DIRECTIONAL)
-		{
-			_mainDirectionalLight = (scene->lights[eachLight]);
-			//SDL_Log("Found a directional light!");
-			foundMainDirectionalLight = true;
-			break;
-		}
-	}
-
-	//fallback: black directional light
-	if (!foundMainDirectionalLight)
-	{
-		RenderableLight mdl;
-		mdl.intensity = 0.0f;
-		_mainDirectionalLight = mdl;
-	}
 
 	//build base matrix
 	glm::mat4 projection = glm::ortho<float>(-GlobalPrefs::rShadowMapSide, GlobalPrefs::rShadowMapSide, -GlobalPrefs::rShadowMapSide, GlobalPrefs::rShadowMapSide, -GlobalPrefs::rShadowMapNear, GlobalPrefs::rShadowMapFar);
@@ -1099,7 +1103,7 @@ void RenderPipeline::drawLightingMainPass(RenderableScene *scene) //will need mo
 	glUniform3f(_framebufferDrawColorID, clear.r, clear.g, clear.b);
 
 	//bind ambient light
-	glm::vec3 ambient = computeAmbientLight(scene);
+	glm::vec3 ambient = _allAmbientLight;
 	glUniform3f(_framebufferDrawAmbientID, ambient.r, ambient.g, ambient.b);
 
 	//bind directional light color
