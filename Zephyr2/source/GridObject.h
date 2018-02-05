@@ -28,5 +28,5 @@ public:
 	int gridX;
 	int gridY;
 
-	const int hexSize = 20;
+	const int hexSize = 50;
 };

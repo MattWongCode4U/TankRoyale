@@ -79,7 +79,7 @@ private:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
-	int hexSize = 20; //"radius" of a single hexagon in the grid
+	int hexSize = 50; //"radius" of a single hexagon in the grid
 
 	//the reticle controlled by the arrow keys. used for aiming and queing up actions
 	GridObject* reticle;
