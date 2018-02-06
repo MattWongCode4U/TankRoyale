@@ -803,3 +803,69 @@ void GameSystem::displayTimeLeft(int time) {
 	m->data = osss.str();
 	msgBus->postMessage(m, this);
 }
+
+/*
+	Takes in the player number we are going to be udpating. Enum in GameSystem
+*/
+void GameSystem::updatePlayerHealthBar(int playerID) {
+	TankObject* curPlayer = nullptr;
+	FullscreenObj* curHealthBar = nullptr;
+	switch (playerID) {
+	case PLAYER1:
+		curPlayer = findTankObject("player1");
+		curHealthBar = findFullscreenObject("player1_hpbar");
+		break;
+	case PLAYER2:
+		curPlayer = findTankObject("player2");
+		curHealthBar = findFullscreenObject("player2_hpbar");
+		break;
+	case PLAYER3:
+		curPlayer = findTankObject("player3");
+		curHealthBar = findFullscreenObject("player3_hpbar");
+		break;
+	case PLAYER4:
+		curPlayer = findTankObject("player4");
+		curHealthBar = findFullscreenObject("player4_hpbar");
+		break;
+	}
+	if (curPlayer != nullptr) {
+		curHealthBar->length = curHealthBar->originalWidth % curPlayer->getHealth(); // TEST: This needs to know the original size of the health bar, then update the size as a percentage of that for the new size
+	}
+};
+
+GameObject* GameSystem::findGameObject(std::string objectID) {
+	GameObject* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == "player1" && g->getObjectType() == "GameObject") {
+			obj = (GameObject*)g;
+		}
+	}
+	return obj;
+}
+TankObject* GameSystem::findTankObject(std::string objectID) {
+	TankObject* obj = nullptr;
+	for (GameObject *g : gameObjects) {
+		if (g->id == "player1" && g->getObjectType() == "TankObject") {
+			obj = (TankObject*)g;
+		}
+	}
+	return obj;
+}
+GridObject* GameSystem::findGridObject(std::string objectID) {
+	GridObject* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == "player1" && g->getObjectType() == "GridObject") {
+			obj = (GridObject*)g;
+		}
+	}
+	return obj;
+}
+FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
+	FullscreenObj* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == "player1" && g->getObjectType() == "GameObject") {
+			obj = (FullscreenObj*)g;
+		}
+	}
+	return obj;
+}

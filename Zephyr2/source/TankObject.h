@@ -14,4 +14,7 @@ public:
 
 	//the remaining hitpoints
 	int health;
+	
+	int getHealth();
+	void setHealth(int newHealth);
 };

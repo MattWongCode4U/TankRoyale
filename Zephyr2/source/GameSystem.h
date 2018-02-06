@@ -17,6 +17,13 @@
 
 extern volatile bool malive;
 
+enum PlayerID {
+	PLAYER1 = 1,
+	PLAYER2 = 2,
+	PLAYER3 = 3,
+	PLAYER4 = 4
+};
+
 class GameSystem : public System {
 public:
 	GameSystem(MessageBus* mbus);
@@ -50,6 +57,12 @@ public:
 	int levelLoaded = -1;
 
 	int score = 0;
+
+	GameObject* findGameObject(std::string objectID);
+	TankObject* findTankObject(std::string objectID);
+	GridObject* findGridObject(std::string objectID);
+	FullscreenObj* findFullscreenObject(std::string objectID);
+
 private:
 	//handler functions for the scenes in the game
 	void mainMenuHandler(Msg * msg);
@@ -59,6 +72,7 @@ private:
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
 	void displayTimeLeft(int time);
+	void updatePlayerHealthBar(int playerID);
 
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);
