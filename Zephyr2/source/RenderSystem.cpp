@@ -292,6 +292,7 @@ void RenderSystem::updateObjPosition(Msg* m) {
 	RenderableObject *obj = &objects->at(id);
 	obj->position = glm::vec3((float)(atof(dataVector[2].c_str())), (float)(atof(dataVector[3].c_str())), (float)(atof(dataVector[4].c_str())));
 	obj->rotation = glm::vec3(0, 0, glm::radians((float)(atof(dataVector[5].c_str()))));
+	obj->scale = glm::vec3((float)(atof(dataVector[6].c_str())), (float)(atof(dataVector[7].c_str())), 1.0f);
 }
 
 /*
