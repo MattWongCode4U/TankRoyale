@@ -105,7 +105,8 @@ void GameSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			Sleep(currentGameTime - thisTime);
+			//Sleep(currentGameTime - thisTime);
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + timeFrame;
 		
@@ -308,10 +309,10 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 	switch (msg->type) {
 	case LEFT_MOUSE_BUTTON:
 	{
-			vector<string> objectData = split(msg->data, ',');
-			INT32 x = atoi(objectData[0].c_str());
-			INT32 y = atoi(objectData[1].c_str());
-			break;
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		break;
 	}
 		
 	case DOWN_ARROW_PRESSED:
@@ -515,7 +516,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				<< reticle->x << "," //target x pos
 				<< reticle->y; //target y pos
 
-			mm->type = NETWORK_R_ACTION;
+			mm->type = NETWORK_S_ACTION;
 			mm->data = oss.str();
 			msgBus->postMessage(mm, this);
 

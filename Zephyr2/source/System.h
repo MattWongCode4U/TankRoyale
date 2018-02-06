@@ -3,9 +3,9 @@
 #include <queue>
 #include <mutex>
 #include <string>  
-
 #include "Msg.h"
 #include "MessageBus.h"
+#include "NetworkHelpers.h"
 
 class MessageBus;
 

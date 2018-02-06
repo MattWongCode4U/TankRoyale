@@ -158,5 +158,8 @@
     <ClInclude Include="source\GridObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\NetworkHelpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
