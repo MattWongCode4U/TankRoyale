@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	// TO DO: Implement 
 	while (malive) {
 		if (thisTime  < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + 100;
 

@@ -515,7 +515,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				<< reticle->x << "," //target x pos
 				<< reticle->y; //target y pos
 
-			mm->type = NETWORK_R_ACTION;
+			mm->type = NETWORK_S_ACTION;
 			mm->data = oss.str();
 			msgBus->postMessage(mm, this);
 
