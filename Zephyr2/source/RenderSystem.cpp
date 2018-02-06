@@ -818,8 +818,3 @@ void RenderSystem::levelLoaded(Msg* m) {
 		cameraY = 0.0f;
 	}
 }
-
-SDL_Window* RenderSystem::GetSDLWindow()
-{
-	return window;
-}

@@ -4,7 +4,6 @@
 #include <chrono>
 #include <thread>
 #include "System.h"
-#include "RenderSystem.h"
 
 class IOSystem : public System {
 public:
