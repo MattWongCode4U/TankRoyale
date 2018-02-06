@@ -304,10 +304,10 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 	switch (msg->type) {
 	case LEFT_MOUSE_BUTTON:
 	{
-			vector<string> objectData = split(msg->data, ',');
-			INT32 x = atoi(objectData[0].c_str());
-			INT32 y = atoi(objectData[1].c_str());
-			break;
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		break;
 	}
 		
 	case DOWN_ARROW_PRESSED:
