@@ -2,9 +2,9 @@
 #include "System.h"
 #include <chrono>
 #include <thread>
+#pragma comment (lib, "Ws2_32.lib")
 
-class NetworkSystem : public System
-{
+class NetworkSystem : public System {
 public:
 
 	// use config file to set this later
@@ -27,7 +27,7 @@ public:
 	std::string playerTurnTargetX[4];
 	std::string playerTurnTargetY[4];
 
-	const int timeFrame = 20;
+	const int timeFrame = 100;
 
 	int actionCounter = 0;
 	// temp set here, should be set in config, and the gameysstem needs its own too probably
@@ -37,4 +37,17 @@ public:
 
 	// 30 secs - used during testing, server uses timer irl
 	const int turnTimer = 30000;
+
+	// for error checking function calls in Winsock library
+	int iResult;
+
+	// socket for client to connect to server
+	SOCKET ConnectSocket;
+
+	int receivePackets(char *);
+	void sendActionPackets();
+
+	char network_data[MAX_PACKET_SIZE];
+
+	void networkUpdate();
 };

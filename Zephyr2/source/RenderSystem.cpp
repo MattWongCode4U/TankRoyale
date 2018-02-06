@@ -533,7 +533,6 @@ void RenderSystem::stopSystemLoop() {
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	running = false;
-
 }
 
 /*

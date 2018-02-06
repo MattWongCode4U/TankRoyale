@@ -99,6 +99,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib;$(SolutionDir)Dependencies/sdl/lib;$(SolutionDir)Dependencies/glew/lib;$(SolutionDir)Dependencies/freeglut/lib;$(SolutionDir)Dependencies/fmod/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -197,6 +198,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\Main.h" />
     <ClInclude Include="source\MessageBus.h" />
     <ClInclude Include="source\Msg.h" />
+    <ClInclude Include="source\NetworkHelpers.h" />
     <ClInclude Include="source\NetworkSystem.h" />
     <ClInclude Include="source\ObjectData.h" />
     <ClInclude Include="source\RenderSystem.h" />
