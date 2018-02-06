@@ -4,12 +4,14 @@
 #include <glew.h>
 #include <SDL_opengl.h>
 #include <freeglut.h>
-#include "System.h"
-#include "GameObject.h"
 #include <mutex>
 #include <math.h>  
 #include <chrono>
 #include <thread>
+
+#include "System.h"
+#include "GameObject.h"
+
 
 class RenderSystem : public System {
 public:
@@ -25,6 +27,7 @@ public:
 	void startSystemLoop();
 	void stopSystemLoop();
 	void init();
+	SDL_Window* GetSDLWindow();
 
 	int loadedLevel = 0;
 

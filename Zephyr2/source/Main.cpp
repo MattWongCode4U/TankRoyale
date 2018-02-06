@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
 
 	//////////////////////////////////////////////////////////////////
 	//						SYSTEM CREATION							//
-	// DO NOT START SYSTEM LOOPS IN HERE (if a loop is required)
+	// DO NOT START SYSTEM LOOPS IN HERE (if a loop is required)	//
 	//////////////////////////////////////////////////////////////////	
 	IOSystem* ios = new IOSystem(mbus);
 	mbus->addSystem(ios);
@@ -66,12 +66,13 @@ int main(int argc, char *argv[]) {
 	//						Console Loop							//
 	//////////////////////////////////////////////////////////////////
 	malive = true; //Move this
-	clock_t thisTime = clock();
+	clock_t thisTime;
 	int currentGameTime = 0;
 	// TO DO: Implement 
 	while (malive) {
+		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + 100;
 

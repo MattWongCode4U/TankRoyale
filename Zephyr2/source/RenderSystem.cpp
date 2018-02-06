@@ -492,7 +492,6 @@ GLuint RenderSystem::getTexture(string path) {
 void RenderSystem::startSystemLoop() {
 	init();
 	running = true;
-	clock_t thisTime = clock();
 	//clock_t lastTime = thisTime;
 	//SDL_Event windowEvent;
 
@@ -500,12 +499,6 @@ void RenderSystem::startSystemLoop() {
 
 	int currentGameTime = 0;
 	while (running) {
-		thisTime = clock();
-		if (thisTime  < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
-		}
-		currentGameTime += timeFrame;
-
 		handleMsgQ();
 
 		//lastTime = thisTime;
@@ -824,4 +817,9 @@ void RenderSystem::levelLoaded(Msg* m) {
 		cameraX = 0.0f;
 		cameraY = 0.0f;
 	}
+}
+
+SDL_Window* RenderSystem::GetSDLWindow()
+{
+	return window;
 }

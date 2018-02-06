@@ -101,7 +101,8 @@ void GameSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			Sleep(currentGameTime - thisTime);
+			//Sleep(currentGameTime - thisTime);
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + timeFrame;
 		

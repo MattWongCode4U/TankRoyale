@@ -113,7 +113,7 @@ void NetworkSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		handleMsgQ();
 

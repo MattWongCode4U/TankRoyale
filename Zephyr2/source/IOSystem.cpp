@@ -17,7 +17,7 @@ void IOSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(currentGameTime - thisTime));
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 			//std::this_thread::yield();
 		}
 		handleMsgQ();
@@ -48,7 +48,6 @@ void IOSystem::checkKeyPresses() {
 				RECT rect = { NULL };
 				if (GetCursorPos(&p)) 
 				{
-					
 					oss << p.x << "," << p.y;
 					m->data = oss.str();
 				}
