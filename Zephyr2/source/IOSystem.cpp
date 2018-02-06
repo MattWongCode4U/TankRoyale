@@ -36,9 +36,9 @@ void IOSystem::checkKeyPresses() {
 	// specific keys, and then having another function somewhere that 
 	// parses the data to get the proper code to the Gamesystem but that's 
 	// a bit convoluted 
-	if (focus) 
+	if (focus)
 	{
-		if (GetKeyState(VK_LBUTTON) & 0x8000) 
+		if (GetKeyState(VK_LBUTTON) & 0x8000)
 		{
 			//OutputDebugString("Mouse Pressed\n");
 			m->type = LEFT_MOUSE_BUTTON;
@@ -46,7 +46,7 @@ void IOSystem::checkKeyPresses() {
 				keyspressed["Lmouse"] = clock();
 				POINT p;
 				RECT rect = { NULL };
-				if (GetCursorPos(&p)) 
+				if (GetCursorPos(&p))
 				{
 					oss << p.x << "," << p.y;
 					m->data = oss.str();
@@ -153,12 +153,13 @@ void IOSystem::checkKeyPresses() {
 			}
 		}
 
-	if (GetKeyState('Z') & 0x8000) {
-		//OutputDebugString("Z Pressed\n"); 
-		m->type = KEY_Z_PRESSED;
-		if ((clock() - keyspressed["z"]) >= timebetweenPresses) {
-			keyspressed["z"] = clock();
-			msgBus->postMessage(m, this);
+		if (GetKeyState('Z') & 0x8000) {
+			//OutputDebugString("Z Pressed\n"); 
+			m->type = KEY_Z_PRESSED;
+			if ((clock() - keyspressed["z"]) >= timebetweenPresses) {
+				keyspressed["z"] = clock();
+				msgBus->postMessage(m, this);
+			}
 		}
 	}
 }

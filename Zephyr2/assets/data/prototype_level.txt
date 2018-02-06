@@ -35,7 +35,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: player1_hpbar,
-renderable: hpbar.png,
+renderable: green_hpbar.png,
 xPos: -565,
 yPos: 310,
 zPos: 10,
@@ -71,7 +71,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: player2_hpbar,
-renderable: hpbar.png,
+renderable: green_hpbar.png,
 xPos: -415,
 yPos: 310,
 zPos: 10,
@@ -107,7 +107,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: player3_hpbar,
-renderable: hpbar.png,
+renderable: green_hpbar.png,
 xPos: -265,
 yPos: 310,
 zPos: 10,
@@ -143,7 +143,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: player4_hpbar,
-renderable: hpbar.png,
+renderable: green_hpbar.png,
 xPos: -115,
 yPos: 310,
 zPos: 10,

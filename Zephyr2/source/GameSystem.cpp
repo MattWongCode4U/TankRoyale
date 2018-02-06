@@ -861,12 +861,87 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 		break;
 	}
 	if (curPlayer != nullptr && curHealthBar != nullptr) {
+		// TODO: Update the image to be a red bar when < 30%, and orange when < 50%
+		Msg* m;
 		if (curPlayer->getHealth() == 100) {
-			curHealthBar->length = curHealthBar->originalLength;
+			std::ostringstream oss;
+			//id,renderable,x,y,z,orientation,width,length
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->originalWidth << ",";
+			oss << curHealthBar->length;
+			m = new Msg(MSG_TYPE::UPDATE_HP_BAR, oss.str());
+		} else if (curPlayer->getHealth() <= 30) {
+			int hpBarSize = curHealthBar->originalWidth * 1 - (TANK_MAX_HEALTH - curPlayer->getHealth()); // TEST: Does this update the size correctly?
+			std::ostringstream oss;
+			// change sprite
+			if (curHealthBar->renderable != "red_hpbar")
+			{
+				oss << curHealthBar->id << ",";
+				oss << " ,";
+				oss << "red_hpbar.png";
+				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
+				msgBus->postMessage(m, this);
+			}
+			// update size
+			oss.clear();
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << hpBarSize << ","; // width
+			oss << curHealthBar->length; // lenght
+			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
+		} else if (curPlayer->getHealth() <= 50) {
+			int hpBarSize = curHealthBar->originalWidth * 1 - (TANK_MAX_HEALTH - curPlayer->getHealth()); // TEST: Does this update the size correctly?
+			std::ostringstream oss;
+			if (curHealthBar->renderable != "orange_hpbar.png")
+			{
+				oss << curHealthBar->id << ",";
+				oss << curHealthBar->id << ",";
+				oss << "orange_hpbar.png";
+				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
+				msgBus->postMessage(m, this);
+			}
+			oss.clear();
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << hpBarSize << ","; // width
+			oss << curHealthBar->length; // lenght
+			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
+		} else { 
+			int hpBarSize = curHealthBar->originalWidth * 1-(TANK_MAX_HEALTH - curPlayer->getHealth()); // TEST: Does this update the size correctly?
+			std::ostringstream oss; 
+			if (curHealthBar->renderable != "green_hpbar.png")
+			{
+				oss << curHealthBar->id << ",";
+				oss << " ,";
+				oss << "green_hpbar.png";
+				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
+				msgBus->postMessage(m, this);
+			}
+			oss.clear();
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << hpBarSize << ","; // width
+			oss << curHealthBar->length; // lenght
+			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		}
-		else {
-			curHealthBar->length = curHealthBar->originalLength % curPlayer->getHealth(); // TEST: Does this update the size correctly?
-		}
+		msgBus->postMessage(m, this);
 	}
 };
 

@@ -342,7 +342,7 @@ void RenderSystem::updateObjRender(Msg * m)
 	Update the health bar on the HUD.
 */
 void RenderSystem::updateHealthHUD(Msg* m) {
-	
+	// TODO: Put healthbar stuff here and send a message instead of updating in GameSystem
 }
 
 /*
