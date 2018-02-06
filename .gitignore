@@ -263,3 +263,6 @@ __pycache__/
 # Mac Builds
 *.out
 *.out.dSYM/*
+
+# unignoring obj files for models
+!Zephyr2/assets/models/*.obj

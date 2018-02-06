@@ -9,7 +9,8 @@ enum MSG_TYPE {
 	RENDER_FRAME_TEST, UPDATE_TEST_OBJ, OBJ_TEST_MSG,
 
 	// Render System
-	UPDATE_OBJ_SPRITE,
+	UPDATE_OBJ_SPRITE, 
+	UPDATE_OBJ_RENDER, //id,renderable,renderType,model,normalMap,smoothness
 
 	// Physics System
 	UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,physEnabled,type

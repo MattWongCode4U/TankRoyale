@@ -41,7 +41,12 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord )
 
 void main()
 {
-	FragColor.rgb = texture(iTexImage, oTexC).rgb;
+	vec4 texColor = texture(iTexImage, oTexC);
+	
+	if(texColor.a < 0.75)
+		discard;
+	
+	FragColor.rgb = texColor.rgb;
 	FragColor.a = iSmoothness;
 	FragPosition = oWorldPos;
 	FragNormal = normalize(oNormal);

@@ -152,24 +152,13 @@ void NetworkSystem::handleMessage(Msg *msg) {
 		actionCounter++;
 		break;
 	case NETWORK_R_ACTION:
-		if (actionCounter > 3) {
-			break;
-		}
-		playerTurnAction[stoi(data[2])] = data[1];
-		playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
-		playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
-
-		// always add 1 to the action counter
-		//may not be needed if action # passed in from game systems
-		actionCounter++;
+		
 		break;
 	case NETWORK_R_PING:
 
 		break;
 	case NETWORK_S_ACTION:
-		if (!echoMode) {
-			aggregateTurnInfo(msg);
-		}
+		aggregateTurnInfo(msg);
 		break;
 	default:
 		break;
@@ -177,7 +166,18 @@ void NetworkSystem::handleMessage(Msg *msg) {
 }
 
 void NetworkSystem::aggregateTurnInfo(Msg* m) {
+	if (actionCounter > 3) {
+		return;
+	}
+	vector<string> data = split(m->data, ',');
 
+	playerTurnAction[stoi(data[2])] = data[1];
+	playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
+	playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
+
+											   // always add 1 to the action counter
+											   //may not be needed if action # passed in from game systems
+	actionCounter++;
 }
 
 void NetworkSystem::broadcastTurnInfo() {

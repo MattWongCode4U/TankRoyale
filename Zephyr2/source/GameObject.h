@@ -4,6 +4,7 @@
 #include <iostream>
 #include "ObjectData.h"
 #include "Vector2.h"
+#include "renderer\RenderableTypes.h"
 using namespace std;
 
 class GameObject {
@@ -23,7 +24,12 @@ public:
 	// this CAN BE DIFFERENT from orientation; eg: cannon ball orientated one direction, but affecteed by the wind will curve.
 	int direction; 
 	ObjectData* objData;
-	std::string renderable; // name of a file/sprite? probably needs to be changed
+
+	std::string renderable;
+	RenderableType renderType;
+	std::string model;
+	std::string normalMap;
+	float smoothness;
 
 	GameObject();
 	~GameObject();
@@ -41,7 +47,10 @@ public:
 
 	GameObject* parentObject;
 
+	static RenderableType getRenderableTypeFromName(std::string name);
+
 protected:
+	
 
 private:
 
