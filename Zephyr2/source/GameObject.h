@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
 #include <map>
 #include <iostream>
 #include "ObjectData.h"
