@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
 
 	//////////////////////////////////////////////////////////////////
 	//						SYSTEM CREATION							//
-	// DO NOT START SYSTEM LOOPS IN HERE (if a loop is required)
+	// DO NOT START SYSTEM LOOPS IN HERE (if a loop is required)	//
 	//////////////////////////////////////////////////////////////////	
 	IOSystem* ios = new IOSystem(mbus);
 	mbus->addSystem(ios);
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 	//gs->timeFrame = std::stoi(configData.at(0), &sz);
 	//rs->timeFrame = std::stoi(configData.at(1), &sz);
 	//ios->timeFrame = std::stoi(configData.at(2), &sz);
-//	ps->timeFrame = std::stoi(configData.at(3), &sz);
+	//ps->timeFrame = std::stoi(configData.at(3), &sz);
 
 	// Not using this right now, move it to game system/Render/Physics later maybe
 	//// Create worker thread pool
@@ -66,11 +66,11 @@ int main(int argc, char *argv[]) {
 	//						Console Loop							//
 	//////////////////////////////////////////////////////////////////
 	malive = true; //Move this
-	clock_t thisTime = clock();
+	clock_t thisTime;
 	int currentGameTime = 0;
-
 	// TO DO: Implement 
 	while (malive) {
+		thisTime = clock();
 		if (thisTime  < currentGameTime) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
@@ -78,8 +78,17 @@ int main(int argc, char *argv[]) {
 
 		SDL_Event windowEvent;
 		while (SDL_PollEvent(&windowEvent)) {
-			if (SDL_QUIT == windowEvent.type) {
+			if (SDL_QUIT == windowEvent.type) 
+			{
 				malive = false;
+			}
+			else if (SDL_WINDOWEVENT_FOCUS_LOST == windowEvent.window.event)
+			{
+				mbus->postMessage(new Msg(LOST_FOCUS, ""), NULL);
+			}
+			else if (SDL_WINDOWEVENT_FOCUS_GAINED == windowEvent.window.event)
+			{
+				mbus->postMessage(new Msg(GAINED_FOCUS, ""), NULL);
 			}
 		}
 		//OutputDebugString("outside\n");
