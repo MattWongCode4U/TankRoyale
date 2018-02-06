@@ -21,13 +21,8 @@
 ========================================================================================*/
 #pragma once
 
-#ifdef __APPLE__
-#include <GL/glew.h>
-#include <SDL2/SDL.h>
-#elif defined _WIN32 || defined _WIN64
 #include <glew.h>
 #include <SDL.h>
-#endif
 #include <iostream>
 
 /*========================================================================================
@@ -61,6 +56,10 @@ class Shaders
 		static std::string FSH_COPY_PATH;
 		static std::string VSH_OVERLAY_PATH;
 		static std::string FSH_OVERLAY_PATH;
+		static std::string VSH_FORWARD_PATH;
+		static std::string FSH_FORWARD_PATH;
+		static std::string VSH_BILLBOARD_PATH;
+		static std::string FSH_BILLBOARD_PATH;
 		
     /*------------------------------------------------------------------------------------
 		Class Methods
@@ -74,6 +73,8 @@ class Shaders
 		static GLuint LoadShadersPostProcessing();
 		static GLuint LoadShadersSBCopy();
 		static GLuint LoadShadersOverlay();
+		static GLuint LoadShadersForward();
+		static GLuint LoadShadersBillboard();
 	private:
 		static GLuint LoadShadersGeneric(std::string vshPath, std::string fshPath);
 };

@@ -73,6 +73,8 @@ void RenderPipeline::setupSceneOnThread()
 	setupFramebuffers();
 	setupFramebufferDraw();
 	setupShadowMapping();
+	setupForward();
+	setupBillboard();
 	setupPostProcessing();
 	setupOverlay();
 	setupFallbacks();
@@ -88,6 +90,8 @@ void RenderPipeline::cleanupSceneOnThread()
 	cleanupFramebuffers();
 	cleanupFramebufferDraw();
 	cleanupShadowMapping();
+	cleanupForward();
+	cleanupBillboard();
 	cleanupPostProcessing();
 	cleanupOverlay();
 	cleanupFallbacks();
@@ -205,6 +209,52 @@ void RenderPipeline::cleanupOverlay()
 
 	//delete programs
 	glDeleteProgram(_overlayDrawData.program);
+}
+
+/// <summary>
+/// Helper method initial setup
+/// Set up shaders for forward pass
+/// </summary>
+void RenderPipeline::setupForward()
+{
+	_forwardDrawData.program = Shaders::LoadShadersForward();
+	_forwardDrawData.programMVPM = glGetUniformLocation(_forwardDrawData.program, "iMVPM");
+	_forwardDrawData.programTexture = glGetUniformLocation(_forwardDrawData.program, "iTexture");
+	_forwardDrawData.programAnimated = glGetUniformLocation(_forwardDrawData.program, "iAnimated");
+	_forwardDrawData.programOffsets = glGetUniformLocation(_forwardDrawData.program, "iOffsets");
+	_forwardDrawData.programAmbient = glGetUniformLocation(_forwardDrawData.program, "iAmbient");
+	_forwardDrawData.programCameraPos = glGetUniformLocation(_forwardDrawData.program, "iCameraPos");
+	_forwardDrawData.programDLight = glGetUniformLocation(_forwardDrawData.program, "iDLight");
+	_forwardDrawData.programDLightFacing = glGetUniformLocation(_forwardDrawData.program, "iDLightFacing");
+	//_forwardDrawData.programDLightPos = glGetUniformLocation(_forwardDrawData.program, "iDLightPos");
+	_forwardDrawData.programSmoothness = glGetUniformLocation(_forwardDrawData.program, "iSmoothness");
+}
+
+/// <summary>
+/// Helper method for final cleanup
+/// Deletes forward pass program
+/// </summary>
+void RenderPipeline::cleanupForward()
+{
+	glDeleteProgram(_forwardDrawData.program);
+}
+
+/// <summary>
+/// Helper method initial setup
+/// Set up shaders for billboard pass
+/// </summary>
+void RenderPipeline::setupBillboard()
+{
+	//TODO billboard implementation
+}
+
+/// <summary>
+/// Helper method for final cleanup
+/// Deletes billboard pass program
+/// </summary>
+void RenderPipeline::cleanupBillboard()
+{
+	//TODO billboard implementation
 }
 
 /// <summary>
@@ -678,6 +728,8 @@ void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay
 		drawObjects(scene); //do the geometry pass
 		drawShadows(scene); //do the shadow map
 		drawLighting(scene); //do the lighting pass
+		drawForward(scene); //do the forward pass
+		drawBillboard(scene); //do the billboard pass
 		drawPostProcessing(scene); //do the postprocessing
 	}
 
@@ -772,6 +824,7 @@ void RenderPipeline::drawObjects(RenderableScene *scene)
 	glBindFramebuffer(GL_FRAMEBUFFER, _framebufferID);
 	glViewport(0, 0, _renderWidth, _renderHeight);
 
+	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
@@ -1255,6 +1308,169 @@ glm::vec3 RenderPipeline::computeAmbientLight(RenderableScene *scene)
 }
 
 /// <summary>
+/// Draws all forward objects in the scene
+/// 
+/// </summary>
+void RenderPipeline::drawForward(RenderableScene *scene)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, _framebufferID);
+	glViewport(0, 0, _renderWidth, _renderHeight);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//bind program and vars
+	glUseProgram(_forwardDrawData.program);
+
+	glm::vec3 ambient = _allAmbientLight;
+	glUniform3f(_forwardDrawData.programAmbient, ambient.r, ambient.g, ambient.b);
+
+	glm::vec3 directional = _mainDirectionalLight.color * _mainDirectionalLight.intensity;
+	glUniform3f(_forwardDrawData.programDLight, directional.r, directional.g, directional.b);
+
+	glm::mat4 rotMatrix = glm::mat4();
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.y, glm::vec3(0, 1, 0));
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.x, glm::vec3(1, 0, 0));
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.z, glm::vec3(0, 0, 1));
+	glm::vec3 lightFacing = rotMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	glUniform3f(_forwardDrawData.programDLightFacing, lightFacing.x, lightFacing.y, lightFacing.z);
+
+	glm::vec3 cPos = scene->camera.position;
+	glUniform3f(_forwardDrawData.programCameraPos, cPos.x, cPos.y, cPos.z);
+
+	for (auto &obj : scene->forwardObjects)
+	{
+		drawForwardObject(&obj);
+	}
+}
+
+/// <summary>
+/// Draws a single forward object
+/// 
+/// </summary>
+void RenderPipeline::drawForwardObject(RenderableObject * object)
+{
+	//check and set animated and offsets
+	//set animation
+	if (object->frameCount <= 1)
+		glUniform1i(_forwardDrawData.programAnimated, GL_FALSE);
+	else
+	{
+		glUniform1i(_forwardDrawData.programAnimated, GL_TRUE);
+		glm::vec4 offsets = computeAnimationOffsets(*object);
+		glUniform4fv(_forwardDrawData.programOffsets, 1, &offsets[0]);
+	}
+
+	//check if a model exists
+	bool hasModel = false;
+	bool hasATexture = false;
+	ModelData modelData;
+	TextureData texData;
+
+	if (_models_p->count(object->modelName) > 0)
+		hasModel = true;
+
+	if (_textures_p->count(object->albedoName) > 0)
+		hasATexture = true;
+
+	//try to bind model
+	if (hasModel)
+	{
+		modelData = _models_p->find(object->modelName)->second;
+		if (modelData.vaoID != 0)
+		{
+			glBindVertexArray(modelData.vaoID);
+		}
+		else
+		{
+			hasModel = false;
+			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Renderer: model has no VAO!");
+		}
+
+	}
+
+	if (!hasModel)
+	{
+		SDL_LogWarn(SDL_LOG_CATEGORY_RENDER, "Renderer: object has no model!");
+		return;
+	}
+
+
+	//try to bind texture
+	if (hasATexture)
+	{
+		texData = _textures_p->find(object->albedoName)->second;
+		if (texData.texID != 0)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texData.texID);
+			glUniform1i(_forwardDrawData.programTexture, 0);
+		}
+		else
+		{
+			hasATexture = false;
+			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Renderer: texture has no texID!");
+		}
+	}
+
+	if (!hasATexture)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _fallbackTextureID);
+		glUniform1i(_forwardDrawData.programTexture, 0);
+	}
+
+	glUniform1f(_shaderSmoothnessID, object->smoothness);
+
+	//transform!
+	glm::mat4 objectMVM = glm::mat4();
+	objectMVM = glm::translate(objectMVM, object->position);
+	objectMVM = glm::scale(objectMVM, object->scale);
+	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
+	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
+	glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+	glUniformMatrix4fv(_forwardDrawData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
+
+	//draw!
+	if (hasModel)
+	{
+		glDrawArrays(GL_TRIANGLES, 0, modelData.numVerts);
+	}
+	else
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+	
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+/// <summary>
+/// Draws all billboard objects in the scene
+/// 
+/// </summary>
+void RenderPipeline::drawBillboard(RenderableScene *scene)
+{
+	glDepthMask(GL_FALSE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	for (auto &obj : scene->billboardObjects)
+	{
+
+	}
+}
+
+/// <summary>
 /// Applies postprocessing and blits buffers
 /// May be broken up with helper methods later
 /// </summary>
@@ -1357,7 +1573,7 @@ void RenderPipeline::drawPostProcessingCopySmearbuffer(float blurFactor, float b
 
 /// <summary>
 /// Draws the overlay
-/// TODO needs implementation
+/// 
 /// </summary>
 void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 {

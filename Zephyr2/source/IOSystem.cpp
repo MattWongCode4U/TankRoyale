@@ -138,7 +138,7 @@ void IOSystem::checkKeyPresses() {
 
 	if (GetKeyState('Z') & 0x8000) {
 		//OutputDebugString("Z Pressed\n"); 
-		m->type = TEST_KEY_PRESSED;
+		m->type = KEY_Z_PRESSED;
 		if ((clock() - keyspressed["z"]) >= timebetweenPresses) {
 			keyspressed["z"] = clock();
 			msgBus->postMessage(m, this);

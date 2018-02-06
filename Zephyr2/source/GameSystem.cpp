@@ -535,13 +535,21 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			sendUpdatePosMessage(indicator);
 
-			actionOrigin = indicator;
-			currentAction++;
+			if(ActionType == MOVE)
+				actionOrigin = indicator;
 
-			
+			currentAction++;
 
 			break;
 		}
+		case KEY_A_PRESSED:
+			setActionType(MOVE);
+			break;
+
+		case KEY_D_PRESSED:
+			setActionType(SHOOT);
+			break;
+
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
 			//OutputDebugString(actionsToExecute[0].c_str());
@@ -596,6 +604,10 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			}
 			break;
 		}
+		case KEY_Z_PRESSED:
+			findTankObject("player1")->setHealth(findTankObject("player1")->getHealth() - 10);
+			updatePlayerHealthBar(1);
+			break;
 		default:
 			break;
 		}
@@ -760,7 +772,7 @@ void GameSystem::updateReticle() {
 
 	int dist = getGridDistance(reticle->gridX, reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
 
-	if (dist > 1) {
+	if (dist > range) {
 		reticle->renderable = "TileIndicatorRed.png";
 		validMove = false;
 	}
@@ -804,6 +816,25 @@ void GameSystem::displayTimeLeft(int time) {
 	msgBus->postMessage(m, this);
 }
 
+void GameSystem::setActionType(ActionTypes a) {
+	ActionType = a;
+	std::ostringstream oss;
+	Msg* mm;
+	
+	switch (a) {
+	case SHOOT:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), this);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), this);
+		range = 5;
+		break;
+	case MOVE:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), this);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), this);
+		range = 1;
+		break;
+	}
+}
+
 /*
 	Takes in the player number we are going to be udpating. Enum in GameSystem
 */
@@ -828,7 +859,7 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 		curHealthBar = findFullscreenObject("player4_hpbar");
 		break;
 	}
-	if (curPlayer != nullptr) {
+	if (curPlayer != nullptr && curHealthBar != nullptr) {
 		curHealthBar->length = curHealthBar->originalWidth % curPlayer->getHealth(); // TEST: This needs to know the original size of the health bar, then update the size as a percentage of that for the new size
 	}
 };
@@ -836,8 +867,9 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 GameObject* GameSystem::findGameObject(std::string objectID) {
 	GameObject* obj = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "player1" && g->getObjectType() == "GameObject") {
+		if (g->id == objectID && g->getObjectType() == "GameObject") {
 			obj = (GameObject*)g;
+			return obj;
 		}
 	}
 	return obj;
@@ -845,8 +877,9 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 TankObject* GameSystem::findTankObject(std::string objectID) {
 	TankObject* obj = nullptr;
 	for (GameObject *g : gameObjects) {
-		if (g->id == "player1" && g->getObjectType() == "TankObject") {
+		if (g->id == objectID && g->getObjectType() == "TankObject") {
 			obj = (TankObject*)g;
+			return obj;
 		}
 	}
 	return obj;
@@ -854,8 +887,9 @@ TankObject* GameSystem::findTankObject(std::string objectID) {
 GridObject* GameSystem::findGridObject(std::string objectID) {
 	GridObject* obj = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "player1" && g->getObjectType() == "GridObject") {
+		if (g->id == objectID && g->getObjectType() == "GridObject") {
 			obj = (GridObject*)g;
+			return obj;
 		}
 	}
 	return obj;
@@ -863,8 +897,9 @@ GridObject* GameSystem::findGridObject(std::string objectID) {
 FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 	FullscreenObj* obj = nullptr;
 	for (GameObject* g : gameObjects) {
-		if (g->id == "player1" && g->getObjectType() == "GameObject") {
+		if (g->id == objectID && g->getObjectType() == "FullscreenObj") {
 			obj = (FullscreenObj*)g;
+			return obj;
 		}
 	}
 	return obj;

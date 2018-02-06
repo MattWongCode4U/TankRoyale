@@ -113,6 +113,8 @@ private:
 	//overlay draw program and buffers (TODO move all to structs)
 	OverlaySetup _overlayDrawData;
 
+	ForwardSetup _forwardDrawData;
+
 	//the texture of shame
 	GLuint _fallbackTextureID = 0;
 
@@ -138,8 +140,9 @@ private:
 	void drawPostProcessing(RenderableScene * scene);
 	void drawPostProcessingCopySmearbuffer(float blurFactor, float blurAmount);
 
-	void drawForward(const RenderableScene &scene);
-	void drawBillboard(const RenderableScene &scene);
+	void drawForward(RenderableScene * scene);
+	void drawForwardObject(RenderableObject * object);
+	void drawBillboard(RenderableScene * scene);
 
 	void drawOverlay(RenderableOverlay * overlay);
 	void drawNullOverlay();
@@ -162,6 +165,10 @@ private:
 	void cleanupShadowMapping();
 	void setupPostProcessing();
 	void cleanupPostProcessing();
+	void setupForward();
+	void cleanupForward();
+	void setupBillboard();
+	void cleanupBillboard();
 	void setupOverlay();
 	void cleanupOverlay();
 
