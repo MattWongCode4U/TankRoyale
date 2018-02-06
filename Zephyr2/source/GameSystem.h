@@ -58,7 +58,11 @@ private:
 	void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	void executeAction(int actionNumber);
+
+	//Displays the amount to time left in the turn
 	void displayTimeLeft(int time);
+
+
 
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);
@@ -87,9 +91,25 @@ private:
 	//the origin of the current action. (The Tank's expected position at the start of the action)
 	GridObject* actionOrigin;
 
+	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
 	bool validMove = false;
+
+	//the possible types of actions
+	enum ActionTypes { MOVE, SHOOT, PASS };
+
+	//the current action being set up
+	ActionTypes ActionType = MOVE;
+
+	//sets the current action to the action specified. logic for switching action icons goes here
+	void setActionType(ActionTypes a);
+
+	//range of the specified ability
+	int range = 1;
+
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 	Msg *m;
+
+
 };

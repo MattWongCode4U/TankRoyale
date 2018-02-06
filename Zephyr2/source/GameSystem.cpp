@@ -535,13 +535,21 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			sendUpdatePosMessage(indicator);
 
-			actionOrigin = indicator;
-			currentAction++;
+			if(ActionType == MOVE)
+				actionOrigin = indicator;
 
-			
+			currentAction++;
 
 			break;
 		}
+		case KEY_A_PRESSED:
+			setActionType(MOVE);
+			break;
+
+		case KEY_D_PRESSED:
+			setActionType(SHOOT);
+			break;
+
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
 			//OutputDebugString(actionsToExecute[0].c_str());
@@ -760,7 +768,7 @@ void GameSystem::updateReticle() {
 
 	int dist = getGridDistance(reticle->gridX, reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
 
-	if (dist > 1) {
+	if (dist > range) {
 		reticle->renderable = "TileIndicatorRed.png";
 		validMove = false;
 	}
@@ -802,4 +810,23 @@ void GameSystem::displayTimeLeft(int time) {
 	osss << "timeLeftpos1,1," << p1 << ".png,";
 	m->data = osss.str();
 	msgBus->postMessage(m, this);
+}
+
+void GameSystem::setActionType(ActionTypes a) {
+	ActionType = a;
+	std::ostringstream oss;
+	Msg* mm;
+	
+	switch (a) {
+	case SHOOT:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), this);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), this);
+		range = 5;
+		break;
+	case MOVE:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), this);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), this);
+		range = 1;
+		break;
+	}
 }

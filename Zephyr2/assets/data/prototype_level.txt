@@ -152,11 +152,35 @@ imageFrames: 1,
 gridX: 0,
 gridY: 0;
 
+
+gameObjectType: GameObject,
+id: shootIcon,
+renderable: moveIconActive.png,
+xPos: 480,
+yPos: -290,
+zPos: 10,
+orientation: 0,
+width: 100,
+length: 100,
+imageFrames: 1;
+
+
+gameObjectType: GameObject,
+id: moveIcon,
+renderable: ReticleInactive.png,
+xPos: 570,
+yPos: -290,
+zPos: 10,
+orientation: 0,
+width: 100,
+length: 100,
+imageFrames: 1;
+
 gameObjectType: GameObject,
 id: timeLeftpos0,
 renderable: 0.png,
-xPos: 240,
-yPos: -240,
+xPos: 390,
+yPos: -290,
 zPos: 10,
 orientation: 0,
 width: 100,
@@ -166,8 +190,8 @@ imageFrames: 1;
 gameObjectType: GameObject,
 id: timeLeftpos1,
 renderable: 0.png,
-xPos: 280,
-yPos: -240,
+xPos: 410,
+yPos: -290,
 zPos: 10,
 orientation: 0,
 width: 100,
