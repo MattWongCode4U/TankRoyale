@@ -860,7 +860,12 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 		break;
 	}
 	if (curPlayer != nullptr && curHealthBar != nullptr) {
-		curHealthBar->length = curHealthBar->originalWidth % curPlayer->getHealth(); // TEST: This needs to know the original size of the health bar, then update the size as a percentage of that for the new size
+		if (curPlayer->getHealth() == 100) {
+			curHealthBar->length = curHealthBar->originalLength;
+		}
+		else {
+			curHealthBar->length = curHealthBar->originalLength % curPlayer->getHealth(); // TEST: Does this update the size correctly?
+		}
 	}
 };
 
