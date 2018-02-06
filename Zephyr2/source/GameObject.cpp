@@ -22,7 +22,7 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		if (!(paramsMap.find("renderType") == paramsMap.end()))
 			renderType = getRenderableTypeFromName(paramsMap.find("renderType")->second);
 		else
-			renderType = RenderableType::OBJECT3D;
+			renderType = RenderableType::OVERLAY;
 		if (!(paramsMap.find("model") == paramsMap.end()))
 			model = paramsMap.find("model")->second;
 		else

@@ -10,6 +10,10 @@
 #include <freeglut.h>
 #include <math.h>  
 
+#include "System.h"
+#include "GameObject.h"
+
+
 class RenderSystem : public System {
 public:
 	RenderSystem(MessageBus* mbus);

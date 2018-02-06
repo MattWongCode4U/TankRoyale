@@ -122,7 +122,6 @@ void RenderSystem::stopSystemLoop() {
 
 	SDL_DestroyWindow(window);
 	SDL_Quit(); //you realize this ENDS THE PROGRAM, right?
-
 }
 
 /*

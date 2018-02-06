@@ -105,7 +105,8 @@ void GameSystem::startSystemLoop() {
 	while (alive) {
 		thisTime = clock();
 		if (thisTime  < currentGameTime) {
-			Sleep(currentGameTime - thisTime);
+			//Sleep(currentGameTime - thisTime);
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + timeFrame;
 		
@@ -308,10 +309,10 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 	switch (msg->type) {
 	case LEFT_MOUSE_BUTTON:
 	{
-			vector<string> objectData = split(msg->data, ',');
-			INT32 x = atoi(objectData[0].c_str());
-			INT32 y = atoi(objectData[1].c_str());
-			break;
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		break;
 	}
 		
 	case DOWN_ARROW_PRESSED:
@@ -515,7 +516,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				<< reticle->x << "," //target x pos
 				<< reticle->y; //target y pos
 
-			mm->type = NETWORK_R_ACTION;
+			mm->type = NETWORK_S_ACTION;
 			mm->data = oss.str();
 			msgBus->postMessage(mm, this);
 
@@ -535,13 +536,21 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			sendUpdatePosMessage(indicator);
 
-			actionOrigin = indicator;
-			currentAction++;
+			if(ActionType == MOVE)
+				actionOrigin = indicator;
 
-			
+			currentAction++;
 
 			break;
 		}
+		case KEY_A_PRESSED:
+			setActionType(MOVE);
+			break;
+
+		case KEY_D_PRESSED:
+			setActionType(SHOOT);
+			break;
+
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
 			//OutputDebugString(actionsToExecute[0].c_str());
@@ -760,7 +769,7 @@ void GameSystem::updateReticle() {
 
 	int dist = getGridDistance(reticle->gridX, reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
 
-	if (dist > 1) {
+	if (dist > range) {
 		reticle->renderable = "TileIndicatorRed.png";
 		validMove = false;
 	}
@@ -802,4 +811,23 @@ void GameSystem::displayTimeLeft(int time) {
 	osss << "timeLeftpos1,1," << p1 << ".png,";
 	m->data = osss.str();
 	msgBus->postMessage(m, this);
+}
+
+void GameSystem::setActionType(ActionTypes a) {
+	ActionType = a;
+	std::ostringstream oss;
+	Msg* mm;
+	
+	switch (a) {
+	case SHOOT:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), this);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), this);
+		range = 5;
+		break;
+	case MOVE:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), this);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), this);
+		range = 1;
+		break;
+	}
 }

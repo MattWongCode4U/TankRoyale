@@ -21,6 +21,7 @@ public:
 	std::map<std::string, clock_t> keyspressed;
 
 	const int timebetweenPresses = 150;
+	bool focus = true;
 private:
 	
 };
