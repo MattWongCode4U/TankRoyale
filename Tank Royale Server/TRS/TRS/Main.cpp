@@ -6,6 +6,7 @@
 Lobby * server;
 
 static unsigned int client_id;
+static int playerNum = 2;
 
 void serverLoop()
 {
@@ -17,7 +18,11 @@ void serverLoop()
 
 int main()
 {
+	std::cout << "Starting Server\n";
+	
 	server = new Lobby();
+
+	std::cout << "Server Ready\n";
 
 	serverLoop();
 

@@ -2,7 +2,7 @@
 
 #include "NetworkHelpers.h"
 #define DEFAULT_PORT "9876" 
-#define MAX_PACKET_SIZE 1000000
+#define MAX_PACKET_SIZE sizeof(Data)
 
 
 class Server
@@ -159,4 +159,5 @@ public:
 			}
 		}
 	}
+
 };

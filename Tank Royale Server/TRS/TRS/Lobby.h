@@ -1,10 +1,10 @@
 #pragma once
 #include "NetworkHelpers.h"
 #include "Server.h"
-#define MAX_PACKET_SIZE 1000000
+#define MAX_PACKET_SIZE sizeof(Data)
 
 extern unsigned int client_id;
-
+extern int playerNum;
 
 class Lobby
 {
@@ -29,8 +29,9 @@ public:
 
 			client_id++;
 		}
-		receiveFromClients();
 
+		// read from clients
+		receiveFromClients();
 	}
 
 	void sendActionPackets()
@@ -41,6 +42,20 @@ public:
 
 		Data packet;
 		packet.packet_type = ACTION_EVENT;
+
+		packet.serialize(packet_data);
+
+		network->sendToAll(packet_data, packet_size);
+	}
+
+	void sendStartGamePackets()
+	{
+		// send action packet
+		const unsigned int packet_size = sizeof(Data);
+		char packet_data[packet_size];
+
+		Data packet;
+		packet.packet_type = GAME_START;
 
 		packet.serialize(packet_data);
 
@@ -64,6 +79,8 @@ public:
 				//no data recieved
 				continue;
 			}
+			
+			std::cout << "|" << network_data << "|\n";
 
 			int i = 0;
 			while (i < (unsigned int)data_length)
@@ -84,7 +101,7 @@ public:
 				case ACTION_EVENT:
 
 					printf("server received action event packet from client\n");
-
+					std::cout << packet.actualData;
 					sendActionPackets();
 
 					break;

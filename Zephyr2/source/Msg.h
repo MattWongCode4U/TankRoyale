@@ -45,7 +45,8 @@ enum MSG_TYPE {
 	NETWORK_S_ACTION, //playerID,actionName,actionNumber,targetX,targetY
 	NETWORK_R_ACTION,
 	NETWORK_R_PING,
-	NETWORK_CONNECT
+	NETWORK_CONNECT,
+	READY_TO_START_GAME
 };
 
 class Msg {

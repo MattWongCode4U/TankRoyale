@@ -137,31 +137,36 @@ void NetworkSystem::startSystemLoop() {
 	}
 }
 
+// this only needs to handle NETWORK_S_messages; for when user input is decided 
+// it will send out NETWORK_R message when it receives from server
 void NetworkSystem::handleMessage(Msg *msg) {
 	// call the parent first 
 	System::handleMessage(msg);
 
 	vector<string> data = split(msg->data, ',');
-	// personal call 
-
-	switch (msg->type) {
-	case NETWORK_R_IDLE:
-		playerTurnAction[actionCounter] = "NETWORK_R_IDLE";
-		playerTurnTarget[actionCounter] = "A0"; // can be changed to use -- later
-		// always add 1 to the action counter
-		actionCounter++;
-		break;
-	case NETWORK_R_ACTION:
-		
-		break;
-	case NETWORK_R_PING:
-
-		break;
-	case NETWORK_S_ACTION:
-		aggregateTurnInfo(msg);
-		break;
-	default:
-		break;
+	if (echoMode) {
+		switch (msg->type) {
+		case NETWORK_R_IDLE:
+			playerTurnAction[actionCounter] = "NETWORK_R_IDLE";
+			playerTurnTarget[actionCounter] = "A0"; // can be changed to use -- later
+			// always add 1 to the action counter
+			actionCounter++;
+			break;
+		case NETWORK_R_ACTION:
+			if (actionCounter > 3) {
+				break;
+			}
+			playerTurnAction[stoi(data[2])] = data[1];
+			playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
+			playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
+		case NETWORK_R_PING:
+			break;
+		case NETWORK_S_ACTION:
+			aggregateTurnInfo(msg);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -223,10 +228,20 @@ void NetworkSystem::sendActionPackets()
 
 	Data packet;
 	packet.packet_type = ACTION_EVENT;
-
+	std::ostringstream oss;
+	oss << "test values[ " << rand() << " ]";
+	std::string st = oss.str();
+	packet.setData(st.c_str());
 	packet.serialize(packet_data);
 
-	NetworkHelpers::sendMessage(ConnectSocket, packet_data, packet_size);
+	OutputDebugString("SENDING: ");
+	OutputDebugString(packet.actualData);
+	OutputDebugString("\n");
+
+	if (NetworkHelpers::sendMessage(ConnectSocket, packet_data, MAX_PACKET_SIZE) == -1) {
+		// send failed
+		OutputDebugString("SEND FAILED");
+	}
 }
 
 void NetworkSystem::networkUpdate() {
@@ -248,17 +263,23 @@ void NetworkSystem::networkUpdate() {
 		switch (packet.packet_type) {
 
 		case ACTION_EVENT:
-
 			OutputDebugString("client received action event packet from server\n");
-
 			sendActionPackets();
-
 			break;
-
+		case GAME_START:
+			break;
+		case TIMER_PING:
+			break;
+		case TURN_START:
+			break;
+		case TURN_OVER:
+			break;
+		case START_ANIMATIONS:
+			break;
+		case ANIMATIONS_COMPLETE:
+			break;
 		default:
-
 			OutputDebugString("error in packet types\n");
-
 			break;
 		}
 	}
