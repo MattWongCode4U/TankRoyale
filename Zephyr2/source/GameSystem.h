@@ -73,6 +73,12 @@ private:
 	//updates the reticle spright, and postion.
 	void updateReticle();
 
+	//get list of tiles affected by an area shot
+	vector<Vector2> getAreaAffectedTiles(Vector2 origin, int affectedRadius);
+
+	//deal aoe damage to all tiles in the affected area
+	void dealAOEDamage(vector<Vector2> affectedTiles);
+
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
 

@@ -831,3 +831,23 @@ void GameSystem::setActionType(ActionTypes a) {
 		break;
 	}
 }
+
+vector<Vector2> GameSystem::getAreaAffectedTiles(Vector2 origin, int affectedRadius) {
+	vector<Vector2> affectedList;
+	for (int i = -affectedRadius; i <= affectedRadius; i++) {
+		for (int j = -affectedRadius; j <= affectedRadius; j++) {
+			for (GameObject *go : gameObjects) { //look through all gameobjects
+				if (go->x == i && go->y == j) { //determine if there is a gameobject with those coordinates that is affected
+					affectedList.push_back(gridToWorldCoord(go->x, go->y)); //add coordinate (Vector2) of gameobject to the list
+				}
+			}
+		}
+	}
+	return affectedList;
+}
+
+void GameSystem::dealAOEDamage(vector<Vector2> affectedTiles) {
+	for (Vector2 hex : affectedTiles) { //loop through list of affected coordinates
+		//dealDamage(hex);
+	}
+}
