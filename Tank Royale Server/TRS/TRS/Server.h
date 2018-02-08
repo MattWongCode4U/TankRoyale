@@ -1,5 +1,5 @@
 #pragma once
-
+#include <vector>
 #include "NetworkHelpers.h"
 #define DEFAULT_PORT "9876" 
 #define MAX_PACKET_SIZE sizeof(Data)
@@ -9,6 +9,8 @@ class Server
 {
 
 public:
+	std::vector<int> playersInQueue;
+	std::map<int, bool> readyPlayers;
 
 	Server(void) {
 		// create WSADATA object
@@ -118,7 +120,7 @@ public:
 
 			// insert new client into session id table
 			sessions.insert(std::pair<unsigned int, SOCKET>(id, ClientSocket));
-
+			playersInQueue.push_back(id);
 			return true;
 		}
 
@@ -150,6 +152,23 @@ public:
 		for (iter = sessions.begin(); iter != sessions.end(); iter++)
 		{
 			currentSocket = iter->second;
+			iSendResult = NetworkHelpers::sendMessage(currentSocket, packets, totalSize);
+
+			if (iSendResult == SOCKET_ERROR)
+			{
+				printf("send failed with error: %d\n", WSAGetLastError());
+				closesocket(currentSocket);
+			}
+		}
+	}
+
+	void sendToPlaying(char* packets, int totalSize, std::vector<int> playing) {
+		SOCKET currentSocket;
+		std::map<unsigned int, SOCKET>::iterator iter;
+		int iSendResult;
+
+		for (int x : playing) {
+			currentSocket = sessions.at(x);
 			iSendResult = NetworkHelpers::sendMessage(currentSocket, packets, totalSize);
 
 			if (iSendResult == SOCKET_ERROR)

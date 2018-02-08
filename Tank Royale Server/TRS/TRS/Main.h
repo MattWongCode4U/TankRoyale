@@ -3,6 +3,7 @@
 #include "NetworkHelpers.h"
 #include "Lobby.h"
 #include "Server.h"
+#include "Game.h"
 #define BUFFER 512
 #define DEFAULT_PORT "9876" 
 #define MAX_PACKET_SIZE sizeof(Data)

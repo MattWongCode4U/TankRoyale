@@ -32,13 +32,13 @@ enum DataType {
 
 	TIMER_PING = 3,
 
-	TURN_START = 4,
+	TURN_START = 4, // signifies all animations are complete
 
 	TURN_OVER = 5, // also contains turn information
 
-	START_ANIMATIONS = 6,
-
 	ANIMATIONS_COMPLETE = 7,
+
+	PLAYER_ACTION = 8,
 
 };
 

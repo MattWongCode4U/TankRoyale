@@ -7,6 +7,8 @@ Lobby * server;
 
 static unsigned int client_id;
 static int playerNum = 2;
+static int playersReady = 0;
+
 
 void serverLoop()
 {

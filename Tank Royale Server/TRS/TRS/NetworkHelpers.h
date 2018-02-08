@@ -29,7 +29,7 @@ enum DataType {
 
 	INIT_CONNECTION = 0,
 
-	ACTION_EVENT = 1,
+	ACTION_EVENT = 1, // use this as the "ready case" when the player hits "start"
 
 	GAME_START = 2,
 
@@ -43,7 +43,7 @@ enum DataType {
 
 	ANIMATIONS_COMPLETE = 7,
 	
-	// add timer ping, start turn, end turn
+	PLAYER_ACTION = 8,
 };
 
 struct Data {

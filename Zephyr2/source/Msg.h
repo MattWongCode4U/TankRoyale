@@ -9,7 +9,7 @@ enum MSG_TYPE {
 	RENDER_FRAME_TEST, UPDATE_TEST_OBJ, OBJ_TEST_MSG,
 
 	// Render System
-	UPDATE_OBJ_SPRITE, 
+	UPDATE_OBJ_SPRITE,
 	UPDATE_OBJ_RENDER, //id,renderable,renderType,model,normalMap,smoothness
 
 	// Physics System
@@ -46,12 +46,15 @@ enum MSG_TYPE {
 	NETWORK_R_ACTION,
 	NETWORK_R_PING,
 	NETWORK_CONNECT,
-	READY_TO_START_GAME
+	READY_TO_START_GAME, // setn from main menuwhen player hits "start game"
+	NETWORK_R_GAMESTART_OK,
+	NETWORK_R_START_TURN,
 };
 
 class Msg {
 public:
 	Msg(MSG_TYPE t, std::string d);
+	Msg(MSG_TYPE t);
 	~Msg();
 
 	MSG_TYPE type;

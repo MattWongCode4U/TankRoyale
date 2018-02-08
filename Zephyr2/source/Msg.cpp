@@ -7,6 +7,10 @@ Msg::Msg(MSG_TYPE t, std::string d) {
 	data = d;
 }
 
+Msg::Msg(MSG_TYPE t) {
+	type = t;
+	data = "";
+}
 
 Msg::~Msg() {
 }

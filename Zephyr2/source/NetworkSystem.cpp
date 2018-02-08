@@ -144,45 +144,36 @@ void NetworkSystem::handleMessage(Msg *msg) {
 	System::handleMessage(msg);
 
 	vector<string> data = split(msg->data, ',');
-	if (echoMode) {
-		switch (msg->type) {
-		case NETWORK_R_IDLE:
-			playerTurnAction[actionCounter] = "NETWORK_R_IDLE";
-			playerTurnTarget[actionCounter] = "A0"; // can be changed to use -- later
-			// always add 1 to the action counter
-			actionCounter++;
-			break;
-		case NETWORK_R_ACTION:
-			if (actionCounter > 3) {
-				break;
-			}
-			playerTurnAction[stoi(data[2])] = data[1];
-			playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
-			playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
-		case NETWORK_R_PING:
-			break;
+	switch (msg->type) {
 		case NETWORK_S_ACTION:
 			aggregateTurnInfo(msg);
 			break;
+		case READY_TO_START_GAME:
+			sendActionPackets();
+			break;
 		default:
 			break;
-		}
 	}
 }
 
 void NetworkSystem::aggregateTurnInfo(Msg* m) {
+	
 	if (actionCounter > 3) {
 		return;
 	}
-	vector<string> data = split(m->data, ',');
+	if (echoMode) {
+		vector<string> data = split(m->data, ',');
 
-	playerTurnAction[stoi(data[2])] = data[1];
-	playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
-	playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
+		playerTurnAction[stoi(data[2])] = data[1];
+		playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
+		playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
 
-											   // always add 1 to the action counter
-											   //may not be needed if action # passed in from game systems
-	actionCounter++;
+												   // always add 1 to the action counter
+												   //may not be needed if action # passed in from game systems
+		actionCounter++;
+	} else {
+		// send turn info to server
+	}
 }
 
 void NetworkSystem::broadcastTurnInfo() {
@@ -223,20 +214,19 @@ int NetworkSystem::receivePackets(char * recvbuf) {
 void NetworkSystem::sendActionPackets()
 {
 	// send action packet
-	const unsigned int packet_size = sizeof(Data);
-	char packet_data[packet_size];
+	char packet_data[MAX_PACKET_SIZE];
 
 	Data packet;
 	packet.packet_type = ACTION_EVENT;
-	std::ostringstream oss;
+	/*std::ostringstream oss;
 	oss << "test values[ " << rand() << " ]";
 	std::string st = oss.str();
-	packet.setData(st.c_str());
+	packet.setData(st.c_str());*/
 	packet.serialize(packet_data);
 
-	OutputDebugString("SENDING: ");
+	/*OutputDebugString("SENDING: ");
 	OutputDebugString(packet.actualData);
-	OutputDebugString("\n");
+	OutputDebugString("\n");*/
 
 	if (NetworkHelpers::sendMessage(ConnectSocket, packet_data, MAX_PACKET_SIZE) == -1) {
 		// send failed
@@ -247,6 +237,7 @@ void NetworkSystem::sendActionPackets()
 void NetworkSystem::networkUpdate() {
 	Data packet;
 	int data_length = receivePackets(network_data);
+	Msg* m = new Msg(EMPTY_MESSAGE);
 
 	if (data_length <= 0)
 	{
@@ -261,22 +252,27 @@ void NetworkSystem::networkUpdate() {
 		i += sizeof(Data);
 
 		switch (packet.packet_type) {
-
-		case ACTION_EVENT:
-			OutputDebugString("client received action event packet from server\n");
-			sendActionPackets();
+		case INIT_CONNECTION:
+			// the data in this is your playerID
 			break;
 		case GAME_START:
+			// broadcast game start
+			m->type = NETWORK_R_GAMESTART_OK;
+			msgBus->postMessage(m, this);
 			break;
 		case TIMER_PING:
+			m->type = NETWORK_R_PING;
+			m->data = packet.actualData;
+			msgBus->postMessage(m, this);
 			break;
 		case TURN_START:
+			m->data = NETWORK_R_START_TURN;
+			msgBus->postMessage(m, this);
 			break;
 		case TURN_OVER:
-			break;
-		case START_ANIMATIONS:
-			break;
-		case ANIMATIONS_COMPLETE:
+			m->type = NETWORK_TURN_BROADCAST;
+			m->data = packet.actualData;
+			msgBus->postMessage(m, this);
 			break;
 		default:
 			OutputDebugString("error in packet types\n");

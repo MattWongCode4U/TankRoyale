@@ -23,7 +23,6 @@ public:
 	Msg* m;
 	
 	std::string playerTurnAction[4];
-	std::string playerTurnTarget[4];
 	std::string playerTurnTargetX[4];
 	std::string playerTurnTargetY[4];
 
