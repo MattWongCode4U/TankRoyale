@@ -104,7 +104,6 @@ NetworkSystem::~NetworkSystem()
 }
 
 void NetworkSystem::startSystemLoop() {
-	// used to prevent the io system from posting messages too often
 	clock_t thisTime = clock();
 
 	int currentGameTime = 0;
@@ -151,6 +150,9 @@ void NetworkSystem::handleMessage(Msg *msg) {
 		case READY_TO_START_GAME:
 			sendActionPackets();
 			break;
+		case NETWORK_S_ANIMATIONS:
+			sendPacket(ANIMATIONS_COMPLETE, "");
+			break;
 		default:
 			break;
 	}
@@ -173,9 +175,11 @@ void NetworkSystem::aggregateTurnInfo(Msg* m) {
 		actionCounter++;
 	} else {
 		// send turn info to server
+		sendPacket(PLAYER_ACTION, m->data);
 	}
 }
 
+// this is only called in echomode
 void NetworkSystem::broadcastTurnInfo() {
 	std::string turnInfo = "";
 
@@ -209,6 +213,20 @@ int NetworkSystem::receivePackets(char * recvbuf) {
 	}
 
 	return iResult;
+}
+
+void NetworkSystem::sendPacket(DataType d, std::string data) {
+	char packet_data[MAX_PACKET_SIZE];
+
+	Data packet;
+	packet.packet_type = d;
+	packet.setData(data.c_str());
+	packet.serialize(packet_data);
+
+	if (NetworkHelpers::sendMessage(ConnectSocket, packet_data, MAX_PACKET_SIZE) == -1) {
+		// send failed
+		OutputDebugString("SEND FAILED");
+	}
 }
 
 void NetworkSystem::sendActionPackets()
@@ -253,23 +271,34 @@ void NetworkSystem::networkUpdate() {
 
 		switch (packet.packet_type) {
 		case INIT_CONNECTION:
+			OutputDebugString("NS:INIT CONNECTION\n");
 			// the data in this is your playerID
+			m->type = NETWORK_CONNECT;
+			m->data = packet.actualData;
+			msgBus->postMessage(m, this);
 			break;
 		case GAME_START:
+			OutputDebugString("NS:GAME START\n");
 			// broadcast game start
 			m->type = NETWORK_R_GAMESTART_OK;
 			msgBus->postMessage(m, this);
 			break;
 		case TIMER_PING:
+			OutputDebugString("NS:TIMER PING\n");
 			m->type = NETWORK_R_PING;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case TURN_START:
+			OutputDebugString("NS:TURN START\n");
+
 			m->data = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);
+			actionCounter = 0; // do this here instead of during Turn_over in case theres a bug where u can make actions during animation sequence
 			break;
 		case TURN_OVER:
+			OutputDebugString("NS:TURN OVER\n");
+
 			m->type = NETWORK_TURN_BROADCAST;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);

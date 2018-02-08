@@ -179,4 +179,18 @@ public:
 		}
 	}
 
+	void sendToSpecific(char* packets, int totalSize, int id) {
+		SOCKET currentSocket;
+		int iSendResult;
+		currentSocket = sessions.at(id);
+		iSendResult = NetworkHelpers::sendMessage(currentSocket, packets, totalSize);
+
+		if (iSendResult == SOCKET_ERROR)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(currentSocket);
+		}
+		
+	}
+
 };

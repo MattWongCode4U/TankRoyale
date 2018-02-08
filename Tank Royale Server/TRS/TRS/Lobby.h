@@ -6,6 +6,7 @@
 #include <chrono>
 #include <vector>
 #define MAX_PACKET_SIZE sizeof(Data)
+#define ACTIONS_PER_TURN 4
 
 extern unsigned int client_id;
 extern int playerNum;
@@ -23,17 +24,7 @@ public:
 	bool animationsInProgress = false;
 	int doneanimations = 0;
 
-	std::string action1 = "";
-	std::string action2 = "";
-	std::string action3 = "";
-	std::string action4 = "";
 	std::string defaultActionString = "IDLE, 0, 0";
-
-	/*turnInfo =
-		playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player2, MOVE, 100,100]player3, MOVE, -20,110]player4, MOVE, -120,0]\n" +
-		playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player2, MOVE, 100,80]player3, MOVE, -20,100]player4, MOVE, -100,-10]\n" +
-		playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player2, MOVE, 100,60]player3, MOVE, -20,90]player4, MOVE, -80,-30]\n" +
-		playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player2, MOVE, 100,40]player3, MOVE, -20,80]player4, MOVE, -60,-50]";*/
 
 	Lobby(void) {
 		// id's to assign clients for our table
@@ -69,6 +60,7 @@ public:
 				if (doneanimations == playerNum) {
 					animationsInProgress = false;
 					doneanimations = 0; // might have issues with dead players not sending.
+					sendStartTurnPackets();
 				}
 			}
 		}
@@ -91,7 +83,7 @@ public:
 				continue;
 			}
 			
-			std::cout << "|" << network_data << "|\n";
+			// std::cout << "|" << network_data << "|\n";
 
 			int i = 0;
 			while (i < (unsigned int)data_length)
@@ -101,7 +93,28 @@ public:
 
 				switch (packet.packet_type) {
 				case PLAYER_ACTION:
+				{
+					bool aggregated = false;
 					// aggreagate turn info str
+					for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+						if (!aggregated) {
+							// first find te right pair using the id
+							if (t.first == iter->first) {
+								for (std::string s : t.second) {
+									// next, find the first string that's still default
+									if (s == defaultActionString) {
+										// modify it
+										s = packet.actualData;
+										aggregated = true;
+										break;// done
+									}
+								}
+							}
+						} else {
+							break;
+						}
+					}
+				}
 					break;
 				case ANIMATIONS_COMPLETE:
 					printf("server received animationComplete message");
@@ -109,7 +122,7 @@ public:
 					break;
 				case INIT_CONNECTION:
 					printf("server received init packet from client\n");
-					// sendActionPackets();
+					sendConnID(iter->first);
 					break;
 				case ACTION_EVENT:
 					printf("server received action event packet from client\n");
@@ -160,7 +173,9 @@ public:
 	}
 
 private:
-
+	// this is disgusting but i'm doing it anyways
+	// int would be the id, add moves to inner vector position, pad with empty data if it doesn't exist
+	std::vector<std::pair<int, std::vector<std::string>>> turnInfo;
 
 	// The ServerNetwork object 
 	Server* network;
@@ -181,8 +196,29 @@ private:
 		network->sendToAll(packet_data, packet_size);
 	}
 
+	void sendConnID(int id)
+	{
+		// send action packet
+		const unsigned int packet_size = sizeof(Data);
+		char packet_data[packet_size];
+
+		Data packet;
+		packet.packet_type = INIT_CONNECTION;
+
+		std::ostringstream oss;
+		oss << id;
+
+		packet.setData(oss.str().c_str());
+		packet.serialize(packet_data);
+
+		network->sendToSpecific(packet_data, packet_size, id);
+	}
+
 	void sendStartGamePackets()
 	{
+		// clear the previous turn info if any exists
+		turnInfo.clear();
+
 		char packet_data[MAX_PACKET_SIZE];
 
 		Data packet;
@@ -193,7 +229,14 @@ private:
 		
 		for (auto i : playingPlayers) {
 			oss << i << ",";
+
+			// while we're at it, start to initalize the turn information for the game
+			std::pair<int, std::vector<std::string>> p;
+			p.first = i;
+			turnInfo.push_back(p);
 		}
+
+		initializeTurnInformation();
 
 		std::string s = oss.str();
 		packet.setData(s.c_str());
@@ -204,6 +247,8 @@ private:
 
 	void sendStartTurnPackets()
 	{
+		resetTurnInformation();
+
 		char packet_data[MAX_PACKET_SIZE];
 
 		Data packet;
@@ -233,7 +278,6 @@ private:
 		}
 	}
 
-	// TODO
 	void sendTurnInformation() {
 		char packet_data[MAX_PACKET_SIZE];
 
@@ -241,6 +285,15 @@ private:
 		packet.packet_type = TURN_OVER;
 		// fill in turn information here
 
+		std::ostringstream oss;
+		
+		for (int i = 0; i < ACTIONS_PER_TURN; i++) {
+			for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+				//oss << t.first << "," << t.second.at(i) << "]";
+				oss << t.second.at(i) << "]";
+			}
+			oss << "\n";
+		}
 
 		packet.serialize(packet_data);
 
@@ -263,10 +316,19 @@ private:
 		network->sendToPlaying(packet_data, MAX_PACKET_SIZE, playingPlayers);
 	}
 
-	// TODO
+	void initializeTurnInformation() {
+		for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+			for (int i = 0; i < ACTIONS_PER_TURN; i++) {
+				t.second.push_back(defaultActionString);
+			}
+		}
+	}
+
 	void resetTurnInformation() {
-		for (int i = 0; i < 4; i++) {
-			
+		for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+			for (std::string s : t.second) {
+				s = defaultActionString;
+			}
 		}
 	}
 

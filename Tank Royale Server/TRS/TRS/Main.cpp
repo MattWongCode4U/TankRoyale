@@ -6,7 +6,7 @@
 Lobby * server;
 
 static unsigned int client_id;
-static int playerNum = 2;
+static int playerNum = 1;
 static int playersReady = 0;
 
 
