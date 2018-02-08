@@ -565,11 +565,11 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 		}
 		case KEY_A_PRESSED:
-			setActionType(MOVE);
+			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
 			break;
 
 		case KEY_D_PRESSED:
-			setActionType(SHOOT);
+			//setActionType(SHOOT);
 			break;
 
 		case NETWORK_TURN_BROADCAST:
