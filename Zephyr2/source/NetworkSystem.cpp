@@ -182,10 +182,10 @@ void NetworkSystem::broadcastTurnInfo() {
 	if (echoMode) {
 		// needs to be changed later to use a loop in case we change max action count
 		turnInfo =
-			playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player2, MOVE, 100,100]player3, MOVE, -20,110]player4, MOVE, -120,0]\n" +
-			playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player2, MOVE, 100,80]player3, MOVE, -20,100]player4, MOVE, -100,-10]\n" +
-			playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player2, MOVE, 100,60]player3, MOVE, -20,90]player4, MOVE, -80,-30]\n" +
-			playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player2, MOVE, 100,40]player3, MOVE, -20,80]player4, MOVE, -60,-50]";
+			playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player2, 0, 1,1]player3, 0, -2,1]player4, 0, -1,0]\n" +
+			playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player2, 0, 1,4]player3, 0, -2,3]player4, 0, -1,-1]\n" +
+			playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player2, 0, 3,2]player3, 0, -2,0]player4, 0, -4,-3]\n" +
+			playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player2, 0, 1,4]player3, 0, -2,4]player4, 0, -2,-4]";
 	}
 
 	// im being lazy here and just sending out the string since ideally the network class doesn't know how to parse. alternatively i can parse here, depends on
