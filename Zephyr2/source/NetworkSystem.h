@@ -49,4 +49,6 @@ public:
 	char network_data[MAX_PACKET_SIZE];
 
 	void networkUpdate();
+
+	void sendPacket(DataType d, std::string data);
 };
