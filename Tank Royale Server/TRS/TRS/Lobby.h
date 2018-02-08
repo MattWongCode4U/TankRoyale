@@ -289,7 +289,8 @@ private:
 		
 		for (int i = 0; i < ACTIONS_PER_TURN; i++) {
 			for (std::pair<int, std::vector<std::string>> t : turnInfo) {
-				oss << t.first << "," << t.second.at(i) << "]";
+				//oss << t.first << "," << t.second.at(i) << "]";
+				oss << t.second.at(i) << "]";
 			}
 			oss << "\n";
 		}
