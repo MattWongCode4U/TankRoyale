@@ -272,6 +272,9 @@ void NetworkSystem::networkUpdate() {
 		switch (packet.packet_type) {
 		case INIT_CONNECTION:
 			// the data in this is your playerID
+			m->type = NETWORK_CONNECT;
+			m->data = packet.actualData;
+			msgBus->postMessage(m, this);
 			break;
 		case GAME_START:
 			// broadcast game start
