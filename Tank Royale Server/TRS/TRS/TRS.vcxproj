@@ -119,7 +119,6 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h" />
     <ClInclude Include="Lobby.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="NetworkHelpers.h" />

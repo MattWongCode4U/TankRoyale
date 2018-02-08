@@ -93,6 +93,7 @@ public:
 
 				switch (packet.packet_type) {
 				case PLAYER_ACTION:
+				{
 					bool aggregated = false;
 					// aggreagate turn info str
 					for (std::pair<int, std::vector<std::string>> t : turnInfo) {
@@ -113,6 +114,7 @@ public:
 							break;
 						}
 					}
+				}
 					break;
 				case ANIMATIONS_COMPLETE:
 					printf("server received animationComplete message");
