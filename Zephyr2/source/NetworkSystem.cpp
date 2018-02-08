@@ -271,27 +271,34 @@ void NetworkSystem::networkUpdate() {
 
 		switch (packet.packet_type) {
 		case INIT_CONNECTION:
+			OutputDebugString("NS:INIT CONNECTION\n");
 			// the data in this is your playerID
 			m->type = NETWORK_CONNECT;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case GAME_START:
+			OutputDebugString("NS:GAME START\n");
 			// broadcast game start
 			m->type = NETWORK_R_GAMESTART_OK;
 			msgBus->postMessage(m, this);
 			break;
 		case TIMER_PING:
+			OutputDebugString("NS:TIMER PING\n");
 			m->type = NETWORK_R_PING;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case TURN_START:
+			OutputDebugString("NS:TURN START\n");
+
 			m->data = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);
 			actionCounter = 0; // do this here instead of during Turn_over in case theres a bug where u can make actions during animation sequence
 			break;
 		case TURN_OVER:
+			OutputDebugString("NS:TURN OVER\n");
+
 			m->type = NETWORK_TURN_BROADCAST;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);

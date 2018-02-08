@@ -122,7 +122,7 @@ public:
 					break;
 				case INIT_CONNECTION:
 					printf("server received init packet from client\n");
-					// sendActionPackets();
+					sendConnID(iter->first);
 					break;
 				case ACTION_EVENT:
 					printf("server received action event packet from client\n");
@@ -194,6 +194,24 @@ private:
 		packet.serialize(packet_data);
 
 		network->sendToAll(packet_data, packet_size);
+	}
+
+	void sendConnID(int id)
+	{
+		// send action packet
+		const unsigned int packet_size = sizeof(Data);
+		char packet_data[packet_size];
+
+		Data packet;
+		packet.packet_type = INIT_CONNECTION;
+
+		std::ostringstream oss;
+		oss << id;
+
+		packet.setData(oss.str().c_str());
+		packet.serialize(packet_data);
+
+		network->sendToSpecific(packet_data, packet_size, id);
 	}
 
 	void sendStartGamePackets()
