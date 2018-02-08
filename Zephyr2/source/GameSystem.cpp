@@ -154,8 +154,9 @@ void GameSystem::startSystemLoop() {
 					if (g->id.find("TileIndicator") != std::string::npos) {
 						g->renderable = "nothing.png";
 						//move object out side of camera instead of changing renderable. Temp Solution
-						g->x = 1000;
-						sendUpdatePosMessage(g);
+						//g->x = 1000;
+						//sendUpdatePosMessage(g);
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, g->id + ",1," + g->renderable), this);
 					}
 				}
 
@@ -528,7 +529,6 @@ void GameSystem::lvl1Handler(Msg * msg) {
 
 			mm->type = NETWORK_S_ACTION;
 			mm->data = oss.str();
-			OutputDebugString(oss.str().c_str());
 			msgBus->postMessage(mm, this);
 
 			GridObject* indicator = NULL;
@@ -541,14 +541,24 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				}
 			}
 
+			if (ActionType == MOVE) {
+				actionOrigin = indicator;
+				indicator->renderable = "MoveIndicator.png";
+			}
+			else if (ActionType == SHOOT) {
+				indicator->renderable = "ShootIndicator.png";
+			}
+
+
 			indicator->gridX = reticle->gridX;
 			indicator->gridY = reticle->gridY;
 			indicator->updateWorldCoords();
-			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
-			sendUpdatePosMessage(indicator);
+			//indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
+			sendUpdatePosMessage(indicator);//send indicator position message
 
-			if(ActionType == MOVE)
-				actionOrigin = indicator;
+			//send update sprite message. maybe this sould be included in update position?
+			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), this);
+
 
 			currentAction++;
 
@@ -851,12 +861,14 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 	for (int i = -affectedRadius; i <= affectedRadius; i++) {
 		for (int j = -affectedRadius; j <= affectedRadius; j++) {
 			for (GameObject *go : gameObjects) { //look through all gameobjects
-				if (go->x == i + _originX && go->y == j + _originY && go->getObjectType() == "TankObject") { //determine if there is a Tankobject with those coordinates that is affected
-					//affectedList.push_back(gridToWorldCoord(go->x, go->y)); //add coordinate (Vector2) of gameobject to the list
-					TankObject* tank = (TankObject*)go;//applying damage to the affected tanks
-					tank->health -= damage;
-					OutputDebugString(go->id.c_str());
-					OutputDebugString(" GOT HIT \n");
+				if (go->getObjectType() == "TankObject") {
+					TankObject* tank = (TankObject*)go;
+					if (tank->gridX == (i + _originX) && tank->gridY == (j + _originY)){
+						tank->health -= damage;
+						OutputDebugString(tank->id.c_str());
+						OutputDebugString(" GOT HIT \n");
+					} 
+					
 				}
 			}
 		}

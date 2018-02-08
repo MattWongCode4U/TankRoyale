@@ -49,7 +49,7 @@ enum MSG_TYPE {
 	READY_TO_START_GAME, // setn from main menuwhen player hits "start game"
 	NETWORK_R_GAMESTART_OK,
 	NETWORK_R_START_TURN,
-	NETWORK_S_ANIMATIONS,
+	NETWORK_S_ANIMATIONS
 };
 
 class Msg {
