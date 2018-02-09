@@ -110,9 +110,13 @@ public:
 									}
 								}
 							}
-						} else {
-							break;
 						}
+					}
+
+					if (validateTurnsComplete()) {
+						// this means we have all the required messages
+						sendTurnInformation();
+						timerPacketsSent = 0;
 					}
 				}
 					break;
@@ -330,6 +334,18 @@ private:
 				s = defaultActionString;
 			}
 		}
+	}
+
+	bool validateTurnsComplete() {
+		for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+			for (std::string s : t.second) {
+				if (s == defaultActionString) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 };
