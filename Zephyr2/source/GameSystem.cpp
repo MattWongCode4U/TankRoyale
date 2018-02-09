@@ -893,10 +893,15 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 	}
 }
 void GameSystem::setPlayerTank(std::string playerID) {
+	if (playerTank != nullptr) {
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), this);
+	}
 	for (GameObject* g : gameObjects) {
 		if (g->id == playerID && g->getObjectType() == "TankObject") {
 			playerTank = (TankObject*)g;
 			actionOrigin = playerTank;
+			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), this);
+
 			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
 			OutputDebugString(debugS.c_str());
 		}

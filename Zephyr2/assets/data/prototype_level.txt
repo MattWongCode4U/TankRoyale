@@ -85,7 +85,7 @@ gridY: 0;
 
 gameObjectType: TankObject,
 id: player1,
-renderable: sciFiTank.png,
+renderable: sciFiTank2.png,
 xPos: -129.9,
 yPos: 225,
 zPos: 4,
