@@ -774,7 +774,7 @@ void GameSystem::executeAction(int a) {
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
 			for (GameObject* g : gameObjects) {
-				if (g->id == playerIdMap[playerAction[0]]) {
+				if (g->id ==playerAction[0]) {
 					//OutputDebugString(playerAction[2].c_str());
 					GridObject* gridObject = (GridObject*)g;
 					gridObject->gridX = stoi(playerAction[2]);
