@@ -122,9 +122,16 @@ private:
 	//range of the specified ability
 	int range = 1;
 
-
 	//maximumNumber of actions per turn
 	int maxActions = 4;
+
+	std::string clientID = "defaultClientID";//the id of the client on the server
+
+	//maps local player Id's to unique id's 
+	//std::map<std::string, std::string> playerIdMap;
+	std::string playerOrder[4];
+	bool gameActive = false;
+
 	Msg *m;
 
 

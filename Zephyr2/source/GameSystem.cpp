@@ -171,10 +171,11 @@ void GameSystem::startSystemLoop() {
 			}
 			else if (framesSinceTurnStart == 300) {
 				executeAction(3);
+				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
 			}
 			framesSinceTurnStart++;
 
-			displayTimeLeft(30 - ((clock() - turnStartTime) / 1000));
+			//displayTimeLeft(30 - ((clock() - turnStartTime) / 1000));
 									
 			//OutputDebugString("\n");
 			//OutputDebugString(to_string(framesSinceTurnStart/timeFrame).c_str());
@@ -377,6 +378,9 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			Msg* m = new Msg(LEVEL_LOADED, "2");
 			msgBus->postMessage(m, this);
 			score = 0;
+			//let NetworkSystem know client is ready to start game
+			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+			OutputDebugString("SENDING READY_TO_START_GAME MSG");
 		}
 		else if (markerPosition == 0) {
 			// instructions page
@@ -387,6 +391,11 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			Msg* m = new Msg(LEVEL_LOADED, "4");
 			msgBus->postMessage(m, this);
 		}
+		break;
+
+	case NETWORK_CONNECT:
+		clientID = msg->data[0];
+		OutputDebugString("\nCONNECTED TO SERVER");
 		break;
 	default:
 		break;
@@ -495,7 +504,50 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	
 	
 	int dist;
-		switch (msg->type) {
+
+	//messages to be read in both active and inactive game state
+	switch (msg->type) {
+	case NETWORK_R_START_TURN:
+		gameActive = true;
+		OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
+		break;
+
+	case NETWORK_TURN_BROADCAST:
+		actionsToExecute = split(msg->data, '\n');
+		currentAction = 0;
+		framesSinceTurnStart = 0;
+		gameActive = false;
+		OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
+		break;
+	case NETWORK_R_GAMESTART_OK: {//"id1,ClientID,id3,id4," only for server version
+		vector<string> clientIDVector = split(msg->data, ',');
+		//OutputDebugString(to_string(clientIDVector.size()).c_str());
+		OutputDebugString("NETWORK_R_GAMESTART_OK RECEIVED BY GS\n");
+
+		//assigns player order
+		playerOrder[0] = "player2";
+		playerOrder[1] = "player3";
+		playerOrder[2] = "player4";
+
+		for (int i = 0; i < clientIDVector.size(); i++) {
+			if (clientIDVector[i] == clientID) {
+				OutputDebugString("ClientID found\n");
+				playerOrder[3] = playerOrder[i];
+				playerOrder[i] = "player1";
+			}
+		}
+		break;
+	}
+	case NETWORK_R_PING:
+		displayTimeLeft(stoi(msg->data));
+		break;
+	default:
+		break;
+
+	}
+	
+	//messages that are only read when game is in active state (used for blocking player input during animations)
+	if (gameActive) switch (msg->type) {
 		case DOWN_ARROW_PRESSED: {
 			reticle->gridY--;
 			updateReticle();
@@ -566,16 +618,11 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		}
 		case KEY_A_PRESSED:
 			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
+			updateReticle();
 			break;
 
 		case KEY_D_PRESSED:
 			//setActionType(SHOOT);
-			break;
-
-		case NETWORK_TURN_BROADCAST:
-			actionsToExecute = split(msg->data, '\n');
-			currentAction = 0;
-			framesSinceTurnStart = 0;
 			break;
 
 		case TEST_KEY_PRESSED:
@@ -585,25 +632,8 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 	
 		case GO_COLLISION:
-		/*
-		{
-			vector<string> data = split(msg->data, ',');
-
-			for (GameObject* g : gameObjects) {
-				//OutputDebugString(g->id.c_str());
-				if (g->id == data[0]) {
-					for (GameObject* o : gameObjects) {
-						if (o->id == data[1]) {
-							g->onCollide(o);
-							break;
-						}
-					}
-				}
-
-			}
 			break;
-		}
-		*/
+
 		case UPDATE_OBJECT_POSITION: {
 
 			vector<string> data = split(msg->data, ',');
@@ -680,6 +710,9 @@ void GameSystem::gameOverMenuHandler(Msg * msg) {
 			Msg* m = new Msg(LEVEL_LOADED, "2");
 			msgBus->postMessage(m, this);
 			score = 0;
+			//let NetworkSystem know client is ready to start game
+			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+
 		}
 	default:
 		break;
@@ -724,13 +757,12 @@ void GameSystem::executeAction(int a) {
 		//switch on the action type received from the network system, and execute the action
 		switch (receivedAction) {
 		case SHOOT:
-			OutputDebugString(playerAction[0].c_str());
  			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 10);
 			break;
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
 			for (GameObject* g : gameObjects) {
-				if (g->id == playerAction[0]) {
+				if (g->id ==playerAction[0]) {
 					//OutputDebugString(playerAction[2].c_str());
 					GridObject* gridObject = (GridObject*)g;
 					gridObject->gridX = stoi(playerAction[2]);
@@ -807,10 +839,7 @@ void GameSystem::updateReticle() {
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
 	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
-	oss << reticle->id << ",1," << reticle->renderable;
-	mm->type = UPDATE_OBJ_SPRITE;
-	mm->data = oss.str();
-	msgBus->postMessage(mm, this);
+	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, reticle->id + ",1," + reticle->renderable), this);
 }
 
 void GameSystem::displayTimeLeft(int time) {
