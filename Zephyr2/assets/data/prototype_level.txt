@@ -93,8 +93,8 @@ orientation: 0,
 width: 100,
 length: 100,
 imageFrames: 1,
-gridX: 0,
-gridY: 0,
+gridX: 3,
+gridY: 1,
 health: 100;
 
 gameObjectType: TankObject,

@@ -117,16 +117,21 @@ void NetworkSystem::startSystemLoop() {
 		handleMsgQ();
 
 		// if testing mode
-		if (echoMode) {
+		if (echoMode && timerActive) {
+			int timeLeft = 30 - ((clock() - turnStartTime) / 1000);
 
-			if (thisTime >= timerGameTime) { // time is up
-				// send stuff in turns
+			//post the time left message (includes the actual time left in the message data)
+			m->type = NETWORK_R_PING;
+			m->data = to_string(timeLeft);
+			msgBus->postMessage(m, this);
+
+			if (timeLeft <= 0) {
 				broadcastTurnInfo();
-
-				// set the new turn timer
-				timerGameTime = thisTime + turnTimer;
+				timerActive = false;
 			}
-		} else {
+
+		} 
+		else {
 			networkUpdate();
 		}
 
@@ -148,10 +153,28 @@ void NetworkSystem::handleMessage(Msg *msg) {
 			aggregateTurnInfo(msg);
 			break;
 		case READY_TO_START_GAME:
-			sendActionPackets();
+			if (!echoMode) {
+				sendActionPackets();
+			}
+			else {
+				startTimer();
+				msgBus->postMessage(new Msg(NETWORK_R_START_TURN,""), this);
+				OutputDebugString("SENT NETWORK_R_START_TURN from NetworkSystem\n");
+
+				//testing sending NETWORK_R_GAMESTART_OK message
+				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id1,defaultClientID,id3,id4,"), this);
+			}
 			break;
 		case NETWORK_S_ANIMATIONS:
-			sendPacket(ANIMATIONS_COMPLETE, "");
+			if (!echoMode) {
+				sendPacket(ANIMATIONS_COMPLETE, "");
+			}
+			else {
+				startTimer();
+				m->type = NETWORK_R_START_TURN;
+				m->data = "";
+				msgBus->postMessage(m, this);
+			}
 			break;
 		default:
 			break;
@@ -292,7 +315,7 @@ void NetworkSystem::networkUpdate() {
 		case TURN_START:
 			OutputDebugString("NS:TURN START\n");
 
-			m->data = NETWORK_R_START_TURN;
+			m->type = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);
 			actionCounter = 0; // do this here instead of during Turn_over in case theres a bug where u can make actions during animation sequence
 			break;
@@ -308,4 +331,10 @@ void NetworkSystem::networkUpdate() {
 			break;
 		}
 	}
+}
+
+void NetworkSystem::startTimer() {
+	turnStartTime = clock();
+	timerActive = true;
+	
 }
