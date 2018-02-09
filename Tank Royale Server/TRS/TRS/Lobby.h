@@ -148,7 +148,7 @@ public:
 								}
 							}
 						}
-
+						printf("starting a game\n");
 						network->readyPlayers.clear();
 
 						ingame = true;
@@ -157,6 +157,7 @@ public:
 						sendStartGamePackets();
 						sendStartTurnPackets();
 					} else {
+						printf("not enough players ready\n");
 						// update and set that this guy is ready
 						if (network->readyPlayers.count(iter->first) == 0) {
 							// new ready

@@ -32,7 +32,7 @@ NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 		hints.ai_protocol = IPPROTO_TCP;
 
 		//resolve server address and port
-		iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
+		iResult = getaddrinfo("50.64.164.103", DEFAULT_PORT, &hints, &result);
 
 		if (iResult != 0)
 		{
