@@ -308,13 +308,14 @@ void NetworkSystem::networkUpdate() {
 			break;
 		case TIMER_PING:
 			OutputDebugString("NS:TIMER PING\n");
+			timerValue--;
 			m->type = NETWORK_R_PING;
-			m->data = packet.actualData;
+			m->data = to_string(timerValue);
 			msgBus->postMessage(m, this);
 			break;
 		case TURN_START:
 			OutputDebugString("NS:TURN START\n");
-
+			timerValue = 30;
 			m->type = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);
 			actionCounter = 0; // do this here instead of during Turn_over in case theres a bug where u can make actions during animation sequence

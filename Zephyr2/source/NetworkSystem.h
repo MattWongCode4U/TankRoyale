@@ -56,4 +56,6 @@ public:
 	void networkUpdate();
 
 	void sendPacket(DataType d, std::string data);
+
+	int timerValue = 0;
 };
