@@ -381,6 +381,8 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			//let NetworkSystem know client is ready to start game
 			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
 			OutputDebugString("SENDING READY_TO_START_GAME MSG");
+
+			setPlayerTank("player1");
 		}
 		else if (markerPosition == 0) {
 			// instructions page
@@ -486,23 +488,15 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		}
 	}
 
-	TankObject* player = nullptr;
-	for (GameObject* g : gameObjects) {
-		if (g->id == "player1" && g->getObjectType() == "TankObject") {
-			player = (TankObject*)g;
-		}
-	}
+	//TankObject* player = nullptr;
 
-	if (actionOrigin == nullptr) {
-		actionOrigin = player;
-	}
+
 	//vector<string> actionsArray;
 	vector<string> playersArray;
 	vector<string> playerAction;
 
 	Vector2 reticleWorldPos;
-	
-	
+
 	int dist;
 
 	//messages to be read in both active and inactive game state
@@ -510,6 +504,8 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	case NETWORK_R_START_TURN:
 		gameActive = true;
 		OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
+		actionOrigin = playerTank;
+		updateReticle();
 		break;
 
 	case NETWORK_TURN_BROADCAST:
@@ -524,16 +520,10 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		//OutputDebugString(to_string(clientIDVector.size()).c_str());
 		OutputDebugString("NETWORK_R_GAMESTART_OK RECEIVED BY GS\n");
 
-		//assigns player order
-		playerOrder[0] = "player2";
-		playerOrder[1] = "player3";
-		playerOrder[2] = "player4";
-
 		for (int i = 0; i < clientIDVector.size(); i++) {
-			if (clientIDVector[i] == clientID) {
-				OutputDebugString("ClientID found\n");
-				playerOrder[3] = playerOrder[i];
-				playerOrder[i] = "player1";
+			if (clientIDVector[i] == clientID) {		
+				//set the new player tank
+				setPlayerTank("player" + to_string(i + 1));			
 			}
 		}
 		break;
@@ -573,7 +563,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				
 			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
-			oss << player->id << ","//playerID
+			oss << playerTank->id << ","//playerID
 				<< to_string(ActionType) << ","//action type (e.g. MOVE or SHOOT)
 				<< currentAction << ","//the action number 0 to <number of actions/turn>
 				<< reticle->gridX << "," //target x pos
@@ -621,10 +611,18 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			updateReticle();
 			break;
 
-		case KEY_D_PRESSED:
-			//setActionType(SHOOT);
+		case KEY_D_PRESSED: {
+			//return the position of the reticle for debugging purposes
+			string s = "RETICLE AT GRID("
+				+ to_string(reticle->gridX)
+				+ "," + to_string(reticle->gridY)
+				+ ")  WORLD("
+				+ to_string(reticle->x)
+				+ "," + to_string(reticle->y)
+				+ ")\n";
+			OutputDebugString(s.c_str());
 			break;
-
+		}
 		case TEST_KEY_PRESSED:
 			break;
 
@@ -706,6 +704,10 @@ void GameSystem::gameOverMenuHandler(Msg * msg) {
 			Msg* m = new Msg(LEVEL_LOADED, "2");
 			msgBus->postMessage(m, this);
 			score = 0;
+
+			//set the default player tank
+			setPlayerTank("player1");
+
 			//let NetworkSystem know client is ready to start game
 			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
 
@@ -741,13 +743,11 @@ void GameSystem::executeAction(int a) {
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
-	for (string s : players) {
-		playerAction = split(s, ',');
-	//	OutputDebugString("\nAction is:");
-		//OutputDebugString(playerAction[1].c_str());
-		//OutputDebugString("\n");
+	//for (string s : players) {
+	for(int playerNum = 0; playerNum < 4; playerNum++){
+		playerAction = split(players[playerNum], ',');
 
-
+		string currentObjectId ="player" + to_string(playerNum + 1);//get id from the order of incoming actions
 		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
 		//switch on the action type received from the network system, and execute the action
@@ -758,7 +758,7 @@ void GameSystem::executeAction(int a) {
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
 			for (GameObject* g : gameObjects) {
-				if (g->id ==playerAction[0]) {
+				if (g->id == currentObjectId) {
 					//OutputDebugString(playerAction[2].c_str());
 					GridObject* gridObject = (GridObject*)g;
 					gridObject->gridX = stoi(playerAction[2]);
@@ -769,9 +769,7 @@ void GameSystem::executeAction(int a) {
 			}
 			break;
 		}
-
 	}
-
 }
 
 
@@ -790,19 +788,6 @@ Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
 
 	return worldPos;
 }
-
-//function cube_to_oddr(cube) :
-//	col = cube.x + (cube.z - (cube.z & 1)) / 2
-//	row = cube.z
-//	return Hex(col, row)
-//
-//	function oddr_to_cube(hex) :
-//	x = hex.col - (hex.row - (hex.row & 1)) / 2
-//	z = hex.row
-//	y = -x - z
-//	return Cube(x, y, z)
-//
-//	return (abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z)) / 2
 
 int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
 	int aXCube = aX - (aY - (aY & 1)) / 2;
@@ -907,4 +892,13 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 		}
 	}
 }
-
+void GameSystem::setPlayerTank(std::string playerID) {
+	for (GameObject* g : gameObjects) {
+		if (g->id == playerID && g->getObjectType() == "TankObject") {
+			playerTank = (TankObject*)g;
+			actionOrigin = playerTank;
+			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
+			OutputDebugString(debugS.c_str());
+		}
+	}
+}

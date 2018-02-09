@@ -115,8 +115,18 @@ private:
 
 	//maps local player Id's to unique id's 
 	//std::map<std::string, std::string> playerIdMap;
-	std::string playerOrder[4];
+	//std::string playerOrder[4];
+
+	//is the game actively receiving player input? false when it game is waiting/animating
 	bool gameActive = false;
+
+	//the Id of the tank being controlled by the player
+	//std::string playerTankID = "player1";
+
+	//the local player tank object
+	TankObject* playerTank;
+
+	void setPlayerTank(std::string playerID);
 
 	Msg *m;
 
