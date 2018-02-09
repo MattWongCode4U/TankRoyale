@@ -618,6 +618,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		}
 		case KEY_A_PRESSED:
 			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
+			updateReticle();
 			break;
 
 		case KEY_D_PRESSED:
@@ -631,25 +632,8 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 	
 		case GO_COLLISION:
-		/*
-		{
-			vector<string> data = split(msg->data, ',');
-
-			for (GameObject* g : gameObjects) {
-				//OutputDebugString(g->id.c_str());
-				if (g->id == data[0]) {
-					for (GameObject* o : gameObjects) {
-						if (o->id == data[1]) {
-							g->onCollide(o);
-							break;
-						}
-					}
-				}
-
-			}
 			break;
-		}
-		*/
+
 		case UPDATE_OBJECT_POSITION: {
 
 			vector<string> data = split(msg->data, ',');
@@ -769,7 +753,6 @@ void GameSystem::executeAction(int a) {
 		//switch on the action type received from the network system, and execute the action
 		switch (receivedAction) {
 		case SHOOT:
-			OutputDebugString(playerAction[0].c_str());
  			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 10);
 			break;
 		case MOVE:
@@ -852,10 +835,7 @@ void GameSystem::updateReticle() {
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
 	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
-	oss << reticle->id << ",1," << reticle->renderable;
-	mm->type = UPDATE_OBJ_SPRITE;
-	mm->data = oss.str();
-	msgBus->postMessage(mm, this);
+	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, reticle->id + ",1," + reticle->renderable), this);
 }
 
 void GameSystem::displayTimeLeft(int time) {
