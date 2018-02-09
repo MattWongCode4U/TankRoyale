@@ -383,9 +383,43 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 		if (change) {
 			mm->type = UPDATE_OBJ_SPRITE;
-			oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+			oss << "MarkerObj,1,MenuItemSelected" << markerPosition << ".png,";
 			mm->data = oss.str();
 			msgBus->postMessage(mm, this);
+
+			for (GameObject* g : gameObjects) {
+				if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected0") {
+					buttonHighlighted = (FullscreenObj*)g;
+					buttonHighlighted->x = 0;
+					buttonHighlighted->y = 0;
+					buttonHighlighted->z = 21;
+					sendUpdatePosMessage(buttonHighlighted);
+				}
+
+				else if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected1") {
+					buttonHighlighted = (FullscreenObj*)g;
+					buttonHighlighted->x = 0;
+					buttonHighlighted->y = -100;
+					buttonHighlighted->z = 21;
+					sendUpdatePosMessage(buttonHighlighted);
+				}
+
+				else if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected2") {
+					buttonHighlighted = (FullscreenObj*)g;
+					buttonHighlighted->x = 0;
+					buttonHighlighted->y = -200;
+					buttonHighlighted->z = 21;
+					sendUpdatePosMessage(buttonHighlighted);
+				}
+
+				else if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected3") {
+					buttonHighlighted = (FullscreenObj*)g;
+					buttonHighlighted->x = 0;
+					buttonHighlighted->y = -300;
+					buttonHighlighted->z = 21;
+					sendUpdatePosMessage(buttonHighlighted);
+				}
+			}
 		}
 		break;
 	}
@@ -397,10 +431,11 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "MarkerObj,1,MenuItemSelected" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
+
 	case UP_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition--;
@@ -410,10 +445,11 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		markerPosition = markerPosition % 4;
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "MarkerObj,1,MenuItemSelected" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
+		
 	case SPACEBAR_PRESSED:
 		if (markerPosition == 3) {
 			// Exit was selected, kill main
