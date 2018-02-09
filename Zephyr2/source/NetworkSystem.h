@@ -23,7 +23,6 @@ public:
 	Msg* m;
 	
 	std::string playerTurnAction[4];
-	std::string playerTurnTarget[4];
 	std::string playerTurnTargetX[4];
 	std::string playerTurnTargetY[4];
 
@@ -50,4 +49,6 @@ public:
 	char network_data[MAX_PACKET_SIZE];
 
 	void networkUpdate();
+
+	void sendPacket(DataType d, std::string data);
 };

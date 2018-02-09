@@ -76,8 +76,6 @@ private:
 	void displayTimeLeft(int time);
 	void updatePlayerHealthBar(int playerID);
 
-
-
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);
 
@@ -86,6 +84,10 @@ private:
 
 	//updates the reticle spright, and postion.
 	void updateReticle();
+
+	//deal aoe damage to all tiles in the affected area
+	void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
+	
 
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;

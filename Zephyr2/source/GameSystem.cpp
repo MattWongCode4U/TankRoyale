@@ -149,6 +149,17 @@ void GameSystem::startSystemLoop() {
 			//OutputDebugString("\n");
 			//OutputDebugString(to_string(framesSinceTurnStart).c_str());
 			if (framesSinceTurnStart == 0) {
+				//clear Indicators for move selection
+				for (GameObject* g : gameObjects) {
+					if (g->id.find("TileIndicator") != std::string::npos) {
+						g->renderable = "nothing.png";
+						//move object out side of camera instead of changing renderable. Temp Solution
+						//g->x = 1000;
+						//sendUpdatePosMessage(g);
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, g->id + ",1," + g->renderable), this);
+					}
+				}
+
 				executeAction(0);
 				turnStartTime = clock();
 			}
@@ -511,10 +522,10 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
 			oss << player->id << ","//playerID
-				<< "MOVE" << ","//action type just MOVE for now
+				<< to_string(ActionType) << ","//action type (e.g. MOVE or SHOOT)
 				<< currentAction << ","//the action number 0 to <number of actions/turn>
-				<< reticle->x << "," //target x pos
-				<< reticle->y; //target y pos
+				<< reticle->gridX << "," //target x pos
+				<< reticle->gridY; //target y pos
 
 			mm->type = NETWORK_S_ACTION;
 			mm->data = oss.str();
@@ -530,35 +541,39 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				}
 			}
 
+			if (ActionType == MOVE) {
+				actionOrigin = indicator;
+				indicator->renderable = "MoveIndicator.png";
+			}
+			else if (ActionType == SHOOT) {
+				indicator->renderable = "ShootIndicator.png";
+			}
+
+
 			indicator->gridX = reticle->gridX;
 			indicator->gridY = reticle->gridY;
 			indicator->updateWorldCoords();
-			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
-			sendUpdatePosMessage(indicator);
+			//indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
+			sendUpdatePosMessage(indicator);//send indicator position message
 
-			if(ActionType == MOVE)
-				actionOrigin = indicator;
+			//send update sprite message. maybe this sould be included in update position?
+			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), this);
+
 
 			currentAction++;
 
 			break;
 		}
 		case KEY_A_PRESSED:
-			setActionType(MOVE);
+			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
 			break;
 
 		case KEY_D_PRESSED:
-			setActionType(SHOOT);
+			//setActionType(SHOOT);
 			break;
 
 		case NETWORK_TURN_BROADCAST:
 			actionsToExecute = split(msg->data, '\n');
-			//OutputDebugString(actionsToExecute[0].c_str());
-	/*		playersArray = split(actionsToExecute[0], ']');
-			playerAction = split(playersArray[0], ',');
-			player->x = stoi(playerAction[2]);
-			player->y = stoi(playerAction[3]);
-			sendUpdatePosMessage(player);*/
 			currentAction = 0;
 			framesSinceTurnStart = 0;
 			break;
@@ -594,7 +609,6 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			vector<string> data = split(msg->data, ',');
 
 			for (GameObject* g : gameObjects) {
-				//OutputDebugString(g->id.c_str());
 
 				if (g->id == data[0]) {
 					g->x = stof(data[2].c_str());
@@ -695,32 +709,39 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
-
-	//clear Indicators
-	for (GameObject* g : gameObjects) {
-		if (g->id.find("TileIndicator") != std::string::npos) {
-			g->renderable = "nothing.png";
-			//move object out side of camera instead of changing renderable. Temp Solution
-			g->x = 1000;
-			sendUpdatePosMessage(g);
-		}
-	}
-
-
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
 	for (string s : players) {
 		playerAction = split(s, ',');
+	//	OutputDebugString("\nAction is:");
+		//OutputDebugString(playerAction[1].c_str());
+		//OutputDebugString("\n");
 
-		//display player actions for players whose id's are found
-		for (GameObject* g : gameObjects) {
-			if (g->id == playerAction[0]) {
-				g->x = stof(playerAction[2]);
-				g->y = stof(playerAction[3]);
-				sendUpdatePosMessage(g);
-			}			
+
+		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
+
+		//switch on the action type received from the network system, and execute the action
+		switch (receivedAction) {
+		case SHOOT:
+			OutputDebugString(playerAction[0].c_str());
+ 			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 10);
+			break;
+		case MOVE:
+			//display player MOVE actions for players whose id's are found
+			for (GameObject* g : gameObjects) {
+				if (g->id == playerAction[0]) {
+					//OutputDebugString(playerAction[2].c_str());
+					GridObject* gridObject = (GridObject*)g;
+					gridObject->gridX = stoi(playerAction[2]);
+					gridObject->gridY = stoi(playerAction[3]);
+					gridObject->updateWorldCoords();
+					sendUpdatePosMessage(gridObject);
+				}
+			}
+			break;
 		}
+
 	}
 
 }
@@ -985,3 +1006,30 @@ FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 	}
 	return obj;
 }
+
+void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
+	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
+	int aZCube = _originY;
+	int aYCube = -aXCube - aZCube;
+	OutputDebugString("origin point of shot: ");
+	OutputDebugString(to_string(_originX).c_str());
+	OutputDebugString(" , ");
+	OutputDebugString(to_string(_originY).c_str());
+	OutputDebugString("\n");
+
+	for (GameObject *go : gameObjects) { //look through all gameobjects
+		if (go->getObjectType() == "TankObject") {
+			TankObject* tank = (TankObject*)go;
+			if (getGridDistance(_originX, _originY, tank->gridX, tank->gridY) <= affectedRadius) {
+				tank->health -= damage;
+				OutputDebugString(tank->id.c_str());
+				OutputDebugString(" GOT HIT AT:");
+				OutputDebugString(to_string(tank->gridX).c_str());
+				OutputDebugString(" , ");
+				OutputDebugString(to_string(tank->gridY).c_str());
+				OutputDebugString("\n");
+			}
+		}
+	}
+}
+

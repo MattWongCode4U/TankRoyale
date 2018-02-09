@@ -208,7 +208,7 @@ void RenderSystem::handleMessage(Msg *msg) {
 */
 std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string data)
 {
-	SDL_Log(data.c_str());
+	//SDL_Log(data.c_str());
 
 	vector<string> objectData = split(data, ',');
 
@@ -318,7 +318,7 @@ void RenderSystem::updateObjSprite(Msg* m)
 */
 void RenderSystem::updateObjRender(Msg * m)
 {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	
 	//id,renderable,renderType,model,normalMap,smoothness
 	vector<string> objectData = split(m->data, ',');
