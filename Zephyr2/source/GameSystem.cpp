@@ -769,7 +769,8 @@ void GameSystem::executeAction(int a) {
 		//switch on the action type received from the network system, and execute the action
 		switch (receivedAction) {
 		case SHOOT:
-			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 10);
+			OutputDebugString(playerAction[0].c_str());
+ 			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 10);
 			break;
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
@@ -785,10 +786,6 @@ void GameSystem::executeAction(int a) {
 			}
 			break;
 		}
-
-		
-
-	
 
 	}
 
@@ -906,22 +903,28 @@ void GameSystem::setActionType(ActionTypes a) {
 }
 
 void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
-	//vector<Vector2> affectedList;
-	for (int i = -affectedRadius; i <= affectedRadius; i++) {
-		for (int j = -affectedRadius; j <= affectedRadius; j++) {
-			for (GameObject *go : gameObjects) { //look through all gameobjects
-				if (go->getObjectType() == "TankObject") {
-					TankObject* tank = (TankObject*)go;
-					if (tank->gridX == (i + _originX) && tank->gridY == (j + _originY)){
-						tank->health -= damage;
-						OutputDebugString(tank->id.c_str());
-						OutputDebugString(" GOT HIT \n");
-					} 
-					
-				}
+	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
+	int aZCube = _originY;
+	int aYCube = -aXCube - aZCube;
+	OutputDebugString("origin point of shot: ");
+	OutputDebugString(to_string(_originX).c_str());
+	OutputDebugString(" , ");
+	OutputDebugString(to_string(_originY).c_str());
+	OutputDebugString("\n");
+
+	for (GameObject *go : gameObjects) { //look through all gameobjects
+		if (go->getObjectType() == "TankObject") {
+			TankObject* tank = (TankObject*)go;
+			if (getGridDistance(_originX, _originY, tank->gridX, tank->gridY) <= affectedRadius) {
+				tank->health -= damage;
+				OutputDebugString(tank->id.c_str());
+				OutputDebugString(" GOT HIT AT:");
+				OutputDebugString(to_string(tank->gridX).c_str());
+				OutputDebugString(" , ");
+				OutputDebugString(to_string(tank->gridY).c_str());
+				OutputDebugString("\n");
 			}
 		}
 	}
-	//return affectedList;
 }
 
