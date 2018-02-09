@@ -396,7 +396,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		break;
 
 	case NETWORK_CONNECT:
-		clientID = msg->data[0];
+		clientID = msg->data;
 		OutputDebugString("\nCONNECTED TO SERVER");
 		break;
 	default:
