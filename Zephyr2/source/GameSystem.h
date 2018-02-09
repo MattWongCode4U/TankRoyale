@@ -62,8 +62,6 @@ private:
 	//Displays the amount to time left in the turn
 	void displayTimeLeft(int time);
 
-
-
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);
 
