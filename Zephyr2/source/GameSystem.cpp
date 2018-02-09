@@ -309,41 +309,68 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 	switch (msg->type) {
 	case LEFT_MOUSE_BUTTON:
 	{
-		if (markerPosition == 3) {
-			// Exit was selected, kill main
-			malive = false;
-		}
-		else if (markerPosition == 2) {
-			// Go to settings
-			removeAllGameObjects();
-			addGameObjects("settings_menu.txt");
-			levelLoaded = 1;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "1");
-			msgBus->postMessage(m, this);
-		}
-		else if (markerPosition == 1) {
-			// start the game (or go to level select?)
-			// first, clear all objects
-			removeAllGameObjects();
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
 
-			// then, load new objects
-			//addGameObjects("Level_1.txt");
-			addGameObjects("prototype_level.txt");
-			levelLoaded = 2;
-			Msg* m = new Msg(LEVEL_LOADED, "2");
-			msgBus->postMessage(m, this);
-			score = 0;
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				if (g->id.compare("Menu_Item1") == 0)
+				{
+					// instructions page
+					removeAllGameObjects();
+					addGameObjects("instructions_menu.txt");
+					levelLoaded = 4;
+					markerPosition = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item2") == 0)
+				{
+					// start the game (or go to level select?)
+					// first, clear all objects
+					removeAllGameObjects();
+
+					// then, load new objects
+					//addGameObjects("Level_1.txt");
+					addGameObjects("prototype_level.txt");
+					levelLoaded = 2;
+					score = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item3") == 0)
+				{
+					// Go to settings
+					removeAllGameObjects();
+					addGameObjects("settings_menu.txt");
+					levelLoaded = 1;
+					markerPosition = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item4") == 0)
+				{
+					malive = false;
+					break;
+				}
+			}
 		}
-		else if (markerPosition == 0) {
-			// instructions page
-			removeAllGameObjects();
-			addGameObjects("instructions_menu.txt");
-			levelLoaded = 4;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "4");
+		if (change) 
+		{
+			Msg* m = new Msg(LEVEL_LOADED, std::to_string(levelLoaded));
 			msgBus->postMessage(m, this);
 		}
+
 		break;
 	}
 	case MOUSE_MOVE:
