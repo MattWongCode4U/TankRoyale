@@ -295,12 +295,16 @@ void NetworkSystem::networkUpdate() {
 		case INIT_CONNECTION:
 			OutputDebugString("NS:INIT CONNECTION\n");
 			// the data in this is your playerID
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			m->type = NETWORK_CONNECT;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case GAME_START:
 			OutputDebugString("NS:GAME START\n");
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			// broadcast game start
 			m->type = NETWORK_R_GAMESTART_OK;
 			msgBus->postMessage(m, this);
@@ -314,6 +318,8 @@ void NetworkSystem::networkUpdate() {
 			break;
 		case TURN_START:
 			OutputDebugString("NS:TURN START\n");
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			timerValue = 30;
 			m->type = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);
@@ -321,7 +327,8 @@ void NetworkSystem::networkUpdate() {
 			break;
 		case TURN_OVER:
 			OutputDebugString("NS:TURN OVER\n");
-
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			m->type = NETWORK_TURN_BROADCAST;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);

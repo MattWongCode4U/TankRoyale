@@ -24,7 +24,7 @@ public:
 	bool animationsInProgress = false;
 	int doneanimations = 0;
 
-	std::string defaultActionString = "IDLE, 0, 0";
+	std::string defaultActionString = "2,0,0";
 
 	Lobby(void) {
 		// id's to assign clients for our table
