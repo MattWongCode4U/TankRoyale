@@ -125,7 +125,7 @@ public:
 				}
 					break;
 				case ANIMATIONS_COMPLETE:
-					printf("server received animationComplete message");
+					printf("server received animationComplete message\n");
 					doneanimations++;
 					break;
 				case INIT_CONNECTION:
@@ -353,7 +353,7 @@ private:
 
 	void resetTurnInformation() {
 		for (auto& t : turnInfo) {
-			for (std::string s : t.second) {
+			for (auto& s : t.second) {
 				s = defaultActionString;
 			}
 		}

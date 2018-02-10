@@ -307,6 +307,7 @@ void NetworkSystem::networkUpdate() {
 			OutputDebugString("\n");
 			// broadcast game start
 			m->type = NETWORK_R_GAMESTART_OK;
+			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case TIMER_PING:
