@@ -306,8 +306,11 @@ private:
 		
 		for (int i = 0; i < ACTIONS_PER_TURN; i++) {
 			for (auto& t : turnInfo) {
-				oss << t.first << "," << t.second.at(i) << "]";
-				oss << t.second.at(i) << "]";
+				if (t.second.at(i) == defaultActionString) {
+					oss << t.first << "," << t.second.at(i) << "]";
+				} else {
+					oss << t.second.at(i) << "]";
+				}
 			}
 			oss << "\n";
 		}
