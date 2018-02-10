@@ -174,10 +174,11 @@ void GameSystem::startSystemLoop() {
 				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
 				//spam out actions if dead
 				if (playerTank->health <= 0) {
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
+					string spoofData = clientID + "3, 0, 0";
+					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
 				}
 				
 				currentAction = maxActions;
