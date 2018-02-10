@@ -312,6 +312,8 @@ private:
 			oss << "\n";
 		}
 
+		packet.setData(oss.str().c_str());
+
 		packet.serialize(packet_data);
 
 		network->sendToPlaying(packet_data, MAX_PACKET_SIZE, playingPlayers);
