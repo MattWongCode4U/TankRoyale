@@ -97,7 +97,7 @@ private:
 	bool validMove = false;
 
 	//the possible types of actions
-	enum ActionTypes { MOVE, SHOOT, PASS };
+	enum ActionTypes { MOVE, SHOOT, PASS, DEAD };
 
 	//the current action being set up
 	ActionTypes ActionType = MOVE;

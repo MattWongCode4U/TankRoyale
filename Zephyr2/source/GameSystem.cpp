@@ -172,6 +172,13 @@ void GameSystem::startSystemLoop() {
 			else if (framesSinceTurnStart == 300) {
 				executeAction(3);
 				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
+				//spam out actions if dead
+				msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
+				msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
+				msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
+				msgBus->postMessage(new Msg(NETWORK_S_ACTION, "0, 3, 0, 0"), this);
+				currentAction = maxActions;
+
 			}
 			framesSinceTurnStart++;
 
@@ -758,7 +765,7 @@ void GameSystem::executeAction(int a) {
 		//switch on the action type received from the network system, and execute the action
 		switch (receivedAction) {
 		case SHOOT:
- 			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 10);
+ 			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 70);
 			break;
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
@@ -893,6 +900,9 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 				OutputDebugString(" , ");
 				OutputDebugString(to_string(tank->gridY).c_str());
 				OutputDebugString("\n");
+
+				if(tank->health <= 0)
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,WaterSplash.png,"), this);
 			}
 		}
 	}
