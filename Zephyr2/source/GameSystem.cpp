@@ -173,15 +173,9 @@ void GameSystem::startSystemLoop() {
 				executeAction(3);
 				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
 				//spam out actions if dead
-				if (playerTank->health <= 0) {
-					string spoofData = clientID + ",3,0,0";
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
-					msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
-				}
+			
 				
-				currentAction = maxActions;
+				
 
 			}
 			framesSinceTurnStart++;
@@ -518,6 +512,16 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		gameActive = true;
 		OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
 		actionOrigin = playerTank;
+
+		if (playerTank->health <= 0) {
+			string spoofData = clientID + ",3,0,0";
+			msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+			msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+			msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+			msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), this);
+			currentAction = maxActions;
+		}
+
 		updateReticle();
 		break;
 
