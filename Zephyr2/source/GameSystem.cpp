@@ -397,8 +397,9 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 
 	case NETWORK_CONNECT:
 		clientID = msg->data;
+		OutputDebugString("GS: NETWORK_CONNECT RECEIVED: \n");
 		OutputDebugString(clientID.c_str());
-		OutputDebugString("NETWORK_CONNECT RECEIVED BY GAMESSYSTEM \n");
+		OutputDebugString("\n");
 		break;
 	default:
 		break;
@@ -519,8 +520,10 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	case NETWORK_R_GAMESTART_OK: {//"id1,ClientID,id3,id4," only for server version
 		vector<string> clientIDVector = split(msg->data, ',');
 		//OutputDebugString(to_string(clientIDVector.size()).c_str());
+		
+		OutputDebugString("GS: NETWORK_R_GAMESTART_OK RECEIVED:  ");
 		OutputDebugString(msg->data.c_str());
-		OutputDebugString("NETWORK_R_GAMESTART_OK RECEIVED BY GS\n");
+		OutputDebugString("\n");
 
 		for (int i = 0; i < clientIDVector.size(); i++) {
 			if (clientIDVector[i] == clientID) {		
