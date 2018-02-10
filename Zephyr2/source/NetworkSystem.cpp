@@ -310,7 +310,7 @@ void NetworkSystem::networkUpdate() {
 			msgBus->postMessage(m, this);
 			break;
 		case TIMER_PING:
-			OutputDebugString("NS:TIMER PING\n");
+			// OutputDebugString("NS:TIMER PING\n");
 			timerValue--;
 			m->type = NETWORK_R_PING;
 			m->data = to_string(timerValue);
@@ -318,8 +318,6 @@ void NetworkSystem::networkUpdate() {
 			break;
 		case TURN_START:
 			OutputDebugString("NS:TURN START\n");
-			OutputDebugString(packet.actualData);
-			OutputDebugString("\n");
 			timerValue = 30;
 			m->type = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);

@@ -312,6 +312,9 @@ private:
 			oss << "\n";
 		}
 
+		printf("TURN INFO:");
+		printf(oss.str().c_str());
+		printf("\n");
 		packet.setData(oss.str().c_str());
 
 		packet.serialize(packet_data);
