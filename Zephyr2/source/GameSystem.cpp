@@ -568,9 +568,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 				
 			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
-			oss << playerTank->id << ","//playerID
+			oss << clientID << ","//playerID
 				<< to_string(ActionType) << ","//action type (e.g. MOVE or SHOOT)
-				<< currentAction << ","//the action number 0 to <number of actions/turn>
+				//<< currentAction << ","//the action number 0 to <number of actions/turn>
 				<< reticle->gridX << "," //target x pos
 				<< reticle->gridY; //target y pos
 
