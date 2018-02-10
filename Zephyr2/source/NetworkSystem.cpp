@@ -188,12 +188,10 @@ void NetworkSystem::aggregateTurnInfo(Msg* m) {
 	if (echoMode) {
 		vector<string> data = split(m->data, ',');
 
-		playerTurnAction[stoi(data[2])] = data[1];
-		playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
-		playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
+		playerTurnAction[actionCounter] = data[1];
+		playerTurnTargetX[actionCounter] = data[2]; //seperateX and y to match gamesystem
+		playerTurnTargetY[actionCounter] = data[3];//seperateX and y to match gamesystem
 
-												   // always add 1 to the action counter
-												   //may not be needed if action # passed in from game systems
 		actionCounter++;
 	} else {
 		// send turn info to server
