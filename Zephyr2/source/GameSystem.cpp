@@ -173,9 +173,6 @@ void GameSystem::startSystemLoop() {
 				executeAction(3);
 				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
 				//spam out actions if dead
-			
-				
-				
 
 			}
 			framesSinceTurnStart++;
@@ -780,11 +777,14 @@ void GameSystem::executeAction(int a) {
 			for (GameObject* g : gameObjects) {
 				if (g->id == currentObjectId) {
 					//OutputDebugString(playerAction[2].c_str());
-					GridObject* gridObject = (GridObject*)g;
-					gridObject->gridX = stoi(playerAction[2]);
-					gridObject->gridY = stoi(playerAction[3]);
-					gridObject->updateWorldCoords();
-					sendUpdatePosMessage(gridObject);
+					TankObject* t = (TankObject*)g;
+					if (t->health > 0) {
+						t->gridX = stoi(playerAction[2]);
+						t->gridY = stoi(playerAction[3]);
+						t->updateWorldCoords();
+						sendUpdatePosMessage(t);
+					}
+					
 				}
 			}
 			break;
