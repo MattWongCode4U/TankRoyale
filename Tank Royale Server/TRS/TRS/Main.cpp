@@ -6,7 +6,7 @@
 Lobby * server;
 
 static unsigned int client_id;
-static int playerNum = 2;
+static int playerNum = 4;
 static int playersReady = 0;
 std::vector<std::pair<int, std::vector<std::string>>> turnInfo;
 
