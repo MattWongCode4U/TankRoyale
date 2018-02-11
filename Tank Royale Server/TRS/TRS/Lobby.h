@@ -11,7 +11,7 @@
 extern unsigned int client_id;
 extern int playerNum;
 extern int playersReady;
-
+extern std::vector<std::pair<int, std::vector<std::string>>> turnInfo;
 
 class Lobby
 {
@@ -24,7 +24,7 @@ public:
 	bool animationsInProgress = false;
 	int doneanimations = 0;
 
-	std::string defaultActionString = "IDLE, 0, 0";
+	std::string defaultActionString = "0,2,0,0";
 
 	Lobby(void) {
 		// id's to assign clients for our table
@@ -96,28 +96,36 @@ public:
 				{
 					bool aggregated = false;
 					// aggreagate turn info str
-					for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+					for (auto& t : turnInfo) {
 						if (!aggregated) {
 							// first find te right pair using the id
 							if (t.first == iter->first) {
-								for (std::string s : t.second) {
+								for (auto& s : t.second) {
 									// next, find the first string that's still default
 									if (s == defaultActionString) {
 										// modify it
 										s = packet.actualData;
+										printf("PLAYER ACTION ACTUAL DATA: ");
+										printf(s.c_str());
+										printf("\n");
 										aggregated = true;
 										break;// done
 									}
 								}
 							}
-						} else {
-							break;
 						}
+					}
+
+					if (validateTurnsComplete()) {
+						printf("ALL TURNS COMPLETE RETURNED TRUE\n");
+						// this means we have all the required messages
+						sendTurnInformation();
+						timerPacketsSent = 0;
 					}
 				}
 					break;
 				case ANIMATIONS_COMPLETE:
-					printf("server received animationComplete message");
+					printf("server received animationComplete message\n");
 					doneanimations++;
 					break;
 				case INIT_CONNECTION:
@@ -128,39 +136,46 @@ public:
 					printf("server received action event packet from client\n");
 					// std::cout << packet.actualData;
 					// sendActionPackets();
-										
-					if (readyPlayerNum == playerNum) {
-						// remove enough players to start the game 
-						for (auto x : network->readyPlayers) {
-							if (x.second == true) {
-								// this player is ready to start
-								for (int i = 0; i < network->playersInQueue.size(); i++) {
-									// is this the player that is ready
-									if (x.first == network->playersInQueue.at(i)) {
-										playingPlayers.push_back(network->playersInQueue.at(i));
-										network->playersInQueue.erase(network->playersInQueue.begin() + i);
-										break; // dont need to search, id is unique
-									}
-								}
-							}
-						}
-
-						network->readyPlayers.clear();
-
-						ingame = true;
-						gameStartTime = clock();
-						readyPlayerNum = 0;
-						sendStartGamePackets();
-						sendStartTurnPackets();
-					} else {
+					{
+						printf("not enough players ready\n");
 						// update and set that this guy is ready
 						if (network->readyPlayers.count(iter->first) == 0) {
 							// new ready
+							std::ostringstream os;
+							os << iter->first;
+							printf("adding a player ");
+							printf(os.str().c_str());
+							printf("\n");
+
 							readyPlayerNum++;
 							network->readyPlayers[iter->first] = true;
 						}
-					}
 
+						if (readyPlayerNum == playerNum) {
+							// remove enough players to start the game 
+							for (auto x : network->readyPlayers) {
+								if (x.second == true) {
+									// this player is ready to start
+									for (int i = 0; i < network->playersInQueue.size(); i++) {
+										// is this the player that is ready
+										if (x.first == network->playersInQueue.at(i)) {
+											playingPlayers.push_back(network->playersInQueue.at(i));
+											network->playersInQueue.erase(network->playersInQueue.begin() + i);
+											break; // dont need to search, id is unique
+										}
+									}
+								}
+							}
+							printf("starting a game\n");
+							network->readyPlayers.clear();
+
+							ingame = true;
+							gameStartTime = clock();
+							readyPlayerNum = 0;
+							sendStartGamePackets();
+							sendStartTurnPackets();
+						}
+					}
 					break;
 				default:
 
@@ -175,7 +190,7 @@ public:
 private:
 	// this is disgusting but i'm doing it anyways
 	// int would be the id, add moves to inner vector position, pad with empty data if it doesn't exist
-	std::vector<std::pair<int, std::vector<std::string>>> turnInfo;
+	
 
 	// The ServerNetwork object 
 	Server* network;
@@ -231,9 +246,11 @@ private:
 			oss << i << ",";
 
 			// while we're at it, start to initalize the turn information for the game
-			std::pair<int, std::vector<std::string>> p;
-			p.first = i;
-			turnInfo.push_back(p);
+			std::vector<std::string> vs;
+
+			//std::pair<int, std::vector<std::string>> p(i, vs);
+			
+			turnInfo.push_back(std::make_pair(i, vs));
 		}
 
 		initializeTurnInformation();
@@ -288,12 +305,22 @@ private:
 		std::ostringstream oss;
 		
 		for (int i = 0; i < ACTIONS_PER_TURN; i++) {
-			for (std::pair<int, std::vector<std::string>> t : turnInfo) {
-				//oss << t.first << "," << t.second.at(i) << "]";
-				oss << t.second.at(i) << "]";
+			for (auto& t : turnInfo) {
+				/*
+				if (t.second.at(i) == defaultActionString) {
+					oss << t.first << "," << t.second.at(i) << "]";
+				} else {
+				*/
+					oss << t.second.at(i) << "]";
+				//}
 			}
 			oss << "\n";
 		}
+
+		printf("TURN INFO:\n");
+		printf(oss.str().c_str());
+		printf("\n");
+		packet.setData(oss.str().c_str());
 
 		packet.serialize(packet_data);
 
@@ -317,7 +344,7 @@ private:
 	}
 
 	void initializeTurnInformation() {
-		for (std::pair<int, std::vector<std::string>> t : turnInfo) {
+		for (auto& t : turnInfo) {
 			for (int i = 0; i < ACTIONS_PER_TURN; i++) {
 				t.second.push_back(defaultActionString);
 			}
@@ -325,11 +352,26 @@ private:
 	}
 
 	void resetTurnInformation() {
-		for (std::pair<int, std::vector<std::string>> t : turnInfo) {
-			for (std::string s : t.second) {
+		for (auto& t : turnInfo) {
+			for (auto& s : t.second) {
 				s = defaultActionString;
 			}
 		}
+	}
+
+	bool validateTurnsComplete() {
+		for (auto& t : turnInfo) {
+			for (std::string s : t.second) {
+				printf("Validating ");
+				printf(s.c_str());
+				printf("\n");
+				if (s == defaultActionString) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 };

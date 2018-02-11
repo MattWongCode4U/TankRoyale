@@ -32,7 +32,7 @@ NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 		hints.ai_protocol = IPPROTO_TCP;
 
 		//resolve server address and port
-		iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
+		iResult = getaddrinfo("50.64.164.103", DEFAULT_PORT, &hints, &result);
 
 		if (iResult != 0)
 		{
@@ -162,7 +162,7 @@ void NetworkSystem::handleMessage(Msg *msg) {
 				OutputDebugString("SENT NETWORK_R_START_TURN from NetworkSystem\n");
 
 				//testing sending NETWORK_R_GAMESTART_OK message
-				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id1,defaultClientID,id3,id4,"), this);
+				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,defaultClientID,id3,id4,"), this);
 			}
 			break;
 		case NETWORK_S_ANIMATIONS:
@@ -171,9 +171,8 @@ void NetworkSystem::handleMessage(Msg *msg) {
 			}
 			else {
 				startTimer();
-				m->type = NETWORK_R_START_TURN;
-				m->data = "";
-				msgBus->postMessage(m, this);
+				msgBus->postMessage(new Msg(NETWORK_R_START_TURN, ""), this);
+				OutputDebugString("SENT NETWORK_R_START_TURN from NetworkSystem\n");
 			}
 			break;
 		default:
@@ -189,12 +188,10 @@ void NetworkSystem::aggregateTurnInfo(Msg* m) {
 	if (echoMode) {
 		vector<string> data = split(m->data, ',');
 
-		playerTurnAction[stoi(data[2])] = data[1];
-		playerTurnTargetX[stoi(data[2])] = data[3]; //seperateX and y to match gamesystem
-		playerTurnTargetY[stoi(data[2])] = data[4];//seperateX and y to match gamesystem
+		playerTurnAction[actionCounter] = data[1];
+		playerTurnTargetX[actionCounter] = data[2]; //seperateX and y to match gamesystem
+		playerTurnTargetY[actionCounter] = data[3];//seperateX and y to match gamesystem
 
-												   // always add 1 to the action counter
-												   //may not be needed if action # passed in from game systems
 		actionCounter++;
 	} else {
 		// send turn info to server
@@ -209,10 +206,10 @@ void NetworkSystem::broadcastTurnInfo() {
 	if (echoMode) {
 		// needs to be changed later to use a loop in case we change max action count
 		turnInfo =
-			playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player2, 0, 1,3]player3, 0, -2,1]player4, 0, -1,0]\n" +
-			playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player2, 0, 1,3]player3, 0, -2,3]player4, 0, -1,-1]\n" +
-			playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player2, 0, 1,3]player3, 0, -1,0]player4, 0, -3,-3]\n" +
-			playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player2, 0, 1,3]player3, 0, -2,4]player4, 0, -2,-4]";
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player3, 0, -2,1]player4, 0, -1,0]\n" +
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player3, 0, -2,3]player4, 0, -1,-1]\n" +
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player3, 0, -1,0]player4, 0, -3,-3]\n" +
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player3, 0, -2,4]player4, 0, -2,-4]";
 	}
 
 	// im being lazy here and just sending out the string since ideally the network class doesn't know how to parse. alternatively i can parse here, depends on
@@ -296,32 +293,39 @@ void NetworkSystem::networkUpdate() {
 		case INIT_CONNECTION:
 			OutputDebugString("NS:INIT CONNECTION\n");
 			// the data in this is your playerID
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			m->type = NETWORK_CONNECT;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case GAME_START:
 			OutputDebugString("NS:GAME START\n");
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			// broadcast game start
 			m->type = NETWORK_R_GAMESTART_OK;
+			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
 			break;
 		case TIMER_PING:
-			OutputDebugString("NS:TIMER PING\n");
+			// OutputDebugString("NS:TIMER PING\n");
+			timerValue--;
 			m->type = NETWORK_R_PING;
-			m->data = packet.actualData;
+			m->data = to_string(timerValue);
 			msgBus->postMessage(m, this);
 			break;
 		case TURN_START:
 			OutputDebugString("NS:TURN START\n");
-
+			timerValue = 30;
 			m->type = NETWORK_R_START_TURN;
 			msgBus->postMessage(m, this);
 			actionCounter = 0; // do this here instead of during Turn_over in case theres a bug where u can make actions during animation sequence
 			break;
 		case TURN_OVER:
 			OutputDebugString("NS:TURN OVER\n");
-
+			OutputDebugString(packet.actualData);
+			OutputDebugString("\n");
 			m->type = NETWORK_TURN_BROADCAST;
 			m->data = packet.actualData;
 			msgBus->postMessage(m, this);
