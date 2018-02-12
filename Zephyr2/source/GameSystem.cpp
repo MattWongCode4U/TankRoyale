@@ -586,6 +586,36 @@ void GameSystem::lvl1Handler(Msg * msg) {
 	
 	int dist;
 	switch (msg->type) {
+		case MOUSE_MOVE: 
+		{
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
+			INT32 width = atoi(objectData[2].c_str());
+			INT32 length = atoi(objectData[3].c_str());
+			x -= width / 2; y -= length / 2;
+			y = -y;
+
+			int offsetX = x;
+			int offsetY = y;
+
+			if (y < -44) offsetY -= 45;
+			else if (y > 44) offsetY += 45;
+
+			int gridLocationY = (offsetY * 2 / 3) / hexSize;
+
+			if (x < -44 && gridLocationY % 2 == 0) offsetX -= 45;
+			else if (x > 44 && gridLocationY % 2 == 0) offsetX += 45;
+			else if (x <= 0 && gridLocationY % 2 != 0) offsetX -= 90;
+
+			int gridLocationX = (offsetX * sqrt(3) / 3) / hexSize;
+
+		    reticle->gridX = gridLocationX;
+			reticle->gridY = gridLocationY;
+			updateReticle();
+
+			break;
+		}
 		case DOWN_ARROW_PRESSED: {
 			reticle->gridY--;
 			updateReticle();
