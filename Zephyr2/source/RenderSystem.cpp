@@ -400,4 +400,11 @@ void RenderSystem::levelLoaded(Msg* m) {
 		cameraY = 0.0f;
 	}
 }
+/*
+	Gets the Window -- Appearently needed (John)
+*/
+SDL_Window* RenderSystem::GetSDLWindow()
+{
+	return window;
+}
 

@@ -44,8 +44,8 @@ void GridObject::updateWorldCoords() {
 	
 	x = hexWidth * gridX;
 	y = vertDist * gridY;
-
-	if (gridY % 2 != 0){
-			x += hexWidth / 2;
+	
+	if (gridY % 2 != 0) {
+		x += hexWidth / 2;
 	}
 }

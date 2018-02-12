@@ -28,6 +28,7 @@ public:
 	void startSystemLoop();
 	void stopSystemLoop();
 	void init();
+	SDL_Window* GetSDLWindow();
 
 	int loadedLevel = 0;
 

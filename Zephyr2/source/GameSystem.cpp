@@ -326,9 +326,111 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		vector<string> objectData = split(msg->data, ',');
 		INT32 x = atoi(objectData[0].c_str());
 		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
+
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				if (g->id.compare("Menu_Item1") == 0)
+				{
+					// instructions page
+					removeAllGameObjects();
+					addGameObjects("instructions_menu.txt");
+					levelLoaded = 4;
+					markerPosition = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item2") == 0)
+				{
+					// start the game (or go to level select?)
+					// first, clear all objects
+					removeAllGameObjects();
+
+					// then, load new objects
+					//addGameObjects("Level_1.txt");
+					addGameObjects("prototype_level.txt");
+					levelLoaded = 2;
+					score = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item3") == 0)
+				{
+					// Go to settings
+					removeAllGameObjects();
+					addGameObjects("settings_menu.txt");
+					levelLoaded = 1;
+					markerPosition = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item4") == 0)
+				{
+					malive = false;
+					break;
+				}
+			}
+		}
+		if (change) 
+		{
+			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
+			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+			setPlayerTank("player1");
+		}
+
 		break;
 	}
-		
+	case MOUSE_MOVE:
+	{
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
+
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				if (g->id.compare("Menu_Item1") == 0 && markerPosition != 0)
+				{
+					markerPosition = 0; change = true;
+				}
+				else if (g->id.compare("Menu_Item2") == 0 && markerPosition != 1)
+				{
+					markerPosition = 1; change = true;
+				} 
+				else if (g->id.compare("Menu_Item3") == 0 && markerPosition != 2)
+				{
+					markerPosition = 2; change = true;
+				}
+				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 3)
+				{
+					markerPosition = 3; change = true;
+				}
+			}
+		}
+		if (change) {
+			mm->type = UPDATE_OBJ_SPRITE;
+			oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+			mm->data = oss.str();
+			msgBus->postMessage(mm, this);
+		}
+		break;
+	}
 	case DOWN_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition++;
@@ -337,7 +439,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
@@ -350,7 +452,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		markerPosition = markerPosition % 4;
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
@@ -552,9 +654,39 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		break;
 
 	}
-	
 	//messages that are only read when game is in active state (used for blocking player input during animations)
+
 	if (gameActive) switch (msg->type) {
+		case MOUSE_MOVE: 
+		{
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
+			INT32 width = atoi(objectData[2].c_str());
+			INT32 length = atoi(objectData[3].c_str());
+			x -= width / 2; y -= length / 2;
+			y = -y;
+
+			int offsetX = x;
+			int offsetY = y;
+
+			if (y < -44) offsetY -= 45;
+			else if (y > 44) offsetY += 45;
+
+			int gridLocationY = (offsetY * 2 / 3) / hexSize;
+
+			if (x < -44 && gridLocationY % 2 == 0) offsetX -= 45;
+			else if (x > 44 && gridLocationY % 2 == 0) offsetX += 45;
+			else if (x <= 0 && gridLocationY % 2 != 0) offsetX -= 90;
+
+			int gridLocationX = (offsetX * sqrt(3) / 3) / hexSize;
+
+		    reticle->gridX = gridLocationX;
+			reticle->gridY = gridLocationY;
+			updateReticle();
+
+			break;
+		}
 		case DOWN_ARROW_PRESSED: {
 			reticle->gridY--;
 			updateReticle();
@@ -666,7 +798,8 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		}
 		default:
 			break;
-		}
+	}
+
 }
 
 //gameover menu message handler
