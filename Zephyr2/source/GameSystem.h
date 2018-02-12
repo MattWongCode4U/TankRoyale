@@ -92,7 +92,7 @@ private:
 	GridObject* actionOrigin;
 
 	//for getting the position of the highlighted button
-	FullscreenObj* buttonHighlighted;
+	GameObject* buttonHighlighted;
 
 	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
 	bool validMove = false;

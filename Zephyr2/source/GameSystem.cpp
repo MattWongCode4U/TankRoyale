@@ -363,64 +363,35 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 			{
-				if (g->id.compare("Menu_Item1") == 0 && markerPosition != 0)
+				if (g->id.compare("Menu_Item0") == 0 && markerPosition != 0)
 				{
 					markerPosition = 0; change = true;
 				}
-				else if (g->id.compare("Menu_Item2") == 0 && markerPosition != 1)
+				else if (g->id.compare("Menu_Item1") == 0 && markerPosition != 1)
 				{
 					markerPosition = 1; change = true;
 				} 
-				else if (g->id.compare("Menu_Item3") == 0 && markerPosition != 2)
+				else if (g->id.compare("Menu_Item2") == 0 && markerPosition != 2)
 				{
 					markerPosition = 2; change = true;
 				}
-				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 3)
+				else if (g->id.compare("Menu_Item3") == 0 && markerPosition != 3)
 				{
 					markerPosition = 3; change = true;
 				}
 			}
 		}
 		if (change) {
-			mm->type = UPDATE_OBJ_SPRITE;
-			oss << "MarkerObj,1,MenuItemSelected" << markerPosition << ".png,";
-			mm->data = oss.str();
-			msgBus->postMessage(mm, this);
-
-			for (GameObject* g : gameObjects) {
-				if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected0") {
-					buttonHighlighted = (FullscreenObj*)g;
-					buttonHighlighted->x = 0;
-					buttonHighlighted->y = 0;
-					buttonHighlighted->z = 21;
-					sendUpdatePosMessage(buttonHighlighted);
+			for (int i = 0; i < 4; i++) {
+				if (i == markerPosition) {
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Menu_Item" + to_string(i) +",1,MenuItemSelected" + to_string(markerPosition) + ".png"), this);
 				}
-
-				else if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected1") {
-					buttonHighlighted = (FullscreenObj*)g;
-					buttonHighlighted->x = 0;
-					buttonHighlighted->y = -100;
-					buttonHighlighted->z = 21;
-					sendUpdatePosMessage(buttonHighlighted);
-				}
-
-				else if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected2") {
-					buttonHighlighted = (FullscreenObj*)g;
-					buttonHighlighted->x = 0;
-					buttonHighlighted->y = -200;
-					buttonHighlighted->z = 21;
-					sendUpdatePosMessage(buttonHighlighted);
-				}
-
-				else if (g->id == "MarkerObj" && g->getObjectType() == "FullScreenObj" && g->renderable == "MenuItemSelected3") {
-					buttonHighlighted = (FullscreenObj*)g;
-					buttonHighlighted->x = 0;
-					buttonHighlighted->y = -300;
-					buttonHighlighted->z = 21;
-					sendUpdatePosMessage(buttonHighlighted);
+				else {
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Menu_Item" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), this);
 				}
 			}
 		}
+		
 		break;
 	}
 	case DOWN_ARROW_PRESSED:
@@ -431,7 +402,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "MarkerObj,1,MenuItemSelected" << markerPosition << ".png,";
+		oss << "Menu_Item1,1,MenuItemSelected" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
@@ -445,7 +416,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		markerPosition = markerPosition % 4;
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "MarkerObj,1,MenuItemSelected" << markerPosition << ".png,";
+		oss << "Menu_Item1,1,MenuItemSelected" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
