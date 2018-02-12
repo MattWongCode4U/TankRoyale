@@ -935,7 +935,7 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 				OutputDebugString("\n");
 
 				if(tank->health <= 0)
-					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,WaterSplash.png,"), this);
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), this);
 			}
 		}
 	}
