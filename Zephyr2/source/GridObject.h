@@ -4,6 +4,9 @@
 class GridObject : public GameObject {
 public:
 	GridObject(map<string, string> params, ObjectData* objData);
+
+	GridObject(std::string id, std::string renderable, float xPos, float yPos, int zPos, int orientation, int width, int length, int imageFrames, int gridX, int gridY);
+	
 	~GridObject();
 
 	//returns the object type string e.g. "GridObject"

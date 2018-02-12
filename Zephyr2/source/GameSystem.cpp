@@ -629,6 +629,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 
 		case KEY_D_PRESSED: {
+			
+			
+
 			//return the position of the reticle for debugging purposes
 			string s = "RETICLE AT GRID("
 				+ to_string(reticle->gridX)
@@ -769,9 +772,15 @@ void GameSystem::executeAction(int a) {
 
 		//switch on the action type received from the network system, and execute the action
 		switch (receivedAction) {
-		case SHOOT:
- 			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 70);
+		case SHOOT: {
+			string newID = "explosion" + to_string(rand());
+			GridObject* gr = new GridObject(newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]));
+			gr->updateWorldCoords();
+			createGameObject(gr);
+			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 70);
 			break;
+		}
+
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
 			for (GameObject* g : gameObjects) {
