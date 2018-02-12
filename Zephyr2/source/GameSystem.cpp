@@ -173,7 +173,15 @@ void GameSystem::startSystemLoop() {
 				executeAction(3);
 				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
 				//spam out actions if dead
-
+			}
+			else if (framesSinceTurnStart == 350){
+				//clear Explosions from previous actions
+				for (GameObject* ex : gameObjects) {
+					if (ex->id.find("xplosion") != std::string::npos) {
+						gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), ex), gameObjects.end());
+						gameObjectRemoved(ex);
+					}
+				}
 			}
 			framesSinceTurnStart++;
 
@@ -760,13 +768,21 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
+	//clear Explosions from previous actions
+	for (GameObject* ex : gameObjects) {
+		if (ex->id.find("xplosion") != std::string::npos) {
+			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), ex), gameObjects.end());
+			gameObjectRemoved(ex);
+		}
+	}
+
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
 	//for (string s : players) {
 	for(int playerNum = 0; playerNum < 4; playerNum++){
-		playerAction = split(players[playerNum], ',');
 
+		playerAction = split(players[playerNum], ',');
 		string currentObjectId ="player" + to_string(playerNum + 1);//get id from the order of incoming actions
 		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
