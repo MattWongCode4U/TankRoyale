@@ -381,8 +381,9 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 		if (change) 
 		{
-			Msg* m = new Msg(LEVEL_LOADED, std::to_string(levelLoaded));
-			msgBus->postMessage(m, this);
+			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
+			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+			setPlayerTank("player1");
 		}
 
 		break;
