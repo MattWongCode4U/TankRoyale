@@ -208,7 +208,7 @@ void RenderSystem::handleMessage(Msg *msg) {
 */
 std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string data)
 {
-	SDL_Log(data.c_str());
+	//SDL_Log(data.c_str());
 
 	vector<string> objectData = split(data, ',');
 
@@ -283,7 +283,7 @@ void RenderSystem::addObjectToRenderList(Msg* m) {
 	Update the position of an object given in the message.
 */
 void RenderSystem::updateObjPosition(Msg* m) {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 
 	//id,renderable,x,y,z,orientation,width,length,physEnabled,type
@@ -317,7 +317,7 @@ void RenderSystem::updateObjSprite(Msg* m)
 */
 void RenderSystem::updateObjRender(Msg * m)
 {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	
 	//id,renderable,renderType,model,normalMap,smoothness
 	vector<string> objectData = split(m->data, ',');
