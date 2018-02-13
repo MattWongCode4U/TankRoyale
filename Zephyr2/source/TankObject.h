@@ -13,5 +13,5 @@ public:
 	std::string toString();
 
 	//the remaining hitpoints
-	int health;
+	int health = 100;
 };

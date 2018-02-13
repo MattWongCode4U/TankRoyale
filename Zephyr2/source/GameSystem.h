@@ -62,8 +62,6 @@ private:
 	//Displays the amount to time left in the turn
 	void displayTimeLeft(int time);
 
-
-
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);
 
@@ -72,6 +70,10 @@ private:
 
 	//updates the reticle spright, and postion.
 	void updateReticle();
+
+	//deal aoe damage to all tiles in the affected area
+	void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
+	
 
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
@@ -98,7 +100,7 @@ private:
 	bool validMove = false;
 
 	//the possible types of actions
-	enum ActionTypes { MOVE, SHOOT, PASS };
+	enum ActionTypes { MOVE, SHOOT, PASS, DEAD };
 
 	//the current action being set up
 	ActionTypes ActionType = MOVE;
@@ -109,9 +111,26 @@ private:
 	//range of the specified ability
 	int range = 1;
 
-
 	//maximumNumber of actions per turn
 	int maxActions = 4;
+
+	std::string clientID = "defaultClientID";//the id of the client on the server
+
+	//maps local player Id's to unique id's 
+	//std::map<std::string, std::string> playerIdMap;
+	//std::string playerOrder[4];
+
+	//is the game actively receiving player input? false when it game is waiting/animating
+	bool gameActive = false;
+
+	//the Id of the tank being controlled by the player
+	//std::string playerTankID = "player1";
+
+	//the local player tank object
+	TankObject* playerTank;
+
+	void setPlayerTank(std::string playerID);
+
 	Msg *m;
 
 

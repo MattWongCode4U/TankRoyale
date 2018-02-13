@@ -13,6 +13,20 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
+id: trabg,
+renderable: TRABG3.png,
+xPos: 0,
+yPos: 0,
+zPos: 10,
+orientation: 0,
+width: 1280,
+length: 720,
+physicsEnabled: 0,
+windScale: 0,
+renderType: overlay,
+imageFrames: 33;
+
+gameObjectType: FullscreenObj,
 id: ScrollObj,
 renderable: Z1.png,
 xPos: 0,
@@ -25,20 +39,6 @@ physicsEnabled: 0,
 windScale: 0,
 renderType: overlay,
 imageFrames: 1;
-
-gameObjectType: FullscreenObj,
-id: aniWaves,
-renderable: Boat_S0.png,
-xPos: -400,
-yPos: 100,
-zPos: 40,
-orientation: 0,
-width: 200,
-length: 200,
-physicsEnabled: 0,
-renderType: overlay,
-windScale: 0,
-imageFrames: 16;
 
 gameObjectType: FullscreenObj,
 id: TitleObj,

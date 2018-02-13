@@ -93,7 +93,11 @@ int main(int argc, char *argv[]) {
 			}
 			else if (SDL_MOUSEBUTTONDOWN == windowEvent.type && SDL_BUTTON_LEFT == windowEvent.button.button) 
 			{
-				mbus->postMessage(new Msg(LEFT_MOUSE_BUTTON, ""), NULL);
+				ostringstream oss;
+				INT32 x, y;
+				SDL_GetWindowSize(rs->GetSDLWindow(), &x, &y);
+				oss << windowEvent.button.x << "," << windowEvent.button.y << "," << x << "," << y;
+				mbus->postMessage(new Msg(LEFT_MOUSE_BUTTON, oss.str()), NULL);
 			}
 			else if (SDL_MOUSEMOTION == windowEvent.type) {
 				//OutputDebugString("Mouse Motion");
