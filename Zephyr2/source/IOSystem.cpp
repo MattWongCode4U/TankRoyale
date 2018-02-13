@@ -36,7 +36,7 @@ void IOSystem::checkKeyPresses() {
 	// specific keys, and then having another function somewhere that 
 	// parses the data to get the proper code to the Gamesystem but that's 
 	// a bit convoluted 
-	if (focus) 
+	if (focus)
 	{
 		if (GetKeyState(VK_UP) & 0x8000) {
 			//OutputDebugString("Up Pressed\n"); 
@@ -139,7 +139,7 @@ void IOSystem::checkKeyPresses() {
 
 		if (GetKeyState('Z') & 0x8000) {
 			//OutputDebugString("Z Pressed\n"); 
-			m->type = TEST_KEY_PRESSED;
+			m->type = KEY_Z_PRESSED;
 			if ((clock() - keyspressed["z"]) >= timebetweenPresses) {
 				keyspressed["z"] = clock();
 				msgBus->postMessage(m, this);

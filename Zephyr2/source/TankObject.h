@@ -1,6 +1,8 @@
 #pragma once
 #include "GridObject.h"
 
+const int TANK_MAX_HEALTH = 100;
+
 class TankObject : public GridObject {
 public:
 	TankObject(map<string, string> params, ObjectData* objData);
@@ -14,4 +16,6 @@ public:
 
 	//the remaining hitpoints
 	int health = 100;
+	int getHealth();
+	void setHealth(int newHealth);
 };

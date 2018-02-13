@@ -16,6 +16,8 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		orientation = stoi(paramsMap.find("orientation")->second);
 		width = stoi(paramsMap.find("width")->second);
 		length = stoi(paramsMap.find("length")->second);
+		originalWidth = width;
+		originalLength = length;
 		//physicsEnabled = stoi(paramsMap.find("physicsEnabled")->second);
 		//windScale = stoi(paramsMap.find("windScale")->second);
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);

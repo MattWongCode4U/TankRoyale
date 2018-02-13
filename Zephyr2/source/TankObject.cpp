@@ -16,3 +16,12 @@ TankObject::~TankObject() {
 string TankObject::getObjectType() {
 	return "TankObject";
 }
+
+int TankObject::getHealth() {
+	// this->id
+	return this->health;
+}
+
+void TankObject::setHealth(int newHealth) {
+	this->health = newHealth;
+}

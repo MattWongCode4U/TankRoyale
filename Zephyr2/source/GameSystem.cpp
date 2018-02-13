@@ -807,6 +807,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			}
 			break;
 		}
+		case KEY_Z_PRESSED:
+			// PREVIOUSLY USED FOR TESTING HEALTHBAR // NOW UNUSED
+			break;
 		default:
 			break;
 	}
@@ -1045,6 +1048,137 @@ void GameSystem::setActionType(ActionTypes a) {
 	}
 }
 
+/*
+	Takes in the player number we are going to be udpating. Enum in GameSystem
+*/
+void GameSystem::updatePlayerHealthBar(string playerID) {
+	Msg* m;
+	TankObject* curPlayer = nullptr;
+	FullscreenObj* curHealthBar = nullptr;
+	curPlayer = findTankObject(playerID);
+	curHealthBar = findFullscreenObject(playerID + "_hpbar");
+	if (curPlayer != nullptr && curHealthBar != nullptr) {
+		int hpBarSize = curHealthBar->originalWidth * (1 - (TANK_MAX_HEALTH - curPlayer->getHealth())); // TEST: Does this update the size correctly?
+		if (curPlayer->getHealth() == 100) {
+			std::ostringstream oss;
+			//id,renderable,x,y,z,orientation,width,length
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->originalWidth << ",";
+			oss << curHealthBar->length;
+			m = new Msg(MSG_TYPE::UPDATE_HP_BAR, oss.str());
+		} else if (curPlayer->getHealth() <= 30) {
+			std::ostringstream oss;
+			// change sprite
+			if (curHealthBar->renderable != "red_hpbar")
+			{
+				oss << curHealthBar->id << ",";
+				oss << " ,";
+				oss << "red_hpbar.png";
+				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
+				msgBus->postMessage(m, this);
+			}
+			// update size
+			oss.clear();
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << hpBarSize << ","; // width
+			oss << curHealthBar->length; // lenght
+			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
+		} else if (curPlayer->getHealth() <= 50) {
+			std::ostringstream oss;
+			if (curHealthBar->renderable != "orange_hpbar.png")
+			{
+				oss << curHealthBar->id << ",";
+				oss << curHealthBar->id << ",";
+				oss << "orange_hpbar.png";
+				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
+				msgBus->postMessage(m, this);
+			}
+			oss.clear();
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << hpBarSize << ","; // width
+			oss << curHealthBar->length; // lenght
+			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
+		} else { 
+			std::ostringstream oss;
+			if (curHealthBar->renderable != "green_hpbar.png")
+			{
+				oss << curHealthBar->id << ",";
+				oss << " ,";
+				oss << "green_hpbar.png";
+				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
+				msgBus->postMessage(m, this);
+			}
+			oss.clear();
+			oss << curHealthBar->id << ",";
+			oss << curHealthBar->renderable << ",";
+			oss << curHealthBar->x << ",";
+			oss << curHealthBar->y << ",";
+			oss << curHealthBar->z << ",";
+			oss << curHealthBar->orientation << ",";
+			oss << hpBarSize << ","; // width
+			oss << curHealthBar->length; // lenght
+			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
+		}
+		msgBus->postMessage(m, this);
+	}
+};
+
+GameObject* GameSystem::findGameObject(std::string objectID) {
+	GameObject* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "GameObject") {
+			obj = (GameObject*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+TankObject* GameSystem::findTankObject(std::string objectID) {
+	TankObject* obj = nullptr;
+	for (GameObject *g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "TankObject") {
+			obj = (TankObject*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+GridObject* GameSystem::findGridObject(std::string objectID) {
+	GridObject* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "GridObject") {
+			obj = (GridObject*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
+	FullscreenObj* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "FullscreenObj") {
+			obj = (FullscreenObj*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+
 void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
 	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
 	int aZCube = _originY;
@@ -1069,6 +1203,7 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 
 				if(tank->health <= 0)
 					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), this);
+				updatePlayerHealthBar(tank->id);
 			}
 		}
 	}
