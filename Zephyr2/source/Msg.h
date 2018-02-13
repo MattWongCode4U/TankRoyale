@@ -10,6 +10,7 @@ enum MSG_TYPE {
 
 	// Render System
 	UPDATE_OBJ_SPRITE,
+	UPDATE_OBJ_RENDER, //id,renderable,renderType,model,normalMap,smoothness
 
 	// Physics System
 	UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,physEnabled,type
@@ -23,8 +24,8 @@ enum MSG_TYPE {
 
 	// IO System 
 	CHECK_KEY_PRESSES, TEST_KEY_PRESSED,
-	UP_ARROW_PRESSED, DOWN_ARROW_PRESSED, RIGHT_ARROW_PRESSED, LEFT_ARROW_PRESSED, SPACEBAR_PRESSED, KEY_A_PRESSED, KEY_D_PRESSED, KEY_S_PRESSED, KEY_W_PRESSED, KEY_Q_PRESSED, KEY_E_PRESSED,
-
+	UP_ARROW_PRESSED, DOWN_ARROW_PRESSED, RIGHT_ARROW_PRESSED, LEFT_ARROW_PRESSED, SPACEBAR_PRESSED, KEY_A_PRESSED, KEY_D_PRESSED, KEY_S_PRESSED, KEY_W_PRESSED, KEY_Q_PRESSED, KEY_E_PRESSED, KEY_Z_PRESSED,
+	LEFT_MOUSE_BUTTON, MOUSE_MOVE, GAINED_FOCUS, LOST_FOCUS,
 	// Audio System
 	AUDIO_MUTE, CHANGE_SOUNDTRACK,
 
@@ -41,13 +42,20 @@ enum MSG_TYPE {
 	// NETWOR_R_ACTION is what network system will send to our game system when it receives an action
 	NETWORK_TURN_BROADCAST,
 	NETWORK_R_IDLE, NETWORK_S_IDLE,
-	NETWORK_S_ACTION,//playerID,actionName,actionNumber,targetX,targetY
-	NETWORK_R_ACTION
+	NETWORK_S_ACTION, //playerID,actionName,actionNumber,targetX,targetY
+	NETWORK_R_ACTION,
+	NETWORK_R_PING,
+	NETWORK_CONNECT,
+	READY_TO_START_GAME, // setn from main menuwhen player hits "start game"
+	NETWORK_R_GAMESTART_OK,
+	NETWORK_R_START_TURN,
+	NETWORK_S_ANIMATIONS
 };
 
 class Msg {
 public:
 	Msg(MSG_TYPE t, std::string d);
+	Msg(MSG_TYPE t);
 	~Msg();
 
 	MSG_TYPE type;

@@ -15,7 +15,6 @@ void MessageBus::postMessage(Msg* m, System* sender) {
 		if (sender != s) {
 			s->addToMsgQ(m);
 		}
-		
 	}
 }
 

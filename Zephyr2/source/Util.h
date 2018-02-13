@@ -3,11 +3,12 @@
 #include <sstream>
 #include <vector>
 #include <iterator>
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 #include <chrono>
 #include <map>
 #include <algorithm>
+#include <filesystem>
 
 enum class ASSET_TYPE {
 	TEXTURE, MODEL, DATA, MUSIC, SOUND, SHADER
@@ -19,7 +20,7 @@ inline std::string getAssetPrefixPath(ASSET_TYPE assetType) {
 	case ASSET_TYPE::TEXTURE:
 		return std::string("assets/textures/");
 	case ASSET_TYPE::MODEL:
-		return std::string("assets/model/");
+		return std::string("assets/models/");
 	case ASSET_TYPE::DATA:
 		return std::string("assets/data/");
 	case ASSET_TYPE::SOUND:
@@ -55,7 +56,7 @@ inline std::string openFileRemoveSpaces(std::string fileName) {
 	std::string output((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 	t.close();
 
-	output.erase(std::remove_if(output.begin(), output.end(), isspace), output.end());//remove spaces from data
+	output.erase(std::remove_if(output.begin(), output.end(), ::isspace), output.end());//remove spaces from data
 
 	return output;
 }
@@ -85,4 +86,17 @@ inline void writeToFile(std::string fileName, std::string data) {
 	myfile.open(fileName);
 	myfile << data;
 	myfile.close();
+}
+
+inline std::vector<std::string> listFilesInPath(std::string path) {
+	namespace fs = std::experimental::filesystem;
+	std::vector<std::string> filesInPath;
+
+	for (auto &p : fs::directory_iterator(path))
+	{
+		filesInPath.push_back(p.path().stem().string());
+	}
+
+	//will return filenames WITHOUT extension
+	return filesInPath;
 }

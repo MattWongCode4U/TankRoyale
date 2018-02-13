@@ -1,6 +1,8 @@
 #include "FullscreenObj.h"
 
-FullscreenObj::FullscreenObj(int idNum, std::string renderableName, int xpos, int ypos, int orientation) {
+FullscreenObj::FullscreenObj() {}; // Empty Constructor necessary
+
+FullscreenObj::FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation) {
 	id = idNum;
 	renderable = renderableName;
 	x = xpos;
@@ -15,8 +17,8 @@ FullscreenObj::FullscreenObj(map <string, string> paramsMap, ObjectData* objData
 
 string FullscreenObj::toString() {
 	string output = GameObject::toString();
-	output += "\nsail: " + to_string(sail) + ",";
-	output += "\nrudder: " + to_string(rudder) + ",";
+	//output += "\nsail: " + to_string(sail) + ",";
+	//output += "\nrudder: " + to_string(rudder) + ",";
 	return output;
 }
 

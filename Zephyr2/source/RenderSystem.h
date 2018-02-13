@@ -1,6 +1,7 @@
 #pragma once
 #include "System.h"
 #include "GameObject.h"
+#include "renderer\RenderPipeline.h"
 #include <mutex>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -8,6 +9,10 @@
 #include <SDL_opengl.h>
 #include <freeglut.h>
 #include <math.h>  
+
+#include "System.h"
+#include "GameObject.h"
+
 
 class RenderSystem : public System {
 public:
@@ -23,6 +28,7 @@ public:
 	void startSystemLoop();
 	void stopSystemLoop();
 	void init();
+	SDL_Window* GetSDLWindow();
 
 	int loadedLevel = 0;
 
@@ -39,54 +45,22 @@ public:
 		minCameraY = -330.0f, maxCameraY = 330.0f, cameraY = 0.0f;
 private:
 	bool running;
-	int animationCount;
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint inGameFragmentShader;
-	GLuint shaderProgram;
-	GLuint inGameShaderProgram;
-	map<string, GLuint> textures;
-	SDL_Window *window;
-	SDL_GLContext context;
-	GLuint VBO, VAO, TBO;
-	std::mutex mtx;
-	//Vertecies for a quad
-	GLfloat vertices[12] = {
-		-0.5f, -0.5f, 0.0f, // bottom left
-		0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, 0.5f, 0.0f,  // top left
-		0.5f, 0.5f, 0.0f,  // top right
-	};
-
-	//Texture coordinates for quad
-	GLfloat TexCoord[10] = {
-		0, 0,
-		1, 0,
-		0, 1,
-		1, 1
-	};
-
-	//Indices to reuse vertecies
-	GLubyte indices[10] = { 0,1,2, // first triangle (bottom left - bottom right - top left)
-		1,2,3 }; // second triangle (bottom right - top left - top right)
+	RendererState state;
 	
-	vector<string*> gameObjectsToRender;
-	vector<renderObj*> renderObjects;
+	RenderPipeline *pipeline;
+	SDL_Window *window;
+	std::mutex mtx;
+	
+	std::map<string, RenderableObject> *objects;
+	RenderableScene *scene;
+	RenderableOverlay *overlay;
 
-	void renderAllItems();
-	void draw(string ID, string path, float x, float y, float z, float rotation, float width, float height, int frames, bool fso);
-	GLuint getTexture(string path);
-	void renderObject(string object);
-	void renderObject(renderObj* object);
-	float transX(float x);
-	float transY(float y);
-	float getScaleX(float x);
-	float getScaleY(float y);
-	void addObjectToRenderList(Msg* m);
-	void removeObjectFromRenderList(Msg* m);
-	void updateObjPosition(Msg* m);
-	void updateObjSprite(Msg*m);
-	void updateHealthHUD(Msg*m);
+	void addObjectToRenderList(Msg *m);
+	void removeObjectFromRenderList(Msg *m);
+	void updateObjPosition(Msg *m);
+	void updateObjSprite(Msg *m);
+	void updateObjRender(Msg *m);
+	void updateHealthHUD(Msg *m);
 
 	void panLeft();
 	void panRight();
@@ -96,4 +70,5 @@ private:
 	void positionUpdated();
 
 	void levelLoaded(Msg*m);
+	std::pair<std::string,RenderableObject> parseObject(std::string data);
 };

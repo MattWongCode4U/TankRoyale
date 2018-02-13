@@ -1,9 +1,9 @@
 #pragma once
-#include "System.h"
-#include <Windows.h>
+#include <windows.h>
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include "System.h"
 
 class IOSystem : public System {
 public:
@@ -21,6 +21,7 @@ public:
 	std::map<std::string, clock_t> keyspressed;
 
 	const int timebetweenPresses = 150;
+	bool focus = true;
 private:
-
+	
 };

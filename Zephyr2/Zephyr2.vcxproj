@@ -99,6 +99,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib;$(SolutionDir)Dependencies/sdl/lib;$(SolutionDir)Dependencies/glew/lib;$(SolutionDir)Dependencies/freeglut/lib;$(SolutionDir)Dependencies/fmod/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -167,9 +168,10 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\GridObject.cpp" />
+    <ClCompile Include="source\HexTile.cpp" />
     <ClCompile Include="source\AudioEngine.cpp" />
     <ClCompile Include="source\AudioSystem.cpp" />
-    <ClCompile Include="source\Cannonball.cpp" />
     <ClCompile Include="source\FullscreenObj.cpp" />
     <ClCompile Include="source\GameObject.cpp" />
     <ClCompile Include="source\GameSystem.cpp" />
@@ -179,15 +181,20 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\Msg.cpp" />
     <ClCompile Include="source\NetworkSystem.cpp" />
     <ClCompile Include="source\ObjectData.cpp" />
+    <ClCompile Include="source\renderer\GlobalPrefs.cpp" />
+    <ClCompile Include="source\renderer\OBJImport.cpp" />
+    <ClCompile Include="source\renderer\RenderPipeline.cpp" />
+    <ClCompile Include="source\renderer\Shaders.cpp" />
     <ClCompile Include="source\RenderSystem.cpp" />
-    <ClCompile Include="source\ShipObj.cpp" />
     <ClCompile Include="source\System.cpp" />
     <ClCompile Include="source\Vector2.cpp" />
+    <ClCompile Include="source\TankObject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\GridObject.h" />
+    <ClInclude Include="source\HexTile.h" />
     <ClInclude Include="source\AudioEngine.h" />
     <ClInclude Include="source\AudioSystem.h" />
-    <ClInclude Include="source\Cannonball.h" />
     <ClInclude Include="source\FullscreenObj.h" />
     <ClInclude Include="source\GameObject.h" />
     <ClInclude Include="source\GameSystem.h" />
@@ -195,13 +202,22 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\Main.h" />
     <ClInclude Include="source\MessageBus.h" />
     <ClInclude Include="source\Msg.h" />
+    <ClInclude Include="source\NetworkHelpers.h" />
     <ClInclude Include="source\NetworkSystem.h" />
     <ClInclude Include="source\ObjectData.h" />
+    <ClInclude Include="source\renderer\Cube.h" />
+    <ClInclude Include="source\renderer\GlobalPrefs.h" />
+    <ClInclude Include="source\renderer\OBJImport.h" />
+    <ClInclude Include="source\renderer\Quad.h" />
+    <ClInclude Include="source\renderer\RenderableTypes.h" />
+    <ClInclude Include="source\renderer\RendererInternalTypes.h" />
+    <ClInclude Include="source\renderer\RenderPipeline.h" />
+    <ClInclude Include="source\renderer\Shaders.h" />
     <ClInclude Include="source\RenderSystem.h" />
-    <ClInclude Include="source\ShipObj.h" />
     <ClInclude Include="source\System.h" />
     <ClInclude Include="source\Util.h" />
     <ClInclude Include="source\Vector2.h" />
+    <ClInclude Include="source\TankObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
