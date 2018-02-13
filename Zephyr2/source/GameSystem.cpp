@@ -1027,7 +1027,7 @@ void GameSystem::executeAction(int a) {
 			GridObject* gr = new GridObject(newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]));
 			gr->updateWorldCoords();
 			createGameObject(gr);
-			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 70);
+			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 1, 19);
 			break;
 		}
 
