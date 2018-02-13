@@ -107,6 +107,9 @@ private:
 	//the origin of the current action. (The Tank's expected position at the start of the action)
 	GridObject* actionOrigin;
 
+	//for getting the position of the highlighted button
+	GameObject* buttonHighlighted;
+
 	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
 	bool validMove = false;
 

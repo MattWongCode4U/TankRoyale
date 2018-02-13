@@ -346,7 +346,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 			{
-				if (g->id.compare("Menu_Item1") == 0)
+				if (g->id.compare("Menu_Item0") == 0)
 				{
 					// instructions page
 					removeAllGameObjects();
@@ -356,7 +356,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 					change = true;
 					break;
 				}
-				else if (g->id.compare("Menu_Item2") == 0)
+				else if (g->id.compare("Menu_Item1") == 0)
 				{
 					// start the game (or go to level select?)
 					// first, clear all objects
@@ -370,7 +370,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 					change = true;
 					break;
 				}
-				else if (g->id.compare("Menu_Item3") == 0)
+				else if (g->id.compare("Menu_Item2") == 0)
 				{
 					// Go to settings
 					removeAllGameObjects();
@@ -380,17 +380,28 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 					change = true;
 					break;
 				}
-				else if (g->id.compare("Menu_Item4") == 0)
+				else if (g->id.compare("Menu_Item3") == 0)
 				{
 					malive = false;
 					break;
 				}
+
+				/*
+				// This is for the Back Button
+				else if (g->id.compare("Menu_Item4") == 0)
+				{
+					removeAllGameObjects();
+					addGameObjects("main_menu.txt");
+					levelLoaded = 0;
+				}*/
 			}
 		}
 		if (change) 
 		{
 			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
-			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+			if (levelLoaded == 2) {
+				msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+			}
 			setPlayerTank("player1");
 		}
 
@@ -413,32 +424,47 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 			{
-				if (g->id.compare("Menu_Item1") == 0 && markerPosition != 0)
+				if (g->id.compare("Menu_Item0") == 0 && markerPosition != 0)
 				{
 					markerPosition = 0; change = true;
 				}
-				else if (g->id.compare("Menu_Item2") == 0 && markerPosition != 1)
+				else if (g->id.compare("Menu_Item1") == 0 && markerPosition != 1)
 				{
 					markerPosition = 1; change = true;
 				} 
-				else if (g->id.compare("Menu_Item3") == 0 && markerPosition != 2)
+				else if (g->id.compare("Menu_Item2") == 0 && markerPosition != 2)
 				{
 					markerPosition = 2; change = true;
 				}
-				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 3)
+				else if (g->id.compare("Menu_Item3") == 0 && markerPosition != 3)
 				{
 					markerPosition = 3; change = true;
 				}
+
+				/*
+				// This is for the back button
+				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 0)
+				{
+					markerPosition = 4; change = true;
+				}*/
 			}
 		}
 		if (change) {
-			mm->type = UPDATE_OBJ_SPRITE;
-			oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
-			mm->data = oss.str();
-			msgBus->postMessage(mm, this);
+			for (int i = 0; i < 4; i++) {
+				if (i == markerPosition) {
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Menu_Item" + to_string(i) +",1,MenuItemSelected" + to_string(markerPosition) + ".png"), this);
+				}
+				else {
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Menu_Item" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), this);
+				}
+			}
 		}
+		
 		break;
 	}
+
+
+	/*
 	case DOWN_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition++;
@@ -447,10 +473,11 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "Menu_Item1,1,MenuItemSelected" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
+
 	case UP_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition--;
@@ -460,10 +487,13 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		markerPosition = markerPosition % 4;
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "Menu_Item1,1,MenuItemSelected" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
+	*/
+
+	/*
 	case SPACEBAR_PRESSED:
 		if (markerPosition == 3) {
 			// Exit was selected, kill main
@@ -506,6 +536,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			msgBus->postMessage(m, this);
 		}
 		break;
+	*/
 
 	case NETWORK_CONNECT:
 		clientID = msg->data;
@@ -528,6 +559,39 @@ void GameSystem::instructionMenuHandler(Msg * msg) {
 		markerPosition = 0;
 		Msg* m = new Msg(LEVEL_LOADED, "0");
 		msgBus->postMessage(m, this);
+	}
+	if (msg->type == LEFT_MOUSE_BUTTON)
+	{
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
+
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				// This is for the Back Button
+				if (g->id.compare("Menu_Item4") == 0)
+				{
+					removeAllGameObjects();
+					addGameObjects("main_menu.txt");
+					levelLoaded = 0;
+					break;
+				}
+			}
+		}
+		if (change)
+		{
+			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
+			setPlayerTank("player1");
+		}
 	}
 }
 
@@ -584,6 +648,40 @@ void GameSystem::settingsMenuHandler(Msg * msg) {
 			msgBus->postMessage(mm, this);
 		}
 		break;
+	case LEFT_MOUSE_BUTTON:
+	{
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
+
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				// This is for the Back Button
+				if (g->id.compare("Menu_Item4") == 0)
+				{
+					removeAllGameObjects();
+					addGameObjects("main_menu.txt");
+					levelLoaded = 0;
+					break;
+				}
+			}
+		}
+		if (change)
+		{
+			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
+			setPlayerTank("player1");
+		}
+		break;
+	}
 	default:
 		break;
 	}
