@@ -1156,7 +1156,7 @@ void GameSystem::updatePlayerHealthBar(string playerID) {
 	curPlayer = findTankObject(playerID);
 	curHealthBar = findFullscreenObject(playerID + "_hpbar");
 	if (curPlayer != nullptr && curHealthBar != nullptr) {
-		int hpBarSize = curHealthBar->originalWidth * (1 - (TANK_MAX_HEALTH - curPlayer->getHealth())); // TEST: Does this update the size correctly?
+		int hpBarSize = (int)((float)(curHealthBar->originalWidth * ((float)curPlayer->getHealth() / (float)TANK_MAX_HEALTH ))); // TEST: Does this update the size correctly?
 		if (curPlayer->getHealth() == 100) {
 			std::ostringstream oss;
 			//id,renderable,x,y,z,orientation,width,length
