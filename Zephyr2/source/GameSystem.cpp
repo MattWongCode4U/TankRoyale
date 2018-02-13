@@ -1172,14 +1172,14 @@ void GameSystem::updatePlayerHealthBar(string playerID) {
 		} else if (curPlayer->getHealth() <= 30) {
 			std::ostringstream oss;
 			// change sprite
-			if (curHealthBar->renderable != "red_hpbar")
+			/*if (curHealthBar->renderable != "red_hpbar.png")
 			{
 				oss << curHealthBar->id << ",";
 				oss << " ,";
 				oss << "red_hpbar.png";
 				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
 				msgBus->postMessage(m, this);
-			}
+			}*/
 			// update size
 			oss.clear();
 			oss << curHealthBar->id << ",";
@@ -1193,14 +1193,14 @@ void GameSystem::updatePlayerHealthBar(string playerID) {
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		} else if (curPlayer->getHealth() <= 50) {
 			std::ostringstream oss;
-			if (curHealthBar->renderable != "orange_hpbar.png")
+			/*if (curHealthBar->renderable != "orange_hpbar.png")
 			{
 				oss << curHealthBar->id << ",";
 				oss << curHealthBar->id << ",";
 				oss << "orange_hpbar.png";
 				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
 				msgBus->postMessage(m, this);
-			}
+			}*/
 			oss.clear();
 			oss << curHealthBar->id << ",";
 			oss << curHealthBar->renderable << ",";
@@ -1213,14 +1213,14 @@ void GameSystem::updatePlayerHealthBar(string playerID) {
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		} else { 
 			std::ostringstream oss;
-			if (curHealthBar->renderable != "green_hpbar.png")
+			/*if (curHealthBar->renderable != "green_hpbar.png")
 			{
 				oss << curHealthBar->id << ",";
 				oss << " ,";
 				oss << "green_hpbar.png";
 				m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
 				msgBus->postMessage(m, this);
-			}
+			}*/
 			oss.clear();
 			oss << curHealthBar->id << ",";
 			oss << curHealthBar->renderable << ",";
