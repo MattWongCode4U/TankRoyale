@@ -346,7 +346,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 			{
-				if (g->id.compare("Menu_Item1") == 0)
+				if (g->id.compare("Menu_Item0") == 0)
 				{
 					// instructions page
 					removeAllGameObjects();
@@ -356,7 +356,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 					change = true;
 					break;
 				}
-				else if (g->id.compare("Menu_Item2") == 0)
+				else if (g->id.compare("Menu_Item1") == 0)
 				{
 					// start the game (or go to level select?)
 					// first, clear all objects
@@ -370,7 +370,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 					change = true;
 					break;
 				}
-				else if (g->id.compare("Menu_Item3") == 0)
+				else if (g->id.compare("Menu_Item2") == 0)
 				{
 					// Go to settings
 					removeAllGameObjects();
@@ -380,11 +380,20 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 					change = true;
 					break;
 				}
-				else if (g->id.compare("Menu_Item4") == 0)
+				else if (g->id.compare("Menu_Item3") == 0)
 				{
 					malive = false;
 					break;
 				}
+
+				/*
+				// This is for the Back Button
+				else if (g->id.compare("Menu_Item4") == 0)
+				{
+					removeAllGameObjects();
+					addGameObjects("main_menu.txt");
+					levelLoaded = 0;
+				}*/
 			}
 		}
 		if (change) 
@@ -429,6 +438,13 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 				{
 					markerPosition = 3; change = true;
 				}
+
+				/*
+				// This is for the back button
+				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 0)
+				{
+					markerPosition = 4; change = true;
+				}*/
 			}
 		}
 		if (change) {
@@ -444,6 +460,9 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		
 		break;
 	}
+
+
+	/*
 	case DOWN_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition++;
@@ -470,7 +489,9 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
-		
+	*/
+
+	/*
 	case SPACEBAR_PRESSED:
 		if (markerPosition == 3) {
 			// Exit was selected, kill main
@@ -513,6 +534,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 			msgBus->postMessage(m, this);
 		}
 		break;
+	*/
 
 	case NETWORK_CONNECT:
 		clientID = msg->data;
