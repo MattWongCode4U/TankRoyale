@@ -74,7 +74,7 @@ private:
 
 	//Displays the amount to time left in the turn
 	void displayTimeLeft(int time);
-	void updatePlayerHealthBar(int playerID);
+	void updatePlayerHealthBar(string playerID);
 
 	//converts grid coordinates to world coordinates
 	Vector2 gridToWorldCoord(int gridX, int gridY);

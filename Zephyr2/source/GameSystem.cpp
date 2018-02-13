@@ -808,8 +808,7 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 		}
 		case KEY_Z_PRESSED:
-			findTankObject("player1")->setHealth(findTankObject("player1")->getHealth() - 10);
-			updatePlayerHealthBar(1);
+			// PREVIOUSLY USED FOR TESTING HEALTHBAR // NOW UNUSED
 			break;
 		default:
 			break;
@@ -1052,30 +1051,14 @@ void GameSystem::setActionType(ActionTypes a) {
 /*
 	Takes in the player number we are going to be udpating. Enum in GameSystem
 */
-void GameSystem::updatePlayerHealthBar(int playerID) {
+void GameSystem::updatePlayerHealthBar(string playerID) {
+	Msg* m;
 	TankObject* curPlayer = nullptr;
 	FullscreenObj* curHealthBar = nullptr;
-	switch (playerID) {
-	case PLAYER1:
-		curPlayer = findTankObject("player1");
-		curHealthBar = findFullscreenObject("player1_hpbar");
-		break;
-	case PLAYER2:
-		curPlayer = findTankObject("player2");
-		curHealthBar = findFullscreenObject("player2_hpbar");
-		break;
-	case PLAYER3:
-		curPlayer = findTankObject("player3");
-		curHealthBar = findFullscreenObject("player3_hpbar");
-		break;
-	case PLAYER4:
-		curPlayer = findTankObject("player4");
-		curHealthBar = findFullscreenObject("player4_hpbar");
-		break;
-	}
+	curPlayer = findTankObject(playerID);
+	curHealthBar = findFullscreenObject(playerID + "_hpbar");
 	if (curPlayer != nullptr && curHealthBar != nullptr) {
-		// TODO: Update the image to be a red bar when < 30%, and orange when < 50%
-		Msg* m;
+		int hpBarSize = curHealthBar->originalWidth * (1 - (TANK_MAX_HEALTH - curPlayer->getHealth())); // TEST: Does this update the size correctly?
 		if (curPlayer->getHealth() == 100) {
 			std::ostringstream oss;
 			//id,renderable,x,y,z,orientation,width,length
@@ -1089,7 +1072,6 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 			oss << curHealthBar->length;
 			m = new Msg(MSG_TYPE::UPDATE_HP_BAR, oss.str());
 		} else if (curPlayer->getHealth() <= 30) {
-			int hpBarSize = curHealthBar->originalWidth * 1 - (TANK_MAX_HEALTH - curPlayer->getHealth()); // TEST: Does this update the size correctly?
 			std::ostringstream oss;
 			// change sprite
 			if (curHealthBar->renderable != "red_hpbar")
@@ -1112,7 +1094,6 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 			oss << curHealthBar->length; // lenght
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		} else if (curPlayer->getHealth() <= 50) {
-			int hpBarSize = curHealthBar->originalWidth * 1 - (TANK_MAX_HEALTH - curPlayer->getHealth()); // TEST: Does this update the size correctly?
 			std::ostringstream oss;
 			if (curHealthBar->renderable != "orange_hpbar.png")
 			{
@@ -1133,8 +1114,7 @@ void GameSystem::updatePlayerHealthBar(int playerID) {
 			oss << curHealthBar->length; // lenght
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		} else { 
-			int hpBarSize = curHealthBar->originalWidth * 1-(TANK_MAX_HEALTH - curPlayer->getHealth()); // TEST: Does this update the size correctly?
-			std::ostringstream oss; 
+			std::ostringstream oss;
 			if (curHealthBar->renderable != "green_hpbar.png")
 			{
 				oss << curHealthBar->id << ",";
@@ -1223,6 +1203,7 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 
 				if(tank->health <= 0)
 					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), this);
+				updatePlayerHealthBar(tank->id);
 			}
 		}
 	}
