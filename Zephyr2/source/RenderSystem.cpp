@@ -12,7 +12,7 @@ RenderSystem::RenderSystem(MessageBus* mbus) : System(mbus) {
 	aspectRatio = (GLfloat)(GlobalPrefs::windowWidth) / (GLfloat)(GlobalPrefs::windowHeight);
 	window = SDL_CreateWindow("Zephyr2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, GlobalPrefs::windowWidth, GlobalPrefs::windowHeight, SDL_WINDOW_OPENGL);
 
-	SDL_GL_SwapWindow(window); //needed?
+	//SDL_GL_SwapWindow(window); //needed?
 
 	//create pipeline, scene, overlay
 	pipeline = new RenderPipeline(window);
@@ -82,6 +82,8 @@ void RenderSystem::startSystemLoop() {
 		//TODO can we do this without copying?
 		//TODO pointers?!
 		scene->objects.clear();
+		scene->forwardObjects.clear();
+		scene->billboardObjects.clear();
 		overlay->elements.clear();
 		for (auto el : *objects)
 		{
@@ -91,6 +93,12 @@ void RenderSystem::startSystemLoop() {
 			{
 			case RenderableType::OBJECT3D:
 				scene->objects.push_back(obj);
+				break;
+			case RenderableType::FORWARD3D:
+				scene->forwardObjects.push_back(obj);
+				break;
+			case RenderableType::BILLBOARD:
+				scene->billboardObjects.push_back(obj);
 				break;
 			case RenderableType::OVERLAY:
 				overlay->elements.push_back(obj);
