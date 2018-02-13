@@ -38,22 +38,6 @@ void IOSystem::checkKeyPresses() {
 	// a bit convoluted 
 	if (focus)
 	{
-		if (GetKeyState(VK_LBUTTON) & 0x8000)
-		{
-			//OutputDebugString("Mouse Pressed\n");
-			m->type = LEFT_MOUSE_BUTTON;
-			if ((clock() - keyspressed["Lmouse"]) >= timebetweenPresses) {
-				keyspressed["Lmouse"] = clock();
-				POINT p;
-				RECT rect = { NULL };
-				if (GetCursorPos(&p))
-				{
-					oss << p.x << "," << p.y;
-					m->data = oss.str();
-				}
-				msgBus->postMessage(m, this);
-			}
-		}
 		if (GetKeyState(VK_UP) & 0x8000) {
 			//OutputDebugString("Up Pressed\n"); 
 			m->type = UP_ARROW_PRESSED;

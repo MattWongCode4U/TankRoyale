@@ -173,7 +173,15 @@ void GameSystem::startSystemLoop() {
 				executeAction(3);
 				msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), this);//tells network system action animation is done on client
 				//spam out actions if dead
-
+			}
+			else if (framesSinceTurnStart == 350){
+				//clear Explosions from previous actions
+				for (GameObject* ex : gameObjects) {
+					if (ex->id.find("xplosion") != std::string::npos) {
+						gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), ex), gameObjects.end());
+						gameObjectRemoved(ex);
+					}
+				}
 			}
 			framesSinceTurnStart++;
 
@@ -326,9 +334,111 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		vector<string> objectData = split(msg->data, ',');
 		INT32 x = atoi(objectData[0].c_str());
 		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
+
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				if (g->id.compare("Menu_Item1") == 0)
+				{
+					// instructions page
+					removeAllGameObjects();
+					addGameObjects("instructions_menu.txt");
+					levelLoaded = 4;
+					markerPosition = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item2") == 0)
+				{
+					// start the game (or go to level select?)
+					// first, clear all objects
+					removeAllGameObjects();
+
+					// then, load new objects
+					//addGameObjects("Level_1.txt");
+					addGameObjects("prototype_level.txt");
+					levelLoaded = 2;
+					score = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item3") == 0)
+				{
+					// Go to settings
+					removeAllGameObjects();
+					addGameObjects("settings_menu.txt");
+					levelLoaded = 1;
+					markerPosition = 0;
+					change = true;
+					break;
+				}
+				else if (g->id.compare("Menu_Item4") == 0)
+				{
+					malive = false;
+					break;
+				}
+			}
+		}
+		if (change) 
+		{
+			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
+			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
+			setPlayerTank("player1");
+		}
+
 		break;
 	}
-		
+	case MOUSE_MOVE:
+	{
+		vector<string> objectData = split(msg->data, ',');
+		INT32 x = atoi(objectData[0].c_str());
+		INT32 y = atoi(objectData[1].c_str());
+		INT32 width = atoi(objectData[2].c_str());
+		INT32 length = atoi(objectData[3].c_str());
+		x -= width / 2; y -= length / 2;
+		y = -y;
+		bool change = false;
+
+
+		for (GameObject *g : gameObjects)
+		{
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			{
+				if (g->id.compare("Menu_Item1") == 0 && markerPosition != 0)
+				{
+					markerPosition = 0; change = true;
+				}
+				else if (g->id.compare("Menu_Item2") == 0 && markerPosition != 1)
+				{
+					markerPosition = 1; change = true;
+				} 
+				else if (g->id.compare("Menu_Item3") == 0 && markerPosition != 2)
+				{
+					markerPosition = 2; change = true;
+				}
+				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 3)
+				{
+					markerPosition = 3; change = true;
+				}
+			}
+		}
+		if (change) {
+			mm->type = UPDATE_OBJ_SPRITE;
+			oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
+			mm->data = oss.str();
+			msgBus->postMessage(mm, this);
+		}
+		break;
+	}
 	case DOWN_ARROW_PRESSED:
 		// move the marker location and let rendering know?
 		markerPosition++;
@@ -337,7 +447,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		}
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
@@ -350,7 +460,7 @@ void GameSystem::mainMenuHandler(Msg * msg) {
 		markerPosition = markerPosition % 4;
 
 		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,MZ6_Marker_P" << markerPosition << ".png,";
+		oss << "MarkerObj,1,MZ6_Marker_P" << markerPosition << ".png,";
 		mm->data = oss.str();
 		msgBus->postMessage(mm, this);
 		break;
@@ -552,9 +662,39 @@ void GameSystem::lvl1Handler(Msg * msg) {
 		break;
 
 	}
-	
 	//messages that are only read when game is in active state (used for blocking player input during animations)
+
 	if (gameActive) switch (msg->type) {
+		case MOUSE_MOVE: 
+		{
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
+			INT32 width = atoi(objectData[2].c_str());
+			INT32 length = atoi(objectData[3].c_str());
+			x -= width / 2; y -= length / 2;
+			y = -y;
+
+			int offsetX = x;
+			int offsetY = y;
+
+			if (y < -44) offsetY -= 45;
+			else if (y > 44) offsetY += 45;
+
+			int gridLocationY = (offsetY * 2 / 3) / hexSize;
+
+			if (x < -44 && gridLocationY % 2 == 0) offsetX -= 45;
+			else if (x > 44 && gridLocationY % 2 == 0) offsetX += 45;
+			else if (x <= 0 && gridLocationY % 2 != 0) offsetX -= 90;
+
+			int gridLocationX = (offsetX * sqrt(3) / 3) / hexSize;
+
+		    reticle->gridX = gridLocationX;
+			reticle->gridY = gridLocationY;
+			updateReticle();
+
+			break;
+		}
 		case DOWN_ARROW_PRESSED: {
 			reticle->gridY--;
 			updateReticle();
@@ -629,6 +769,9 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 
 		case KEY_D_PRESSED: {
+			
+			
+
 			//return the position of the reticle for debugging purposes
 			string s = "RETICLE AT GRID("
 				+ to_string(reticle->gridX)
@@ -670,7 +813,8 @@ void GameSystem::lvl1Handler(Msg * msg) {
 			break;
 		default:
 			break;
-		}
+	}
+
 }
 
 //gameover menu message handler
@@ -761,21 +905,35 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 
 //execute the actions received from the network
 void GameSystem::executeAction(int a) {
+	//clear Explosions from previous actions
+	for (GameObject* ex : gameObjects) {
+		if (ex->id.find("xplosion") != std::string::npos) {
+			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), ex), gameObjects.end());
+			gameObjectRemoved(ex);
+		}
+	}
+
 	vector<string> playerAction;
 	vector<string> players = split(actionsToExecute[a], ']');
 
 	//for (string s : players) {
 	for(int playerNum = 0; playerNum < 4; playerNum++){
-		playerAction = split(players[playerNum], ',');
 
+		playerAction = split(players[playerNum], ',');
 		string currentObjectId ="player" + to_string(playerNum + 1);//get id from the order of incoming actions
 		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
 		//switch on the action type received from the network system, and execute the action
 		switch (receivedAction) {
-		case SHOOT:
- 			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 70);
+		case SHOOT: {
+			string newID = "explosion" + to_string(rand());
+			GridObject* gr = new GridObject(newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]));
+			gr->updateWorldCoords();
+			createGameObject(gr);
+			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 2, 70);
 			break;
+		}
+
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
 			for (GameObject* g : gameObjects) {
@@ -1064,7 +1222,7 @@ void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, i
 				OutputDebugString("\n");
 
 				if(tank->health <= 0)
-					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,WaterSplash.png,"), this);
+					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), this);
 			}
 		}
 	}
