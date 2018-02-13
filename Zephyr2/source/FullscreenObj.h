@@ -5,6 +5,7 @@
 class FullscreenObj :
 	public GameObject {
 public:
+	FullscreenObj();
 	FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation);
 	//DummyGameObj(std::vector<std::string> params);
 	FullscreenObj(map<string, string> params, ObjectData* objData);

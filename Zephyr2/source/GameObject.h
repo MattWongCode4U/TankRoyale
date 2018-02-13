@@ -15,6 +15,8 @@ public:
 	int z;
 	int width;
 	int length;
+	int originalWidth; // necessary for the scale of the healthbar. Also for scaling maybe?
+	int originalLength;
 	int orientation; // in degrees, 0 pointing up on the screen, clockwise rotation = positive
 	//int physicsEnabled; // 0 or 1.
 	//int windScale; //how effected the object is by wind 0-1

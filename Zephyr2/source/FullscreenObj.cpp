@@ -1,5 +1,7 @@
 #include "FullscreenObj.h"
 
+FullscreenObj::FullscreenObj() {}; // Empty Constructor necessary
+
 FullscreenObj::FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation) {
 	id = idNum;
 	renderable = renderableName;
