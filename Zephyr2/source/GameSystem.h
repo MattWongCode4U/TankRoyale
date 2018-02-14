@@ -14,6 +14,7 @@
 #include "GridObject.h"
 #include "TankObject.h"
 #include "ObjectData.h"
+#include "Scene_MainMenu.h"
 
 extern volatile bool malive;
 
@@ -23,23 +24,11 @@ enum PlayerID {
 	PLAYER3 = 3,
 	PLAYER4 = 4
 };
-class GameSystem;
-class Scene {
-public:
-	MessageBus* msgBus;
-	GameSystem* gameSystem;
 
-	Scene(MessageBus* _mbus, GameSystem* _gs);
-	~Scene();
 
-	//virtual void sceneUpdate();
-	//virtual void sceneHandeMessage();
-	//void sceneUpdate();
-	void sceneHandleMessage(Msg * msg);
 
-	//code that runs once when ascene is loaded goes here
-	void startScene();
-};
+
+
 
 class GameSystem : public System {
 public:

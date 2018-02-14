@@ -130,7 +130,7 @@ void GameSystem::startSystemLoop() {
 			// this means we've just started up the system. We should load the main menu
 			levelLoaded = 0;
 
-			scene = new Scene(msgBus, this);
+			scene = new Scene_MainMenu(msgBus, this);
 			scene->startScene();
 
 			// Load Main Menu Scene
