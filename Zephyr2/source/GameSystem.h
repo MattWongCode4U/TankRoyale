@@ -25,11 +25,6 @@ enum PlayerID {
 	PLAYER4 = 4
 };
 
-
-
-
-
-
 class GameSystem : public System {
 public:
 	GameSystem(MessageBus* mbus);
@@ -81,7 +76,7 @@ public:
 
 private:
 	//handler functions for the scenes in the game
-	void mainMenuHandler(Msg * msg);
+	//void mainMenuHandler(Msg * msg);
 	void settingsMenuHandler(Msg * msg);
 	void instructionMenuHandler(Msg * msg);
 	void lvl1Handler(Msg * msg);

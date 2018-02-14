@@ -11,13 +11,12 @@ gameSystem = _gs;
 Scene::~Scene() {
 }
 
-//called whenever the scene is loaded
-void Scene::startScene() {
-}
-void Scene::sceneUpdate() {
-
- }
-
-void Scene::sceneHandleMessage(Msg * msg) {
-
- }
+//These virtual functions are redefined in the Scene class children
+//void Scene::startScene() {
+//	OutputDebugString("SCENE PARENT: STARTING SCENE");
+//}
+//void Scene::sceneUpdate() {
+// }
+//
+//void Scene::sceneHandleMessage(Msg * msg) {
+// }

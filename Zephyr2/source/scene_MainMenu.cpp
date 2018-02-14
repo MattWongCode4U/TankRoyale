@@ -3,15 +3,13 @@
 #include "GameSystem.h"
 
 Scene_MainMenu::Scene_MainMenu(MessageBus* _mbus, GameSystem* _gs): Scene(_mbus, _gs) {
-	//msgBus = _mbus;
-	//gameSystem = _gs;
 }
 
 
 Scene_MainMenu::~Scene_MainMenu() {
 }
 
-//called whenever the scene is loaded
+//called whene the scene is first loaded. Do any initial setup here
 void Scene_MainMenu::startScene() {
 	Msg* m = new Msg(LEVEL_LOADED, "0");
 	msgBus->postMessage(m, gameSystem);
@@ -67,7 +65,6 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 					//addGameObjects("Level_1.txt");
 					gameSystem->addGameObjects("prototype_level.txt");
 					gameSystem->levelLoaded = 2;
-					gameSystem->score = 0;
 					change = true;
 					break;
 				}
