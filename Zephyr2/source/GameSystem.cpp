@@ -129,11 +129,12 @@ void GameSystem::startSystemLoop() {
 		case -1: // First launch
 			// this means we've just started up the system. We should load the main menu
 			levelLoaded = 0;
-			m = new Msg(LEVEL_LOADED, "0");
-			msgBus->postMessage(m, this);
+
+			scene = new Scene(msgBus, this);
+			scene->startScene();
 
 			// Load Main Menu Scene
-			addGameObjects("main_menu.txt");
+			//addGameObjects("main_menu.txt");
 			break;
 		case 0: // Menu page
 			// does nothing as user changes are handled inside handleMessage. In this state,
@@ -303,7 +304,8 @@ void GameSystem::handleMessage(Msg *msg) {
 	//selects loaded level and calls the message handler for that level
 	switch (levelLoaded) {
 	case 0:
-		mainMenuHandler(msg);
+		//mainMenuHandler(msg);
+		scene->sceneHandleMessage(msg);
 		break;
 	case 1:
 		settingsMenuHandler(msg);

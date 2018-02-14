@@ -25,14 +25,20 @@ enum PlayerID {
 };
 class GameSystem;
 class Scene {
+public:
 	MessageBus* msgBus;
 	GameSystem* gameSystem;
 
 	Scene(MessageBus* _mbus, GameSystem* _gs);
 	~Scene();
 
-	virtual void sceneUpdate();
-	virtual void sceneHandeMessage();
+	//virtual void sceneUpdate();
+	//virtual void sceneHandeMessage();
+	//void sceneUpdate();
+	void sceneHandleMessage(Msg * msg);
+
+	//code that runs once when ascene is loaded goes here
+	void startScene();
 };
 
 class GameSystem : public System {
@@ -70,7 +76,14 @@ public:
 	// 4	= Instructions
 	int levelLoaded = -1;
 
+	// The position of the marker, goes from 0 to 2, 0 being the top
+	int markerPosition = 0;
+
 	int score = 0;
+
+	std::string clientID = "defaultClientID";//the id of the client on the server
+
+	void setPlayerTank(std::string playerID);
 
 	GameObject* findGameObject(std::string objectID);
 	TankObject* findTankObject(std::string objectID);
@@ -103,8 +116,7 @@ private:
 	void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
 	
 
-	// The position of the marker, goes from 0 to 2, 0 being the top
-	int markerPosition = 0;
+
 
 	int currentAction = 0;//the current action that is being set
 
@@ -142,7 +154,7 @@ private:
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
-	std::string clientID = "defaultClientID";//the id of the client on the server
+
 
 	//maps local player Id's to unique id's 
 	//std::map<std::string, std::string> playerIdMap;
@@ -157,7 +169,7 @@ private:
 	//the local player tank object
 	TankObject* playerTank;
 
-	void setPlayerTank(std::string playerID);
+	
 
 	Msg *m;
 

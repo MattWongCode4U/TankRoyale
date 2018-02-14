@@ -67,7 +67,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\renderer\OBJImport.cpp">
-	  <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\HexTile.cpp">
       <Filter>Source Files</Filter>
@@ -76,6 +76,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\GridObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -147,7 +150,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\renderer\OBJImport.h">
-	  <Filter>Header Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\HexTile.h">
       <Filter>Header Files</Filter>
