@@ -21,8 +21,6 @@ public:
 	//time since the start of the current turn
 	int framesSinceTurnStart = 0;
 
-
-
 	int turnStartTime = 0;
 
 	//execute the received actions

@@ -16,6 +16,8 @@
 #include "ObjectData.h"
 #include "Scene_MainMenu.h"
 #include "Scene_Gameplay.h"
+#include "Scene_SettingsMenu.h"
+#include "Scene_InstructionsMenu.h"
 
 extern volatile bool malive;
 
@@ -25,6 +27,8 @@ enum PlayerID {
 	PLAYER3 = 3,
 	PLAYER4 = 4
 };
+
+enum SceneType { MAIN_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
 
 class GameSystem : public System {
 public:
@@ -41,12 +45,8 @@ public:
 	void gameObjectRemoved(GameObject* g);
 	std::vector<GameObject*> gameObjects;
 
-
-
 	//closes the old scene and opens a new one 
-	void  loadScene(std::string sceneName);
-
-
+	void  loadScene(SceneType _scene);
 
 	ObjectData objData;
 	void removeAllGameObjects();
@@ -79,6 +79,7 @@ public:
 	GridObject* findGridObject(std::string objectID);
 	FullscreenObj* findFullscreenObject(std::string objectID);
 
+
 	//the reticle controlled by the arrow keys. used for aiming and queing up actions
 	GridObject* reticle;
 
@@ -88,8 +89,8 @@ public:
 
 	//handler functions for the scenes in the game
 	//void mainMenuHandler(Msg * msg);
-	void settingsMenuHandler(Msg * msg);
-	void instructionMenuHandler(Msg * msg);
+	//void settingsMenuHandler(Msg * msg);
+	//void instructionMenuHandler(Msg * msg);
 	//void lvl1Handler(Msg * msg);
 	void gameOverMenuHandler(Msg * msg);
 	
@@ -104,35 +105,14 @@ public:
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
 
-
-
-	
-	
-
-
-
 	int currentAction = 0;//the current action that is being set
 
 	vector<string> actionsToExecute; //the actions to be executed this turn. Received from the network system
 
-
-
 	int hexSize = 50; //"radius" of a single hexagon in the grid
-
-	
-
-
 
 	//for getting the position of the highlighted button
 	GameObject* buttonHighlighted;
-
-
-
-
-	//sets the current action to the action specified. logic for switching action icons goes here
-	//void setActionType(ActionTypes a);
-
-
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;
@@ -151,8 +131,6 @@ public:
 
 	//the local player tank object
 	TankObject* playerTank;
-
-	
 
 	Msg *m;
 

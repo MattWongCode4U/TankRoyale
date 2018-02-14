@@ -5,15 +5,12 @@
 Scene_Gameplay::Scene_Gameplay(MessageBus* _mbus, GameSystem* _gs) : Scene(_mbus, _gs) {
 }
 
-
 Scene_Gameplay::~Scene_Gameplay() {
 }
 
 //called whene the scene is first loaded. Do any initial setup here
 void Scene_Gameplay::startScene() {
 	framesSinceTurnStart = 99999;
-
-	gameSystem->removeAllGameObjects();
 	gameSystem->addGameObjects("prototype_level.txt");
 	gameSystem->setPlayerTank("player1");	
 	gameSystem->levelLoaded = 2;
@@ -21,8 +18,6 @@ void Scene_Gameplay::startScene() {
 	msgBus->postMessage(m, gameSystem);
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
-
-	
 }
 
 //called every frame of the gameloop
@@ -33,13 +28,9 @@ void Scene_Gameplay::sceneUpdate() {
 		for (GameObject* g : gameSystem->gameObjects) {
 			if (g->id.find("TileIndicator") != std::string::npos) {
 				g->renderable = "nothing.png";
-				//move object out side of camera instead of changing renderable. Temp Solution
-				//g->x = 1000;
-				//sendUpdatePosMessage(g);
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, g->id + ",1," + g->renderable), gameSystem);
 			}
 		}
-
 		executeAction(0);
 		turnStartTime = clock();
 	}
@@ -51,8 +42,7 @@ void Scene_Gameplay::sceneUpdate() {
 	}
 	else if (framesSinceTurnStart == 300) {
 		executeAction(3);
-		msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), gameSystem);//tells network system action animation is done on client
-																	 //spam out actions if dead
+		msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), gameSystem);//tells network system action animation is done on client																 //spam out actions if dead
 	}
 	else if (framesSinceTurnStart == 350) {
 		//clear Explosions from previous actions
@@ -70,22 +60,15 @@ void Scene_Gameplay::sceneUpdate() {
 void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		std::ostringstream oss;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
-		//GameObject* g;
 
-		//GridObject* reticle = nullptr;
 		for (GameObject* g : gameSystem->gameObjects) {
 			if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
 				gameSystem->reticle = (GridObject*)g;
 			}
 		}
 
-		//TankObject* player = nullptr;
-
-
-		//vector<string> actionsArray;
 		vector<string> playersArray;
 		vector<string> playerAction;
-
 		Vector2 reticleWorldPos;
 
 		int dist;
@@ -137,7 +120,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 		default:
 			break;
-
 		}
 		//messages that are only read when game is in active state (used for blocking player input during animations)
 
@@ -234,7 +216,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 											//send update sprite message. maybe this sould be included in update position?
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
 
-
 			gameSystem->currentAction++;
 
 			break;
@@ -245,9 +226,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case KEY_D_PRESSED: {
-
-
-
 			//return the position of the reticle for debugging purposes
 			string s = "RETICLE AT GRID("
 				+ to_string(gameSystem->reticle->gridX)
@@ -279,7 +257,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					g->y = stof(data[3].c_str());
 					g->orientation = stoi(data[5].c_str());
 				}
-
 			}
 			break;
 		}
@@ -289,7 +266,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		default:
 			break;
 		}
-
 	}
 
 void Scene_Gameplay::executeAction(int a) {
@@ -304,14 +280,13 @@ void Scene_Gameplay::executeAction(int a) {
 		vector<string> playerAction;
 		vector<string> players = split(gameSystem->actionsToExecute[a], ']');
 
-		//for (string s : players) {
 		for (int playerNum = 0; playerNum < 4; playerNum++) {
 
 			playerAction = split(players[playerNum], ',');
 			string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
 			ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
-																						 //switch on the action type received from the network system, and execute the action
+			//switch on the action type received from the network system, and execute the action
 			switch (receivedAction) {
 			case SHOOT: {
 				string newID = "explosion" + to_string(rand());
@@ -334,7 +309,6 @@ void Scene_Gameplay::executeAction(int a) {
 							t->updateWorldCoords();
 							gameSystem->sendUpdatePosMessage(t);
 						}
-
 					}
 				}
 				break;

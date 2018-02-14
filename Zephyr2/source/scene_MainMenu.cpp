@@ -11,6 +11,8 @@ Scene_MainMenu::~Scene_MainMenu() {
 
 //called whene the scene is first loaded. Do any initial setup here
 void Scene_MainMenu::startScene() {
+
+	gameSystem->levelLoaded = 0;
 	Msg* m = new Msg(LEVEL_LOADED, "0");
 	msgBus->postMessage(m, gameSystem);
 	gameSystem->addGameObjects("main_menu.txt");
@@ -47,27 +49,21 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 			{
 				if (g->id.compare("Menu_Item0") == 0)
 				{
-					// instructions page
-					gameSystem->removeAllGameObjects();
-					gameSystem->addGameObjects("instructions_menu.txt");
-					gameSystem->levelLoaded = 4;
-					gameSystem->markerPosition = 0;
+					// Loadinstructions page
+					gameSystem->loadScene(INSTRUCTION_MENU);
 					change = true;
 					break;
 				}
 				else if (g->id.compare("Menu_Item1") == 0)
 				{
 
-					gameSystem->loadScene("Gameplay");
+					gameSystem->loadScene(GAMEPLAY);
 					change = true;
 					break;
 				}
 				else if (g->id.compare("Menu_Item2") == 0)
 				{
-					// Go to settings
-					gameSystem->removeAllGameObjects();
-					gameSystem->addGameObjects("settings_menu.txt");
-					gameSystem->levelLoaded = 1;
+					gameSystem->loadScene(SETTINGS_MENU);
 					gameSystem->markerPosition = 0;
 					change = true;
 					break;

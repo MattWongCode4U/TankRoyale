@@ -97,26 +97,20 @@ void GameSystem::createGameObject(GameObject* g) {
 void GameSystem::startSystemLoop() {
 	//clocks for limiting gameloop speed
 	clock_t thisTime = clock();
-	
+
 	int enemySpawnCooldownCounter = 0;
 
 	int currentGameTime = 0;
 	while (alive) {
 		thisTime = clock();
-		if (thisTime  < currentGameTime) {
+		if (thisTime < currentGameTime) {
 			//Sleep(currentGameTime - thisTime);
 			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + timeFrame;
-		
+
 
 		handleMsgQ();
-
-		////Display Thread ID for Debugging
-		//std::string s = std::to_string(std::hash<std::thread::id>()(std::this_thread::get_id()));
-		//OutputDebugString("GameSystem Loop on thread: ");
-		//OutputDebugString(s.c_str());
-		//OutputDebugString("\n");
 
 		/////////////////////////////////////////////////////////////////////
 		//							OK to Run							   //
@@ -124,76 +118,47 @@ void GameSystem::startSystemLoop() {
 
 		m = new Msg(EMPTY_MESSAGE, "");
 
-		switch (levelLoaded) {
-		case -1: // First launch
-			// this means we've just started up the system. We should load the main menu
-			levelLoaded = 0;
-
-			scene = new Scene_MainMenu(msgBus, this);
-			scene->startScene();
-
-			// Load Main Menu Scene
-			//addGameObjects("main_menu.txt");
-			break;
-		case 0: // Menu page
-			// does nothing as user changes are handled inside handleMessage. In this state,
-			// the only thing we could possibly do is... idk yet.
-			break;
-		case 1: // Settings page
-			// does nothing as user changes are handled inside handleMessage. In this state,
-			// the only thing we could possibly do is... idk yet. Basically same shit as
-			// the Menu page tho
-			break;
-		case 2: { // Game loaded
-			scene->sceneUpdate();
-
-			
-			//Handle object updates
-			for (GameObject* obj : gameObjects) {
-				obj->earlyUpdate();
-			}
-
-			for (GameObject* obj : gameObjects) {
-				obj->midUpdate();
-			}
-
-			for (GameObject* obj : gameObjects) {
-				obj->lateUpdate();
-			}
-
-			//loop through list of objects to create added by the gameobjects
-			for (GameObject* c : objData.toCreateVector) {
-				createGameObject(c);
-			}
-			objData.toCreateVector.clear();
-
-			//loop through list of objects to destroy added by the gameobjects
-			for (GameObject* g : objData.toDestroyVector) {
-				gameObjectRemoved(g);
-
-				// increase score
-				if (g->id != "playerShip") {
-					if (g->getObjectType() == "ShipObj") {
-						score++; 
-					}
-				} 
-
-				gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
-			}
-			objData.toDestroyVector.clear();
-
-
-			//loop through list of messages to send that were added by Game objects
-			for (Msg* m : objData.toPostVector) {
-				msgBus->postMessage(m, this);
-			}
-			objData.toPostVector.clear();
-
-			break;
+		//if there is no scene loaded, load the main menu
+		if (scene == nullptr) {
+			loadScene(MAIN_MENU);
 		}
-		default:
-			break;
+
+		//call the update function on the currently loaded scene
+		scene->sceneUpdate();
+
+
+		//Handle object update methods
+		for (GameObject* obj : gameObjects) {
+			obj->earlyUpdate();
 		}
+
+		for (GameObject* obj : gameObjects) {
+			obj->midUpdate();
+		}
+
+		for (GameObject* obj : gameObjects) {
+			obj->lateUpdate();
+		}
+
+		//loop through list of objects to create added by the gameobjects
+		for (GameObject* c : objData.toCreateVector) {
+			createGameObject(c);
+		}
+		objData.toCreateVector.clear();
+
+		//loop through list of objects to destroy added by the gameobjects
+		for (GameObject* g : objData.toDestroyVector) {
+			gameObjectRemoved(g);
+			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
+		}
+		objData.toDestroyVector.clear();
+
+		//loop through list of messages to send that were added by Game objects
+		for (Msg* m : objData.toPostVector) {
+			msgBus->postMessage(m, this);
+		}
+		objData.toPostVector.clear();
+
 		delete(m);
 	}
 }
@@ -219,229 +184,9 @@ void GameSystem::handleMessage(Msg *msg) {
 
 	// call the parent first 
 	System::handleMessage(msg);
-
-	//selects loaded level and calls the message handler for that level
-	switch (levelLoaded) {
-	case 0:
-		//mainMenuHandler(msg);
-		scene->sceneHandleMessage(msg);
-		break;
-	case 1:
-		settingsMenuHandler(msg);
-		break;
-	case 2:
-		scene->sceneHandleMessage(msg);
-		break;
-	case 3:
-		gameOverMenuHandler(msg);
-		break;
-	case 4:
-		instructionMenuHandler(msg);
-		break;
-	default:
-		break;
-	}
-}
-//message handling when in the instructions screen
-void GameSystem::instructionMenuHandler(Msg * msg) {
-	// only one option; to go back to menu
-	if (msg->type == SPACEBAR_PRESSED) {
-		removeAllGameObjects();
-		addGameObjects("main_menu.txt");
-		levelLoaded = 0;
-		markerPosition = 0;
-		Msg* m = new Msg(LEVEL_LOADED, "0");
-		msgBus->postMessage(m, this);
-	}
-	if (msg->type == LEFT_MOUSE_BUTTON)
-	{
-		vector<string> objectData = split(msg->data, ',');
-		INT32 x = atoi(objectData[0].c_str());
-		INT32 y = atoi(objectData[1].c_str());
-		INT32 width = atoi(objectData[2].c_str());
-		INT32 length = atoi(objectData[3].c_str());
-		x -= width / 2; y -= length / 2;
-		y = -y;
-		bool change = false;
-
-
-		for (GameObject *g : gameObjects)
-		{
-			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
-				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
-			{
-				// This is for the Back Button
-				if (g->id.compare("Menu_Item4") == 0)
-				{
-					removeAllGameObjects();
-					addGameObjects("main_menu.txt");
-					levelLoaded = 0;
-					break;
-				}
-			}
-		}
-		if (change)
-		{
-			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
-			setPlayerTank("player1");
-		}
-	}
-}
-
-//the settings menu message handler
-void GameSystem::settingsMenuHandler(Msg * msg) {
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	switch (msg->type) {
-	case DOWN_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition++;
-		if (markerPosition > 2) {
-			markerPosition = 2;
-		}
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case UP_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition--;
-		if (markerPosition < 0) {
-			markerPosition = 0;
-		}
-		markerPosition = markerPosition % 3;
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case SPACEBAR_PRESSED:
-		if (markerPosition == 2) {
-			// Back button, go to menu
-			removeAllGameObjects();
-			addGameObjects("main_menu.txt");
-			levelLoaded = 0;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "0");
-			msgBus->postMessage(m, this);
-		}
-		else if (markerPosition == 1) {
-			// change game sound to "off"
-			mm->type = AUDIO_MUTE;
-			mm->data = "1";
-			msgBus->postMessage(mm, this);
-		}
-		else if (markerPosition == 0) {
-			// change game sound to "on"
-			mm->type = AUDIO_MUTE;
-			mm->data = "0";
-			msgBus->postMessage(mm, this);
-		}
-		break;
-	case LEFT_MOUSE_BUTTON:
-	{
-		vector<string> objectData = split(msg->data, ',');
-		INT32 x = atoi(objectData[0].c_str());
-		INT32 y = atoi(objectData[1].c_str());
-		INT32 width = atoi(objectData[2].c_str());
-		INT32 length = atoi(objectData[3].c_str());
-		x -= width / 2; y -= length / 2;
-		y = -y;
-		bool change = false;
-
-
-		for (GameObject *g : gameObjects)
-		{
-			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
-				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
-			{
-				// This is for the Back Button
-				if (g->id.compare("Menu_Item4") == 0)
-				{
-					removeAllGameObjects();
-					addGameObjects("main_menu.txt");
-					levelLoaded = 0;
-					break;
-				}
-			}
-		}
-		if (change)
-		{
-			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(levelLoaded)), this);
-			setPlayerTank("player1");
-		}
-		break;
-	}
-	default:
-		break;
-	}
-}
-
-//gameover menu message handler
-void GameSystem::gameOverMenuHandler(Msg * msg) {
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	switch (msg->type) {
-	case DOWN_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition++;
-		if (markerPosition > 2) {
-			markerPosition = 2;
-		}
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case UP_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition--;
-		if (markerPosition < 1) {
-			markerPosition = 1;
-		}
-		markerPosition = markerPosition % 3;
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case SPACEBAR_PRESSED:
-		// End Game Screen
-		if (markerPosition == 2) {
-			// go to menu
-			removeAllGameObjects();
-			addGameObjects("main_menu.txt");
-			levelLoaded = 0;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "0");
-			msgBus->postMessage(m, this);
-		}
-		else if (markerPosition == 1) {
-			// start the game (or go to level select?)
-			// first, clear all objects
-			removeAllGameObjects();
-
-			// then, load new objects
-			addGameObjects("prototype_level.txt"); // TEMPORARY 
-			levelLoaded = 2;
-			Msg* m = new Msg(LEVEL_LOADED, "2");
-			msgBus->postMessage(m, this);
-
-			//set the default player tank
-			setPlayerTank("player1");
-
-			//let NetworkSystem know client is ready to start game
-			msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), this);
-
-		}
-	default:
-		break;
-	}
+	
+	//call the message handle on the currently loaded scene
+	scene->sceneHandleMessage(msg);
 }
 
 void GameSystem::sendUpdatePosMessage(GameObject* g) {
@@ -464,10 +209,6 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	mm->data = oss.str();
 	msgBus->postMessage(mm, this);
 }
-
-//execute the actions received from the network
-
-
 
 //converts grid coordinates to world coordinates
 Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
@@ -513,11 +254,6 @@ void GameSystem::displayTimeLeft(int time) {
 	m->data = osss.str();
 	msgBus->postMessage(m, this);
 }
-
-
-
-
-
 
 GameObject* GameSystem::findGameObject(std::string objectID) {
 	GameObject* obj = nullptr;
@@ -577,9 +313,29 @@ void GameSystem::setPlayerTank(std::string playerID) {
 	}
 }
 
+void  GameSystem::loadScene(SceneType _scene){
+	//calling destructor on the old scene just in case. 
+	if(scene!= nullptr)
+		scene->~Scene();
 
-void  GameSystem::loadScene(std::string sceneName) {
-	scene->~Scene();
-	scene = new Scene_Gameplay(msgBus, this);
+	//clear all currently loaded gameObjects
+	removeAllGameObjects();
+
+	//instantiate the new scene
+	switch (_scene) {
+	case MAIN_MENU:
+		scene = new Scene_MainMenu(msgBus, this);
+		break;
+	case GAMEPLAY:
+		scene = new Scene_Gameplay(msgBus, this);
+		break;
+	case SETTINGS_MENU:
+		scene = new Scene_SettingsMenu(msgBus, this);
+		break;
+	case INSTRUCTION_MENU:
+		scene = new Scene_InstructionsMenu(msgBus, this);
+		break;
+	}
+
 	scene->startScene();
 }
