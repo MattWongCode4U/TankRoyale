@@ -57,14 +57,8 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 				}
 				else if (g->id.compare("Menu_Item1") == 0)
 				{
-					// start the game (or go to level select?)
-					// first, clear all objects
-					gameSystem->removeAllGameObjects();
 
-					// then, load new objects
-					//addGameObjects("Level_1.txt");
-					gameSystem->addGameObjects("prototype_level.txt");
-					gameSystem->levelLoaded = 2;
+					gameSystem->loadScene("Gameplay");
 					change = true;
 					break;
 				}
@@ -97,10 +91,7 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 		if (change)
 		{
 			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
-			if (gameSystem->levelLoaded == 2) {
-				msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
-			}
-			gameSystem->setPlayerTank("player1");
+			
 		}
 
 		break;
