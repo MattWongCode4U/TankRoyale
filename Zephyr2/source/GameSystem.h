@@ -23,6 +23,17 @@ enum PlayerID {
 	PLAYER3 = 3,
 	PLAYER4 = 4
 };
+class GameSystem;
+class Scene {
+	MessageBus* msgBus;
+	GameSystem* gameSystem;
+
+	Scene(MessageBus* _mbus, GameSystem* _gs);
+	~Scene();
+
+	virtual void sceneUpdate();
+	virtual void sceneHandeMessage();
+};
 
 class GameSystem : public System {
 public:
@@ -44,6 +55,9 @@ public:
 
 	ObjectData objData;
 	void removeAllGameObjects();
+
+	//the currently loaded scene
+	Scene* scene;
 
 	const int timeFrame = 20;
 	int turnStartTime = 0;
