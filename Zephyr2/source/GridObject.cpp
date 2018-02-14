@@ -5,7 +5,8 @@ GridObject::GridObject(map <string, string> paramsMap, ObjectData* objData) : Ga
 	gridY = stoi(paramsMap.find("gridY")->second);
 }
 
-GridObject::GridObject(std::string _id, std::string _renderable, float _x, float _y, int _z, int _orientation, int _width, int _length, int _imageFrames, int _gridX, int _gridY) {
+GridObject::GridObject(ObjectData* _objData, std::string _id, std::string _renderable, float _x, float _y, int _z, int _orientation, int _width, int _length, int _imageFrames, int _gridX, int _gridY, string _parent) {
+	objData = _objData;
 	id = _id;
 	renderable = _renderable;
 	x = _x;
@@ -17,6 +18,7 @@ GridObject::GridObject(std::string _id, std::string _renderable, float _x, float
 	imageFrames = _imageFrames;
 	gridX = _gridX;
 	gridY = _gridY;
+	parentId = _parent;
 
 	//set New renderable variables to default
 	renderType = RenderableType::OVERLAY;
@@ -62,10 +64,13 @@ void GridObject::updateWorldCoords() {
 	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
 	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
 	
-	x = hexWidth * gridX;
-	y = vertDist * gridY;
-	
+	float newX = hexWidth * gridX;
+
 	if (gridY % 2 != 0) {
-		x += hexWidth / 2;
+		newX += hexWidth / 2;
 	}
+	setPosition(newX, vertDist * gridY, z);
+	//x = newX;
+	//y = vertDist * gridY;
+	//z = z;
 }

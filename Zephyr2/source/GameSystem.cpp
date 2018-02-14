@@ -71,6 +71,15 @@ void GameSystem::createGameObject(GameObject* g) {
 			return;
 		}
 	}
+	//set the object's parent
+	if (g->parentId != "") {
+		for (GameObject* p : gameObjects) {
+			if(p->id == g->parentId)
+				g->setParent(p);
+		}	
+	}
+	
+
 	gameObjects.push_back(g);
 	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
 	oss << g->id << ','

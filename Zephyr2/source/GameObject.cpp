@@ -10,6 +10,7 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 	try {
 		id = paramsMap.find("id")->second;
 		renderable = paramsMap.find("renderable")->second;
+		
 		x = stof(paramsMap.find("xPos")->second);
 		y = stof(paramsMap.find("yPos")->second);
 		z = stoi(paramsMap.find("zPos")->second);
@@ -18,8 +19,9 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		length = stoi(paramsMap.find("length")->second);
 		originalWidth = width;
 		originalLength = length;
-		//physicsEnabled = stoi(paramsMap.find("physicsEnabled")->second);
-		//windScale = stoi(paramsMap.find("windScale")->second);
+		if (!(paramsMap.find("parentId") == paramsMap.end()))
+			parentId = paramsMap.find("parentId")->second;
+
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);
 		if (!(paramsMap.find("renderType") == paramsMap.end()))
 			renderType = getRenderableTypeFromName(paramsMap.find("renderType")->second);
@@ -115,4 +117,67 @@ RenderableType GameObject::getRenderableTypeFromName(std::string name)
 	}
 
 	return RenderableType::OBJECT3D;
+}
+
+void GameObject::setPosition(float newX, float newY, float newZ) {
+	offsetPosition(newX - x, newY - y, newZ - z);
+}
+
+void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ) {
+	if (!childObjects.empty()) {
+		for (GameObject* g : childObjects) {
+			g->offsetPosition(offsetX, offsetY, offsetZ);
+		}
+	}
+
+	x += offsetX;
+	y += offsetY;
+	z += offsetZ;
+
+	std::ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");
+
+	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
+	oss << id << ","
+		<< renderable << ","
+		<< x << ","
+		<< y << ","
+		<< z << ","
+		<< orientation << ","
+		<< width << ","
+		<< length << ","
+		<< getObjectType();
+
+	mm->data = oss.str();
+	objData->toPostVector.push_back(mm);
+}
+
+void GameObject::setParent(GameObject* newParent) {
+	parentObject = newParent;
+	parentObject->childObjects.push_back(this);
+	//parentObject->offsetPosition(300, 300, 0);
+}
+
+void GameObject::addChild(GameObject* newChild) {
+	childObjects.push_back(newChild);
+}
+
+//remove a child reference. Does NOT delete the child, just the pointer. 
+//return true if child pointer successfully removed
+bool GameObject::removeChild(GameObject* child2Remove) {
+	for (GameObject* g : childObjects) {
+		if (g == child2Remove) {
+			childObjects.erase(remove(childObjects.begin(), childObjects.end(), g), childObjects.end());
+			return true;
+		}
+	}
+	return false;
+}
+//destroy the objects with its children
+void GameObject::destroyWithChildren() {
+	for (GameObject* g : childObjects) {
+		g->destroyWithChildren();
+	}
+	parentObject->removeChild(this);
+	objData->toDestroyVector.push_back(this);
 }

@@ -18,6 +18,8 @@ void Scene_Gameplay::startScene() {
 	msgBus->postMessage(m, gameSystem);
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
+
+
 }
 
 //called every frame of the gameloop
@@ -64,6 +66,13 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		for (GameObject* g : gameSystem->gameObjects) {
 			if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
 				gameSystem->reticle = (GridObject*)g;
+
+				//for testing of object parenting
+				/*GameObject* testObj = gameSystem->findGameObject("testObject");
+				if (testObj->parentObject == nullptr) {
+					testObj->setParent(g);
+				}*/
+				
 			}
 		}
 
@@ -290,9 +299,10 @@ void Scene_Gameplay::executeAction(int a) {
 			switch (receivedAction) {
 			case SHOOT: {
 				string newID = "explosion" + to_string(rand());
-				GridObject* gr = new GridObject(newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]));
-				gr->updateWorldCoords();
+				GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
+				
 				gameSystem->createGameObject(gr);
+				gr->updateWorldCoords();
 				dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 1, 19);
 				break;
 			}
@@ -378,7 +388,7 @@ int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
 
 void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();
-	gameSystem->sendUpdatePosMessage(gameSystem->reticle);
+	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 
 	int dist = getGridDistance(gameSystem->reticle->gridX, gameSystem->reticle->gridY, gameSystem->actionOrigin->gridX, gameSystem->actionOrigin->gridY);
 

@@ -319,3 +319,28 @@ orientation: 0,
 width: 100,
 length: 100,
 imageFrames: 1;
+
+gameObjectType: GameObject,
+id: testObject,
+renderable: cannon_ball.png,
+xPos: 40,
+yPos: -20,
+zPos: 10,
+orientation: 0,
+width: 100,
+length: 100,
+imageFrames: 1,
+parentId: reticle;
+
+gameObjectType: GameObject,
+id: testObject2,
+renderable: STitle.png,
+xPos: 90,
+yPos: -200,
+zPos: 10,
+orientation: 0,
+width: 200,
+length: 70,
+imageFrames: 1,
+parentId: testObject;
+
