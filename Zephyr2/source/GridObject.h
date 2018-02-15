@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "GridVector3.h"
 
 class GridObject : public GameObject {
 public:
@@ -30,6 +31,8 @@ public:
 	//object's position in in grid coordinates
 	int gridX;
 	int gridY;
+
+	GridVector3 gridPos;
 
 	const int hexSize = 50;
 };
