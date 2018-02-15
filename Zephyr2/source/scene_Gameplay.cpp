@@ -12,14 +12,12 @@ Scene_Gameplay::~Scene_Gameplay() {
 void Scene_Gameplay::startScene() {
 	framesSinceTurnStart = 99999;
 	gameSystem->addGameObjects("prototype_level.txt");
-	gameSystem->setPlayerTank("player1");	
+	setPlayerTank("player1");	
 	gameSystem->levelLoaded = 2;
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
-
-
 }
 
 //called every frame of the gameloop
@@ -87,9 +85,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		case NETWORK_R_START_TURN:
 			gameSystem->gameActive = true;
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
-			gameSystem->actionOrigin = gameSystem->playerTank;
+			actionOrigin = playerTank;
 
-			if (gameSystem->playerTank->health <= 0) {
+			if (playerTank->health <= 0) {
 				string spoofData = gameSystem->clientID + ",3,0,0";
 				msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), gameSystem);
 				msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), gameSystem);
@@ -119,7 +117,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			for (int i = 0; i < clientIDVector.size(); i++) {
 				if (clientIDVector[i] == gameSystem->clientID) {
 					//set the new player tank
-					gameSystem->setPlayerTank("player" + to_string(i + 1));
+					setPlayerTank("player" + to_string(i + 1));
 				}
 			}
 			break;
@@ -209,7 +207,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			}
 
 			if (ActionType == MOVE) {
-				gameSystem->actionOrigin = indicator;
+				actionOrigin = indicator;
 				indicator->renderable = "MoveIndicator.png";
 			}
 			else if (ActionType == SHOOT) {
@@ -222,7 +220,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			//indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			gameSystem->sendUpdatePosMessage(indicator);//send indicator position message
 
-											//send update sprite message. maybe this sould be included in update position?
+			//send update sprite message. maybe this sould be included in update position?
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
 
 			gameSystem->currentAction++;
@@ -235,6 +233,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case KEY_D_PRESSED: {
+			gameSystem->findGameObject("testObject")->offsetPosition(0, 0, 0, 30);
+
 			//return the position of the reticle for debugging purposes
 			string s = "RETICLE AT GRID("
 				+ to_string(gameSystem->reticle->gridX)
@@ -390,7 +390,7 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 
-	int dist = getGridDistance(gameSystem->reticle->gridX, gameSystem->reticle->gridY, gameSystem->actionOrigin->gridX, gameSystem->actionOrigin->gridY);
+	int dist = getGridDistance(gameSystem->reticle->gridX, gameSystem->reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
 
 	if (dist > range) {
 		gameSystem->reticle->renderable = "TileIndicatorRed.png";
@@ -498,3 +498,19 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 		msgBus->postMessage(m, gameSystem);
 	}
 };
+
+void Scene_Gameplay::setPlayerTank(std::string playerID) {
+	if (playerTank != nullptr) {
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), gameSystem);
+	}
+	for (GameObject* g : gameSystem->gameObjects) {
+		if (g->id == playerID && g->getObjectType() == "TankObject") {
+			playerTank = (TankObject*)g;
+			actionOrigin = playerTank;
+			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
+
+			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
+			OutputDebugString(debugS.c_str());
+		}
+	}
+}

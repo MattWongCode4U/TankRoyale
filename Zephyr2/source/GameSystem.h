@@ -72,7 +72,7 @@ public:
 
 	std::string clientID = "defaultClientID";//the id of the client on the server
 
-	void setPlayerTank(std::string playerID);
+	//void setPlayerTank(std::string playerID);
 
 	GameObject* findGameObject(std::string objectID);
 	TankObject* findTankObject(std::string objectID);
@@ -83,24 +83,8 @@ public:
 	//the reticle controlled by the arrow keys. used for aiming and queing up actions
 	GridObject* reticle;
 
-	//the origin of the current action. (The Tank's expected position at the start of the action)
-	GridObject* actionOrigin;
-
-
-	//handler functions for the scenes in the game
-	//void mainMenuHandler(Msg * msg);
-	//void settingsMenuHandler(Msg * msg);
-	//void instructionMenuHandler(Msg * msg);
-	//void lvl1Handler(Msg * msg);
-	void gameOverMenuHandler(Msg * msg);
-	
-
 	//Displays the amount to time left in the turn
 	void displayTimeLeft(int time);
-
-
-	//converts grid coordinates to world coordinates
-	Vector2 gridToWorldCoord(int gridX, int gridY);
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
@@ -117,20 +101,9 @@ public:
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
-
-
-	//maps local player Id's to unique id's 
-	//std::map<std::string, std::string> playerIdMap;
-	//std::string playerOrder[4];
-
 	//is the game actively receiving player input? false when it game is waiting/animating
 	bool gameActive = false;
 
-	//the Id of the tank being controlled by the player
-	//std::string playerTankID = "player1";
-
-	//the local player tank object
-	TankObject* playerTank;
 
 	Msg *m;
 

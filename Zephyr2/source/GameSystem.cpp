@@ -74,11 +74,14 @@ void GameSystem::createGameObject(GameObject* g) {
 	//set the object's parent
 	if (g->parentId != "") {
 		for (GameObject* p : gameObjects) {
-			if(p->id == g->parentId)
+			if (p->id == g->parentId) {
 				g->setParent(p);
+				g->offsetPosition(p->x, p->y, 0, p->orientation);
+			}
+				
+			
 		}	
 	}
-	
 
 	gameObjects.push_back(g);
 	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
@@ -220,20 +223,20 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 }
 
 //converts grid coordinates to world coordinates
-Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
-	float hexHeight = hexSize * 2.0f; //height of a single hex tile
-	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
-	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
-
-	Vector2 worldPos;
-
-	worldPos.x = hexWidth * gridX;
-	worldPos.y = vertDist * gridY;
-	if (gridY % 2 != 0) 
-		worldPos.x += hexWidth / 2;
-
-	return worldPos;
-}
+//Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
+//	float hexHeight = hexSize * 2.0f; //height of a single hex tile
+//	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
+//	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
+//
+//	Vector2 worldPos;
+//
+//	worldPos.x = hexWidth * gridX;
+//	worldPos.y = vertDist * gridY;
+//	if (gridY % 2 != 0) 
+//		worldPos.x += hexWidth / 2;
+//
+//	return worldPos;
+//}
 
 
 
@@ -305,22 +308,6 @@ FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 	return obj;
 }
 
-
-void GameSystem::setPlayerTank(std::string playerID) {
-	if (playerTank != nullptr) {
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), this);
-	}
-	for (GameObject* g : gameObjects) {
-		if (g->id == playerID && g->getObjectType() == "TankObject") {
-			playerTank = (TankObject*)g;
-			actionOrigin = playerTank;
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), this);
-
-			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
-			OutputDebugString(debugS.c_str());
-		}
-	}
-}
 
 void  GameSystem::loadScene(SceneType _scene){
 	//calling destructor on the old scene just in case. 

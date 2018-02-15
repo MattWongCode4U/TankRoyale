@@ -51,9 +51,9 @@ public:
 	//sets the object's (x,y) position to the coordinates specified by the vector2 parameter
 	void setPostion(Vector2 posVector); 
 	
-	void setPosition(float _x, float _y, float _z);
+	void setPosition(float _x, float _y, float _z, int rotation = 999999);
 
-	void offsetPosition(float offsetX, float offsetY, float offsetZ);
+	void offsetPosition(float offsetX, float offsetY, float offsetZ, int rotation = 0);
 
 	void setParent(GameObject* newParent);
 

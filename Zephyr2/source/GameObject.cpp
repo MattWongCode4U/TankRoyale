@@ -119,20 +119,23 @@ RenderableType GameObject::getRenderableTypeFromName(std::string name)
 	return RenderableType::OBJECT3D;
 }
 
-void GameObject::setPosition(float newX, float newY, float newZ) {
-	offsetPosition(newX - x, newY - y, newZ - z);
+void GameObject::setPosition(float newX, float newY, float newZ, int rotation) {
+	if(rotation < 99999)
+		offsetPosition(newX - x, newY - y, newZ - z, rotation);
+	else
+		offsetPosition(newX - x, newY - y, newZ - z);
 }
 
-void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ) {
+void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, int rotation) {
 	if (!childObjects.empty()) {
 		for (GameObject* g : childObjects) {
-			g->offsetPosition(offsetX, offsetY, offsetZ);
+			g->offsetPosition(offsetX, offsetY, offsetZ, rotation);
 		}
 	}
-
 	x += offsetX;
 	y += offsetY;
 	z += offsetZ;
+	orientation += rotation;
 
 	std::ostringstream oss;
 	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");

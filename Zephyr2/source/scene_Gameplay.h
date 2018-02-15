@@ -1,10 +1,15 @@
 #pragma once
 #include "Scene.h"
+#include "TankObject.h"
+#include "GridObject.h"
 
 class Scene_Gameplay : public Scene {
 public:
 	Scene_Gameplay(MessageBus* _mbus, GameSystem* _gs);
 	~Scene_Gameplay();
+
+	//sets the player tank pointer and sets up player
+	void setPlayerTank(std::string playerID);
 
 	//Runs once per gameloop frame
 	void sceneUpdate();
@@ -47,6 +52,12 @@ public:
 
 	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
 	bool validMove = false;
+
+	//the local player tank object
+	TankObject* playerTank;
+
+	//the origin of the current action. (The Tank's expected position at the start of the action)
+	GridObject* actionOrigin;
 
 };
 
