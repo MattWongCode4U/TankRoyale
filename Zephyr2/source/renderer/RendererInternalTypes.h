@@ -69,6 +69,21 @@ struct ForwardSetup
 	GLuint programSmoothness;
 };
 
+struct BillboardSetup
+{
+	GLuint program;
+	GLuint programMVM;
+	GLuint programPM;
+	GLuint programTexture;
+	GLuint programCameraPos;
+	GLuint programAmbient;
+	GLuint programDLight;
+	GLuint programDLightFacing;
+	GLuint programOffsets;
+	GLuint programAnimated;
+	GLuint programSmoothness;
+};
+
 
 /// <summary>
 /// Single object data sent to RenderEngine on draw

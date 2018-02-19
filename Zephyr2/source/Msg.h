@@ -35,6 +35,7 @@ enum MSG_TYPE {
 
 	// Render System
 	CAMERA_OFFSET, //the position of the camera in world space :   xposition,yposition
+	CONFIG_PIPELINE, //configure the pipeline (-1 for no change, 0 for off, 1 for on): deferredPass, forwardPass, postprocessing, overlay
 
 	// Network System
 	// Format: 

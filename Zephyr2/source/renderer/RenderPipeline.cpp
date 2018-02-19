@@ -725,25 +725,30 @@ void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay
 	else
 	{
 		drawCamera(scene); //set up the camera
-		drawObjects(scene); //do the geometry pass
-		drawShadows(scene); //do the shadow map
-		drawLighting(scene); //do the lighting pass
-		drawForward(scene); //do the forward pass
-		drawBillboard(scene); //do the billboard pass
-		drawPostProcessing(scene); //do the postprocessing
+
+		if (_deferredStageEnabled)
+		{
+			drawObjects(scene); //do the geometry pass
+			drawShadows(scene); //do the shadow map
+			drawLighting(scene); //do the lighting pass
+		}
+		
+		if (_forwardStageEnabled)
+		{ 
+			//TODO something something depth buffer
+			drawForward(scene); //do the forward pass
+			drawBillboard(scene); //do the billboard pass
+		}
+		
+		if(_postprocessingEnabled)
+			drawPostProcessing(scene); //do the postprocessing
+		//TODO blit if postprocessing disabled
 	}
 
-	if (overlay == nullptr)
-	{
-		drawNullOverlay();
-	}
-	else
+	if(_overlayStageEnabled && overlay != nullptr)
 	{
 		drawOverlay(overlay); //do the overlay pass
 	}
-
-	//TODO vsync/no vsync
-	//SDL_GL_SwapWindow(_window_p); //will be moved back here once idle screen problems can be fixed
 }
 
 /// <summary>
@@ -1071,9 +1076,7 @@ void RenderPipeline::drawLighting(RenderableScene *scene)
 {
 
 	//setup framebuffer
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebufferID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _postFramebufferID);
-
 	glViewport(0, 0, _renderWidth, _renderHeight);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1313,7 +1316,7 @@ glm::vec3 RenderPipeline::computeAmbientLight(RenderableScene *scene)
 /// </summary>
 void RenderPipeline::drawForward(RenderableScene *scene)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, _framebufferID);
+	glBindFramebuffer(GL_FRAMEBUFFER, _postFramebufferID);
 	glViewport(0, 0, _renderWidth, _renderHeight);
 
 	glDepthMask(GL_TRUE);
@@ -1457,6 +1460,10 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 /// </summary>
 void RenderPipeline::drawBillboard(RenderableScene *scene)
 {
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebufferID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _postFramebufferID);
+	glViewport(0, 0, _renderWidth, _renderHeight);
+
 	glDepthMask(GL_FALSE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -1759,4 +1766,36 @@ bool RenderPipeline::releaseContext()
 bool RenderPipeline::haveContext()
 {
 	return true;
+}
+
+/// <summary>
+/// Setter method for deferred stage
+/// </summary>
+void RenderPipeline::setDeferredStage(bool enabled)
+{
+	_deferredStageEnabled = enabled;
+}
+
+/// <summary>
+/// Setter method for forward stage
+/// </summary>
+void RenderPipeline::setForwardStage(bool enabled)
+{
+	_forwardStageEnabled = enabled;
+}
+
+/// <summary>
+/// Setter method for overlay stage
+/// </summary>
+void RenderPipeline::setOverlayStage(bool enabled)
+{
+	_overlayStageEnabled = enabled;
+}
+
+/// <summary>
+/// Setter method for postprocessing stage
+/// </summary>
+void RenderPipeline::setPostprocessingStage(bool enabled)
+{
+	_postprocessingEnabled = enabled;
 }

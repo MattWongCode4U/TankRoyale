@@ -175,6 +175,9 @@ void RenderSystem::handleMessage(Msg *msg) {
 	case LEVEL_LOADED:
 		levelLoaded(msg);
 		break;
+	case CONFIG_PIPELINE:
+		updatePipelineConfig(msg);
+		break;
 	//PANNING CAMERA
 
 	/*case SPACEBAR_PRESSED:
@@ -350,7 +353,26 @@ void RenderSystem::updateObjRender(Msg * m)
 	Update the health bar on the HUD.
 */
 void RenderSystem::updateHealthHUD(Msg* m) {
-	// TODO: Put healthbar stuff here and send a message instead of updating in GameSystem
+	// TODO: Put healthbar stuff here and send a message instead of updating in GameSystem (not used anymore?)
+}
+
+void RenderSystem::updatePipelineConfig(Msg * m)
+{
+	vector<string> objectData = split(m->data, ',');
+
+	int_fast8_t deferredEnabled = atoi(objectData[0].c_str());
+	int_fast8_t forwardEnabled = atoi(objectData[1].c_str());
+	int_fast8_t postprocessingEnabled = atoi(objectData[2].c_str());
+	int_fast8_t overlayEnabled = atoi(objectData[3].c_str());
+
+	if (deferredEnabled != -1)
+		pipeline->setDeferredStage((bool)deferredEnabled);
+	if (forwardEnabled != -1)
+		pipeline->setForwardStage((bool)forwardEnabled);
+	if (postprocessingEnabled != -1)
+		pipeline->setPostprocessingStage((bool)postprocessingEnabled);
+	if (overlayEnabled != -1)
+		pipeline->setOverlayStage((bool)overlayEnabled);
 }
 
 /*

@@ -33,6 +33,12 @@ private:
 	int _renderWidth = 0;
 	int _renderHeight = 0;
 
+	//stage enablement
+	bool _deferredStageEnabled = true;
+	bool _forwardStageEnabled = true;
+	bool _overlayStageEnabled = true;
+	bool _postprocessingEnabled = true;
+
 	//framebuffer textures
 	GLuint _framebufferID = 0;
 	GLuint _framebufferTexture0ID = 0;
@@ -193,5 +199,10 @@ public:
 	bool acquireContext();
 	bool releaseContext();
 	bool haveContext();
+
+	void setDeferredStage(bool enabled);
+	void setForwardStage(bool enabled);
+	void setOverlayStage(bool enabled);
+	void setPostprocessingStage(bool enabled);
 
 };
