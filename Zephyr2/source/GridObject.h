@@ -1,9 +1,13 @@
 #pragma once
 #include "GameObject.h"
+#include "GridVector3.h"
 
 class GridObject : public GameObject {
 public:
 	GridObject(map<string, string> params, ObjectData* objData);
+
+	GridObject(ObjectData* _objData, std::string id, std::string renderable, float xPos, float yPos, int zPos, int orientation, int width, int length, int imageFrames, int gridX, int gridY, std::string _parent);
+	
 	~GridObject();
 
 	//returns the object type string e.g. "GridObject"
@@ -27,6 +31,8 @@ public:
 	//object's position in in grid coordinates
 	int gridX;
 	int gridY;
+
+	GridVector3 gridPos;
 
 	const int hexSize = 50;
 };

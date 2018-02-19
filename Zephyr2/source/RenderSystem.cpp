@@ -216,7 +216,7 @@ void RenderSystem::handleMessage(Msg *msg) {
 */
 std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string data)
 {
-	SDL_Log(data.c_str());
+	//SDL_Log(data.c_str());
 
 	vector<string> objectData = split(data, ',');
 
@@ -291,7 +291,7 @@ void RenderSystem::addObjectToRenderList(Msg* m) {
 	Update the position of an object given in the message.
 */
 void RenderSystem::updateObjPosition(Msg* m) {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 
 	//id,renderable,x,y,z,orientation,width,length,physEnabled,type
@@ -308,7 +308,7 @@ void RenderSystem::updateObjPosition(Msg* m) {
 */
 void RenderSystem::updateObjSprite(Msg* m)
 {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 	std::string id = dataVector.at(0);
 	std::string sprite = dataVector.at(2);
@@ -326,7 +326,7 @@ void RenderSystem::updateObjSprite(Msg* m)
 */
 void RenderSystem::updateObjRender(Msg * m)
 {
-	SDL_Log(m->data.c_str());
+	//SDL_Log(m->data.c_str());
 	
 	//id,renderable,renderType,model,normalMap,smoothness
 	vector<string> objectData = split(m->data, ',');
@@ -350,7 +350,7 @@ void RenderSystem::updateObjRender(Msg * m)
 	Update the health bar on the HUD.
 */
 void RenderSystem::updateHealthHUD(Msg* m) {
-	
+	// TODO: Put healthbar stuff here and send a message instead of updating in GameSystem
 }
 
 /*
@@ -408,5 +408,12 @@ void RenderSystem::levelLoaded(Msg* m) {
 		cameraX = 0.0f;
 		cameraY = 0.0f;
 	}
+}
+/*
+	Gets the Window -- Appearently needed (John)
+*/
+SDL_Window* RenderSystem::GetSDLWindow()
+{
+	return window;
 }
 

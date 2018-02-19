@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
 	malive = true; //Move this
 	clock_t thisTime;
 	int currentGameTime = 0;
+
 	// TO DO: Implement 
 	while (malive) {
 		thisTime = clock();
@@ -89,6 +90,22 @@ int main(int argc, char *argv[]) {
 			else if (SDL_WINDOWEVENT_FOCUS_GAINED == windowEvent.window.event)
 			{
 				mbus->postMessage(new Msg(GAINED_FOCUS, ""), NULL);
+			}
+			else if (SDL_MOUSEBUTTONDOWN == windowEvent.type && SDL_BUTTON_LEFT == windowEvent.button.button) 
+			{
+				ostringstream oss;
+				INT32 x, y;
+				SDL_GetWindowSize(rs->GetSDLWindow(), &x, &y);
+				oss << windowEvent.button.x << "," << windowEvent.button.y << "," << x << "," << y;
+				mbus->postMessage(new Msg(LEFT_MOUSE_BUTTON, oss.str()), NULL);
+			}
+			else if (SDL_MOUSEMOTION == windowEvent.type) {
+				//OutputDebugString("Mouse Motion");
+				ostringstream oss;
+				INT32 x, y;
+				SDL_GetWindowSize(rs->GetSDLWindow(), &x, &y);
+				oss << windowEvent.button.x << "," << windowEvent.button.y << "," << x << "," << y;
+				mbus->postMessage(new Msg(MOUSE_MOVE, oss.str()), NULL);
 			}
 		}
 		//OutputDebugString("outside\n");

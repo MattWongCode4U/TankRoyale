@@ -71,6 +71,18 @@ void GameSystem::createGameObject(GameObject* g) {
 			return;
 		}
 	}
+	//set the object's parent
+	if (g->parentId != "") {
+		for (GameObject* p : gameObjects) {
+			if (p->id == g->parentId) {
+				g->setParent(p);
+				g->offsetPosition(p->x, p->y, 0, p->orientation);
+			}
+				
+			
+		}	
+	}
+
 	gameObjects.push_back(g);
 	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
 	oss << g->id << ','
@@ -97,27 +109,20 @@ void GameSystem::createGameObject(GameObject* g) {
 void GameSystem::startSystemLoop() {
 	//clocks for limiting gameloop speed
 	clock_t thisTime = clock();
-	
+
 	int enemySpawnCooldownCounter = 0;
 
 	int currentGameTime = 0;
-	framesSinceTurnStart = 9999;
 	while (alive) {
 		thisTime = clock();
-		if (thisTime  < currentGameTime) {
+		if (thisTime < currentGameTime) {
 			//Sleep(currentGameTime - thisTime);
 			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
 		}
 		currentGameTime = thisTime + timeFrame;
-		
+
 
 		handleMsgQ();
-
-		////Display Thread ID for Debugging
-		//std::string s = std::to_string(std::hash<std::thread::id>()(std::this_thread::get_id()));
-		//OutputDebugString("GameSystem Loop on thread: ");
-		//OutputDebugString(s.c_str());
-		//OutputDebugString("\n");
 
 		/////////////////////////////////////////////////////////////////////
 		//							OK to Run							   //
@@ -125,133 +130,47 @@ void GameSystem::startSystemLoop() {
 
 		m = new Msg(EMPTY_MESSAGE, "");
 
-		switch (levelLoaded) {
-		case -1: // First launch
-			// this means we've just started up the system. We should load the main menu
-			levelLoaded = 0;
-			m = new Msg(LEVEL_LOADED, "0");
+		//if there is no scene loaded, load the main menu
+		if (scene == nullptr) {
+			loadScene(MAIN_MENU);
+		}
+
+		//call the update function on the currently loaded scene
+		scene->sceneUpdate();
+
+
+		//Handle object update methods
+		for (GameObject* obj : gameObjects) {
+			obj->earlyUpdate();
+		}
+
+		for (GameObject* obj : gameObjects) {
+			obj->midUpdate();
+		}
+
+		for (GameObject* obj : gameObjects) {
+			obj->lateUpdate();
+		}
+
+		//loop through list of objects to create added by the gameobjects
+		for (GameObject* c : objData.toCreateVector) {
+			createGameObject(c);
+		}
+		objData.toCreateVector.clear();
+
+		//loop through list of objects to destroy added by the gameobjects
+		for (GameObject* g : objData.toDestroyVector) {
+			gameObjectRemoved(g);
+			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
+		}
+		objData.toDestroyVector.clear();
+
+		//loop through list of messages to send that were added by Game objects
+		for (Msg* m : objData.toPostVector) {
 			msgBus->postMessage(m, this);
-
-			// Load Main Menu Scene
-			addGameObjects("main_menu.txt");
-			break;
-		case 0: // Menu page
-			// does nothing as user changes are handled inside handleMessage. In this state,
-			// the only thing we could possibly do is... idk yet.
-			break;
-		case 1: // Settings page
-			// does nothing as user changes are handled inside handleMessage. In this state,
-			// the only thing we could possibly do is... idk yet. Basically same shit as
-			// the Menu page tho
-			break;
-		case 2: { // Game loaded
-			//execute actions
-			//OutputDebugString("\n");
-			//OutputDebugString(to_string(framesSinceTurnStart).c_str());
-			if (framesSinceTurnStart == 0) {
-				executeAction(0);
-				turnStartTime = clock();
-			}
-			else if (framesSinceTurnStart == 100) {
-				executeAction(1);
-			}
-			else if (framesSinceTurnStart == 200) {
-				executeAction(2);
-			}
-			else if (framesSinceTurnStart == 300) {
-				executeAction(3);
-			}
-			framesSinceTurnStart++;
-
-			displayTimeLeft(30 - ((clock() - turnStartTime) / 1000));
-									
-			//OutputDebugString("\n");
-			//OutputDebugString(to_string(framesSinceTurnStart/timeFrame).c_str());
-
-			bool endgame = false;
-
-			//getGridDistance(reticle->gridX)
-
-			for (GameObject* obj : gameObjects) {
-				obj->earlyUpdate();
-			}
-
-			for (GameObject* obj : gameObjects) {
-				obj->midUpdate();
-			}
-
-			for (GameObject* obj : gameObjects) {
-				obj->lateUpdate();
-			}
-
-			//loop through list of objects to create added by the gameobjects
-			for (GameObject* c : objData.toCreateVector) {
-				createGameObject(c);
-			}
-			objData.toCreateVector.clear();
-
-			//loop through list of objects to destroy added by the gameobjects
-			for (GameObject* g : objData.toDestroyVector) {
-				gameObjectRemoved(g);
-
-				// increase score
-				if (g->id != "playerShip") {
-					if (g->getObjectType() == "ShipObj") {
-						score++; 
-					}
-				} 
-
-				// end game
-				if (g->id == "playerShip") {
-					endgame = true;
-				}
-
-				gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
-			}
-			objData.toDestroyVector.clear();
-
-
-			//loop through list of messages to send that were added by Game objects
-			for (Msg* m : objData.toPostVector) {
-				msgBus->postMessage(m, this);
-			}
-			objData.toPostVector.clear();
-
-			if (endgame) {
-				removeAllGameObjects();
-
-				levelLoaded = 3;
-				m = new Msg(LEVEL_LOADED, "3");
-				msgBus->postMessage(m, this);
-				markerPosition = 1;
-
-				// Load Main Menu Scene
-				addGameObjects("gameover_menu.txt");
-
-				// add score code here
-				// position 0
-				int p0 = score / 10;
-				// position 1
-				int p1 = score % 10;
-
-				std::ostringstream oss;
-				Msg* mm = new Msg(UPDATE_OBJ_SPRITE, "");
-				oss << "scorepos0,1," << p0 << ".png,";
-				mm->data = oss.str();
-				msgBus->postMessage(mm, this);
-
-				std::ostringstream osss;
-				Msg* m = new Msg(UPDATE_OBJ_SPRITE, "");
-				osss << "scorepos1,1," << p1 << ".png,";
-				m->data = osss.str();
-				msgBus->postMessage(m, this);
-				break;
-			}
-			break;
 		}
-		default:
-			break;
-		}
+		objData.toPostVector.clear();
+
 		delete(m);
 	}
 }
@@ -277,395 +196,9 @@ void GameSystem::handleMessage(Msg *msg) {
 
 	// call the parent first 
 	System::handleMessage(msg);
-
-	//selects loaded level and calls the message handler for that level
-	switch (levelLoaded) {
-	case 0:
-		mainMenuHandler(msg);
-		break;
-	case 1:
-		settingsMenuHandler(msg);
-		break;
-	case 2:
-		lvl1Handler(msg);
-		break;
-	case 3:
-		gameOverMenuHandler(msg);
-		break;
-	case 4:
-		instructionMenuHandler(msg);
-		break;
-	default:
-		break;
-	}
-}
-
-//handles messages when in the main menu screen
-void GameSystem::mainMenuHandler(Msg * msg) {
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	//GameObject* g;
-
-	switch (msg->type) {
-	case LEFT_MOUSE_BUTTON:
-	{
-		vector<string> objectData = split(msg->data, ',');
-		INT32 x = atoi(objectData[0].c_str());
-		INT32 y = atoi(objectData[1].c_str());
-		break;
-	}
-		
-	case DOWN_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition++;
-		if (markerPosition > 3) {
-			markerPosition = 3;
-		}
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,MZ6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case UP_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition--;
-		if (markerPosition < 0) {
-			markerPosition = 0;
-		}
-		markerPosition = markerPosition % 4;
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,MZ6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case SPACEBAR_PRESSED:
-		if (markerPosition == 3) {
-			// Exit was selected, kill main
-			malive = false;
-		}
-		else if (markerPosition == 2) {
-			// Go to settings
-			removeAllGameObjects();
-			addGameObjects("settings_menu.txt");
-			levelLoaded = 1;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "1");
-			msgBus->postMessage(m, this);
-		}
-		else if (markerPosition == 1) {
-			// start the game (or go to level select?)
-			// first, clear all objects
-			removeAllGameObjects();
-
-			// then, load new objects
-			//addGameObjects("Level_1.txt");
-			addGameObjects("prototype_level.txt");
-			levelLoaded = 2;
-			Msg* m = new Msg(LEVEL_LOADED, "2");
-			msgBus->postMessage(m, this);
-			score = 0;
-		}
-		else if (markerPosition == 0) {
-			// instructions page
-			removeAllGameObjects();
-			addGameObjects("instructions_menu.txt");
-			levelLoaded = 4;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "4");
-			msgBus->postMessage(m, this);
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-//message handling when in the instructions screen
-void GameSystem::instructionMenuHandler(Msg * msg) {
-	// only one option; to go back to menu
-	if (msg->type == SPACEBAR_PRESSED) {
-		removeAllGameObjects();
-		addGameObjects("main_menu.txt");
-		levelLoaded = 0;
-		markerPosition = 0;
-		Msg* m = new Msg(LEVEL_LOADED, "0");
-		msgBus->postMessage(m, this);
-	}
-}
-
-//the settings menu message handler
-void GameSystem::settingsMenuHandler(Msg * msg) {
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	switch (msg->type) {
-	case DOWN_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition++;
-		if (markerPosition > 2) {
-			markerPosition = 2;
-		}
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case UP_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition--;
-		if (markerPosition < 0) {
-			markerPosition = 0;
-		}
-		markerPosition = markerPosition % 3;
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case SPACEBAR_PRESSED:
-		if (markerPosition == 2) {
-			// Back button, go to menu
-			removeAllGameObjects();
-			addGameObjects("main_menu.txt");
-			levelLoaded = 0;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "0");
-			msgBus->postMessage(m, this);
-		}
-		else if (markerPosition == 1) {
-			// change game sound to "off"
-			mm->type = AUDIO_MUTE;
-			mm->data = "1";
-			msgBus->postMessage(mm, this);
-		}
-		else if (markerPosition == 0) {
-			// change game sound to "on"
-			mm->type = AUDIO_MUTE;
-			mm->data = "0";
-			msgBus->postMessage(mm, this);
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-//handles messages in level1 scene
-void GameSystem::lvl1Handler(Msg * msg) {
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	//GameObject* g;
-
-	//GridObject* reticle = nullptr;
-	for (GameObject* g : gameObjects) {
-		if (g->id == "reticle"&& g->getObjectType() =="GridObject") {
-			reticle = (GridObject*)g;
-		}
-	}
-
-	TankObject* player = nullptr;
-	for (GameObject* g : gameObjects) {
-		if (g->id == "player1" && g->getObjectType() == "TankObject") {
-			player = (TankObject*)g;
-		}
-	}
-
-	if (actionOrigin == nullptr) {
-		actionOrigin = player;
-	}
-	//vector<string> actionsArray;
-	vector<string> playersArray;
-	vector<string> playerAction;
-
-	Vector2 reticleWorldPos;
 	
-	
-	int dist;
-		switch (msg->type) {
-		case DOWN_ARROW_PRESSED: {
-			reticle->gridY--;
-			updateReticle();
-			break;
-		}
-		case UP_ARROW_PRESSED:
-			reticle->gridY++;
-			updateReticle();
-			break;
-
-		case LEFT_ARROW_PRESSED:
-			reticle->gridX--;
-			updateReticle();
-			break;
-
-		case RIGHT_ARROW_PRESSED:
-			reticle->gridX++;
-			updateReticle();
-			break;
-
-		case SPACEBAR_PRESSED: {
-			if (currentAction >= maxActions || !validMove) break;
-				
-			//Send Message to network
-			//message format: playerID,actionName,actionNumber,targetX,targetY
-			oss << player->id << ","//playerID
-				<< "MOVE" << ","//action type just MOVE for now
-				<< currentAction << ","//the action number 0 to <number of actions/turn>
-				<< reticle->x << "," //target x pos
-				<< reticle->y; //target y pos
-
-			mm->type = NETWORK_S_ACTION;
-			mm->data = oss.str();
-			msgBus->postMessage(mm, this);
-
-			GridObject* indicator = NULL;
-
-			string indicatorId = "TileIndicator" + to_string(currentAction);
-
-			for (GameObject* g : gameObjects) {
-				if (g->id == indicatorId) {
-					indicator = (GridObject*)g;
-				}
-			}
-
-			indicator->gridX = reticle->gridX;
-			indicator->gridY = reticle->gridY;
-			indicator->updateWorldCoords();
-			indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
-			sendUpdatePosMessage(indicator);
-
-			if(ActionType == MOVE)
-				actionOrigin = indicator;
-
-			currentAction++;
-
-			break;
-		}
-		case KEY_A_PRESSED:
-			setActionType(MOVE);
-			break;
-
-		case KEY_D_PRESSED:
-			setActionType(SHOOT);
-			break;
-
-		case NETWORK_TURN_BROADCAST:
-			actionsToExecute = split(msg->data, '\n');
-			//OutputDebugString(actionsToExecute[0].c_str());
-	/*		playersArray = split(actionsToExecute[0], ']');
-			playerAction = split(playersArray[0], ',');
-			player->x = stoi(playerAction[2]);
-			player->y = stoi(playerAction[3]);
-			sendUpdatePosMessage(player);*/
-			currentAction = 0;
-			framesSinceTurnStart = 0;
-			break;
-
-		case TEST_KEY_PRESSED:
-			break;
-
-		case SHOOT_CANNON: 
-			break;
-	
-		case GO_COLLISION:
-		/*
-		{
-			vector<string> data = split(msg->data, ',');
-
-			for (GameObject* g : gameObjects) {
-				//OutputDebugString(g->id.c_str());
-				if (g->id == data[0]) {
-					for (GameObject* o : gameObjects) {
-						if (o->id == data[1]) {
-							g->onCollide(o);
-							break;
-						}
-					}
-				}
-
-			}
-			break;
-		}
-		*/
-		case UPDATE_OBJECT_POSITION: {
-
-			vector<string> data = split(msg->data, ',');
-
-			for (GameObject* g : gameObjects) {
-				//OutputDebugString(g->id.c_str());
-
-				if (g->id == data[0]) {
-					g->x = stof(data[2].c_str());
-					g->y = stof(data[3].c_str());
-					g->orientation = stoi(data[5].c_str());
-				}
-
-			}
-			break;
-		}
-		default:
-			break;
-		}
-}
-
-//gameover menu message handler
-void GameSystem::gameOverMenuHandler(Msg * msg) {
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-	switch (msg->type) {
-	case DOWN_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition++;
-		if (markerPosition > 2) {
-			markerPosition = 2;
-		}
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case UP_ARROW_PRESSED:
-		// move the marker location and let rendering know?
-		markerPosition--;
-		if (markerPosition < 1) {
-			markerPosition = 1;
-		}
-		markerPosition = markerPosition % 3;
-
-		mm->type = UPDATE_OBJ_SPRITE;
-		oss << "obj3,1,Z6_Marker_P" << markerPosition << ".png,";
-		mm->data = oss.str();
-		msgBus->postMessage(mm, this);
-		break;
-	case SPACEBAR_PRESSED:
-		// End Game Screen
-		if (markerPosition == 2) {
-			// go to menu
-			removeAllGameObjects();
-			addGameObjects("main_menu.txt");
-			levelLoaded = 0;
-			markerPosition = 0;
-			Msg* m = new Msg(LEVEL_LOADED, "0");
-			msgBus->postMessage(m, this);
-		}
-		else if (markerPosition == 1) {
-			// start the game (or go to level select?)
-			// first, clear all objects
-			removeAllGameObjects();
-
-			// then, load new objects
-			addGameObjects("prototype_level.txt"); // TEMPORARY 
-			levelLoaded = 2;
-			Msg* m = new Msg(LEVEL_LOADED, "2");
-			msgBus->postMessage(m, this);
-			score = 0;
-		}
-	default:
-		break;
-	}
+	//call the message handle on the currently loaded scene
+	scene->sceneHandleMessage(msg);
 }
 
 void GameSystem::sendUpdatePosMessage(GameObject* g) {
@@ -689,104 +222,25 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	msgBus->postMessage(mm, this);
 }
 
-//execute the actions received from the network
-void GameSystem::executeAction(int a) {
-
-	//clear Indicators
-	for (GameObject* g : gameObjects) {
-		if (g->id.find("TileIndicator") != std::string::npos) {
-			g->renderable = "nothing.png";
-			//move object out side of camera instead of changing renderable. Temp Solution
-			g->x = 1000;
-			sendUpdatePosMessage(g);
-		}
-	}
-
-
-	vector<string> playerAction;
-	vector<string> players = split(actionsToExecute[a], ']');
-
-	for (string s : players) {
-		playerAction = split(s, ',');
-
-		//display player actions for players whose id's are found
-		for (GameObject* g : gameObjects) {
-			if (g->id == playerAction[0]) {
-				g->x = stof(playerAction[2]);
-				g->y = stof(playerAction[3]);
-				sendUpdatePosMessage(g);
-			}			
-		}
-	}
-
-}
-
-
 //converts grid coordinates to world coordinates
-Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
-	float hexHeight = hexSize * 2.0f; //height of a single hex tile
-	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
-	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
-
-	Vector2 worldPos;
-
-	worldPos.x = hexWidth * gridX;
-	worldPos.y = vertDist * gridY;
-	if (gridY % 2 != 0) 
-		worldPos.x += hexWidth / 2;
-
-	return worldPos;
-}
-
-//function cube_to_oddr(cube) :
-//	col = cube.x + (cube.z - (cube.z & 1)) / 2
-//	row = cube.z
-//	return Hex(col, row)
+//Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
+//	float hexHeight = hexSize * 2.0f; //height of a single hex tile
+//	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
+//	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
 //
-//	function oddr_to_cube(hex) :
-//	x = hex.col - (hex.row - (hex.row & 1)) / 2
-//	z = hex.row
-//	y = -x - z
-//	return Cube(x, y, z)
+//	Vector2 worldPos;
 //
-//	return (abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z)) / 2
+//	worldPos.x = hexWidth * gridX;
+//	worldPos.y = vertDist * gridY;
+//	if (gridY % 2 != 0) 
+//		worldPos.x += hexWidth / 2;
+//
+//	return worldPos;
+//}
 
-int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
-	int aXCube = aX - (aY - (aY & 1)) / 2;
-	int aZCube = aY;
-	int aYCube = -aXCube - aZCube;
 
-	int bXCube = bX - (bY - (bY & 1)) / 2;
-	int bZCube = bY;
-	int bYCube = -bXCube - bZCube;
 
-	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
-}
 
-void GameSystem::updateReticle() {
-	reticle->updateWorldCoords();
-	sendUpdatePosMessage(reticle);
-
-	int dist = getGridDistance(reticle->gridX, reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
-
-	if (dist > range) {
-		reticle->renderable = "TileIndicatorRed.png";
-		validMove = false;
-	}
-	else {
-		reticle->renderable = "TileIndicator.png";
-		validMove = true;
-	}
-
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-
-	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
-	oss << reticle->id << ",1," << reticle->renderable;
-	mm->type = UPDATE_OBJ_SPRITE;
-	mm->data = oss.str();
-	msgBus->postMessage(mm, this);
-}
 
 void GameSystem::displayTimeLeft(int time) {
 	int p0, p1;
@@ -813,21 +267,71 @@ void GameSystem::displayTimeLeft(int time) {
 	msgBus->postMessage(m, this);
 }
 
-void GameSystem::setActionType(ActionTypes a) {
-	ActionType = a;
-	std::ostringstream oss;
-	Msg* mm;
-	
-	switch (a) {
-	case SHOOT:
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), this);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), this);
-		range = 5;
+GameObject* GameSystem::findGameObject(std::string objectID) {
+	GameObject* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "GameObject") {
+			obj = (GameObject*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+TankObject* GameSystem::findTankObject(std::string objectID) {
+	TankObject* obj = nullptr;
+	for (GameObject *g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "TankObject") {
+			obj = (TankObject*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+GridObject* GameSystem::findGridObject(std::string objectID) {
+	GridObject* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "GridObject") {
+			obj = (GridObject*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
+	FullscreenObj* obj = nullptr;
+	for (GameObject* g : gameObjects) {
+		if (g->id == objectID && g->getObjectType() == "FullscreenObj") {
+			obj = (FullscreenObj*)g;
+			return obj;
+		}
+	}
+	return obj;
+}
+
+
+void  GameSystem::loadScene(SceneType _scene){
+	//calling destructor on the old scene just in case. 
+	if(scene!= nullptr)
+		scene->~Scene();
+
+	//clear all currently loaded gameObjects
+	removeAllGameObjects();
+
+	//instantiate the new scene
+	switch (_scene) {
+	case MAIN_MENU:
+		scene = new Scene_MainMenu(msgBus, this);
 		break;
-	case MOVE:
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), this);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), this);
-		range = 1;
+	case GAMEPLAY:
+		scene = new Scene_Gameplay(msgBus, this);
+		break;
+	case SETTINGS_MENU:
+		scene = new Scene_SettingsMenu(msgBus, this);
+		break;
+	case INSTRUCTION_MENU:
+		scene = new Scene_InstructionsMenu(msgBus, this);
 		break;
 	}
+
+	scene->startScene();
 }
