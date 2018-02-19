@@ -148,7 +148,6 @@ private:
 
 	void drawForward(RenderableScene * scene);
 	void drawForwardObject(RenderableObject * object);
-	void drawBillboard(RenderableScene * scene);
 
 	void drawOverlay(RenderableOverlay * overlay);
 	void drawNullOverlay();
@@ -173,8 +172,6 @@ private:
 	void cleanupPostProcessing();
 	void setupForward();
 	void cleanupForward();
-	void setupBillboard();
-	void cleanupBillboard();
 	void setupOverlay();
 	void cleanupOverlay();
 

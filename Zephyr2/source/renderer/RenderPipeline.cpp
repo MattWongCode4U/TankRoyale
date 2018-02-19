@@ -74,7 +74,6 @@ void RenderPipeline::setupSceneOnThread()
 	setupFramebufferDraw();
 	setupShadowMapping();
 	setupForward();
-	setupBillboard();
 	setupPostProcessing();
 	setupOverlay();
 	setupFallbacks();
@@ -91,7 +90,6 @@ void RenderPipeline::cleanupSceneOnThread()
 	cleanupFramebufferDraw();
 	cleanupShadowMapping();
 	cleanupForward();
-	cleanupBillboard();
 	cleanupPostProcessing();
 	cleanupOverlay();
 	cleanupFallbacks();
@@ -218,7 +216,10 @@ void RenderPipeline::cleanupOverlay()
 void RenderPipeline::setupForward()
 {
 	_forwardDrawData.program = Shaders::LoadShadersForward();
-	_forwardDrawData.programMVPM = glGetUniformLocation(_forwardDrawData.program, "iMVPM");
+	_forwardDrawData.programMVM = glGetUniformLocation(_forwardDrawData.program, "iMVM");
+	_forwardDrawData.programPM = glGetUniformLocation(_forwardDrawData.program, "iPM");
+	_forwardDrawData.programMM = glGetUniformLocation(_forwardDrawData.program, "iMM");
+	_forwardDrawData.programBillboard = glGetUniformLocation(_forwardDrawData.program, "iBillboard");
 	_forwardDrawData.programTexture = glGetUniformLocation(_forwardDrawData.program, "iTexture");
 	_forwardDrawData.programAnimated = glGetUniformLocation(_forwardDrawData.program, "iAnimated");
 	_forwardDrawData.programOffsets = glGetUniformLocation(_forwardDrawData.program, "iOffsets");
@@ -237,24 +238,6 @@ void RenderPipeline::setupForward()
 void RenderPipeline::cleanupForward()
 {
 	glDeleteProgram(_forwardDrawData.program);
-}
-
-/// <summary>
-/// Helper method initial setup
-/// Set up shaders for billboard pass
-/// </summary>
-void RenderPipeline::setupBillboard()
-{
-	//TODO billboard implementation
-}
-
-/// <summary>
-/// Helper method for final cleanup
-/// Deletes billboard pass program
-/// </summary>
-void RenderPipeline::cleanupBillboard()
-{
-	//TODO billboard implementation
 }
 
 /// <summary>
@@ -737,7 +720,6 @@ void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay
 		{ 
 			//TODO something something depth buffer
 			drawForward(scene); //do the forward pass
-			drawBillboard(scene); //do the billboard pass
 		}
 		
 		if(_postprocessingEnabled)
@@ -1311,7 +1293,7 @@ glm::vec3 RenderPipeline::computeAmbientLight(RenderableScene *scene)
 }
 
 /// <summary>
-/// Draws all forward objects in the scene
+/// Draws all forward (including billboard) objects in the scene
 /// 
 /// </summary>
 void RenderPipeline::drawForward(RenderableScene *scene)
@@ -1322,7 +1304,7 @@ void RenderPipeline::drawForward(RenderableScene *scene)
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1345,10 +1327,23 @@ void RenderPipeline::drawForward(RenderableScene *scene)
 	glm::vec3 cPos = scene->camera.position;
 	glUniform3f(_forwardDrawData.programCameraPos, cPos.x, cPos.y, cPos.z);
 
+	glUniformMatrix4fv(_forwardDrawData.programPM, 1, GL_FALSE, &_baseProjectionMatrix[0][0]);
+
+	glUniform1i(_forwardDrawData.programBillboard, GL_FALSE);
+
 	for (auto &obj : scene->forwardObjects)
 	{
 		drawForwardObject(&obj);
 	}
+
+	glDepthMask(GL_FALSE);
+	glUniform1i(_forwardDrawData.programBillboard, GL_TRUE);
+
+	for (auto &obj : scene->billboardObjects)
+	{
+		drawForwardObject(&obj);
+	}
+
 }
 
 /// <summary>
@@ -1436,9 +1431,9 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
 	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
 	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
-	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
 	glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
-	glUniformMatrix4fv(_forwardDrawData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
+	glUniformMatrix4fv(_forwardDrawData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
+	glUniformMatrix4fv(_forwardDrawData.programMM, 1, GL_FALSE, &objectMVM[0][0]); 
 
 	//draw!
 	if (hasModel)
@@ -1452,29 +1447,6 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 	
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-/// <summary>
-/// Draws all billboard objects in the scene
-/// 
-/// </summary>
-void RenderPipeline::drawBillboard(RenderableScene *scene)
-{
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebufferID);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _postFramebufferID);
-	glViewport(0, 0, _renderWidth, _renderHeight);
-
-	glDepthMask(GL_FALSE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	for (auto &obj : scene->billboardObjects)
-	{
-
-	}
 }
 
 /// <summary>
