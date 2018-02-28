@@ -7,6 +7,8 @@ zPos: 1,
 orientation: 0,
 width: 695,
 length: 750,
+renderType: object3d,
+model: monkey,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
