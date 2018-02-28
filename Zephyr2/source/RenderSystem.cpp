@@ -1,6 +1,7 @@
 #include "RenderSystem.h"
 #include "renderer\RenderPipeline.h"
 #include "renderer\GlobalPrefs.h"
+#include <gtc\constants.hpp>
 
 /*
 	RenderSystem Constructor.
@@ -41,8 +42,10 @@ void RenderSystem::init() {
 	cam.farPlane = 1000;
 	cam.nearPlane = 1;
 	cam.clearColor = glm::vec3(0.25f, 0.25f, 0.25f);
-	cam.viewAngle = 60.0f;
-	cam.position = glm::vec3(0, 0, 100.0f);
+	cam.viewAngle = glm::radians(60.0f);
+	//cam.position = glm::vec3(0, 0, -100.0f);
+	//cam.rotation = glm::vec3(0, glm::pi<float>(), 0);
+	cam.position = glm::vec3(0, 0, 10.0f);
 	cam.rotation = glm::vec3(0, 0, 0);
 	scene->camera = cam;
 

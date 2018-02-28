@@ -952,11 +952,11 @@ void RenderPipeline::drawObject(RenderableObject *object)
 	objectMVM = glm::translate(objectMVM, object->position);
 	//SDL_Log("%f, %f, %f", object->position.x, object->position.y, object->position.z);
 	objectMVM = glm::scale(objectMVM, object->scale);
-	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
-	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
-	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+	//objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
+	//objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+	//objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
 	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
-	glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+	//glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
 	glUniformMatrix4fv(_shaderMVPMatrixID, 1, GL_FALSE, &objectMVPM[0][0]);
 	glUniformMatrix4fv(_shaderModelMatrixID, 1, GL_FALSE, &objectMVM[0][0]);
 
