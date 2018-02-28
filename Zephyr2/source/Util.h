@@ -100,3 +100,11 @@ inline std::vector<std::string> listFilesInPath(std::string path) {
 	//will return filenames WITHOUT extension
 	return filesInPath;
 }
+
+inline std::string trimResourceName(std::string nameWithExtension)
+{
+	size_t dotPos = nameWithExtension.find_last_of('.');
+	if(dotPos != std::string::npos)
+		return std::string(nameWithExtension, 0, dotPos);
+	return nameWithExtension;
+}

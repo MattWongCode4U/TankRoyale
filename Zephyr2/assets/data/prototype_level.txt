@@ -1,12 +1,14 @@
 gameObjectType: GameObject,
 id: bGround,
-renderable: hexGridVersion2.png,
+renderable: hexGridVersion2,
 xPos: 0,
 yPos: 0,
-zPos: 1,
+zPos: -10,
 orientation: 0,
-width: 695,
-length: 750,
+width: 50,
+length: 50,
+renderType: object3d,
+model: quad,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,

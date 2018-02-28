@@ -1,6 +1,7 @@
 #include "RenderSystem.h"
 #include "renderer\RenderPipeline.h"
 #include "renderer\GlobalPrefs.h"
+#include <gtc\constants.hpp>
 
 /*
 	RenderSystem Constructor.
@@ -41,8 +42,10 @@ void RenderSystem::init() {
 	cam.farPlane = 1000;
 	cam.nearPlane = 1;
 	cam.clearColor = glm::vec3(0.25f, 0.25f, 0.25f);
-	cam.viewAngle = 60.0f;
-	cam.position = glm::vec3(0, 0, 100.0f);
+	cam.viewAngle = glm::radians(60.0f);
+	//cam.position = glm::vec3(0, 0, -100.0f);
+	//cam.rotation = glm::vec3(0, glm::pi<float>(), 0);
+	cam.position = glm::vec3(0, 0, 10.0f);
 	cam.rotation = glm::vec3(0, 0, 0);
 	scene->camera = cam;
 
@@ -234,8 +237,7 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	int type = (int)RenderableType::OBJECT3D;
 
 	id = objectData[0];
-	sprite = objectData[1];
-	std::string spriteName = std::string(sprite, 0, sprite.find_last_of('.')); //strip file extension TODO handle no extension
+	std::string spriteName = trimResourceName(objectData[1]);
 	x = (float)(atof(objectData[2].c_str()));
 	y = (float)(atof(objectData[3].c_str()));
 	z = (float)(atof(objectData[4].c_str()));
@@ -244,8 +246,8 @@ std::pair<std::string, RenderableObject> RenderSystem::parseObject(std::string d
 	h = (float)(atof(objectData[7].c_str())); 
 	frames = atoi(objectData[9].c_str());
 	type = atoi(objectData[10].c_str());
-	model = objectData[11];
-	normal = objectData[12];
+	model = trimResourceName(objectData[11]);
+	normal = trimResourceName(objectData[12]);
 	smoothness = (float)(atof(objectData[13].c_str()));
 
 	//set obj data
@@ -317,7 +319,7 @@ void RenderSystem::updateObjSprite(Msg* m)
 	std::string sprite = dataVector.at(2);
 
 	//strip file extension
-	std::string spriteName = std::string(sprite, 0, sprite.find_last_of('.')); 
+	std::string spriteName = trimResourceName(sprite);
 
 	RenderableObject *obj = &objects->at(id); //TODO handle if missing
 	obj->albedoName = spriteName; //TODO handling swapping normal maps and models
@@ -338,13 +340,13 @@ void RenderSystem::updateObjRender(Msg * m)
 	RenderableObject *obj = &objects->at(id);
 
 	if (!objectData[1].empty())
-		obj->albedoName = objectData[1];
+		obj->albedoName = trimResourceName(objectData[1]);
 	if (!objectData[2].empty())
 		obj->type = GameObject::getRenderableTypeFromName(objectData[2]);
 	if (!objectData[3].empty())
-		obj->modelName = objectData[3];
+		obj->modelName = trimResourceName(objectData[3]);
 	if (!objectData[4].empty())
-		obj->normalName = objectData[4];
+		obj->normalName = trimResourceName(objectData[4]);
 	if (!objectData[5].empty())
 		obj->smoothness = stof(objectData[5]);
 }
