@@ -939,9 +939,9 @@ void RenderPipeline::drawObject(RenderableObject *object)
 	objectMVM = glm::translate(objectMVM, object->position);
 	//SDL_Log("%f, %f, %f", object->position.x, object->position.y, object->position.z);
 	objectMVM = glm::scale(objectMVM, object->scale);
-	//objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
-	//objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
-	//objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
 	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
 	//glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
 	glUniformMatrix4fv(_shaderMVPMatrixID, 1, GL_FALSE, &objectMVPM[0][0]);
@@ -1318,9 +1318,9 @@ void RenderPipeline::drawForward(RenderableScene *scene)
 	glUniform3f(_forwardDrawData.programDLight, directional.r, directional.g, directional.b);
 
 	glm::mat4 rotMatrix = glm::mat4();
-	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.y, glm::vec3(0, 1, 0));
-	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.x, glm::vec3(1, 0, 0));
 	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.z, glm::vec3(0, 0, 1));
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.x, glm::vec3(1, 0, 0));
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.y, glm::vec3(0, 1, 0));
 	glm::vec3 lightFacing = rotMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	glUniform3f(_forwardDrawData.programDLightFacing, lightFacing.x, lightFacing.y, lightFacing.z);
 
@@ -1329,17 +1329,7 @@ void RenderPipeline::drawForward(RenderableScene *scene)
 
 	glUniformMatrix4fv(_forwardDrawData.programPM, 1, GL_FALSE, &_baseProjectionMatrix[0][0]);
 
-	glUniform1i(_forwardDrawData.programBillboard, GL_FALSE);
-
 	for (auto &obj : scene->forwardObjects)
-	{
-		drawForwardObject(&obj);
-	}
-
-	glDepthMask(GL_FALSE);
-	glUniform1i(_forwardDrawData.programBillboard, GL_TRUE);
-
-	for (auto &obj : scene->billboardObjects)
 	{
 		drawForwardObject(&obj);
 	}
@@ -1424,16 +1414,29 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 
 	glUniform1f(_shaderSmoothnessID, object->smoothness);
 
-	//transform!
-	glm::mat4 objectMVM = glm::mat4();
-	objectMVM = glm::translate(objectMVM, object->position);
-	objectMVM = glm::scale(objectMVM, object->scale);
-	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
-	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
-	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
-	glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
-	glUniformMatrix4fv(_forwardDrawData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
-	glUniformMatrix4fv(_forwardDrawData.programMM, 1, GL_FALSE, &objectMVM[0][0]); 
+	//normal or billboard transform
+	if (object->type == RenderableType::BILLBOARD)
+	{
+		//TODO billboard matrices
+
+		glDepthMask(GL_FALSE);
+		glUniform1i(_forwardDrawData.programBillboard, GL_TRUE);
+	}
+	else
+	{	
+		glm::mat4 objectMVM = glm::mat4();
+		objectMVM = glm::translate(objectMVM, object->position);
+		objectMVM = glm::scale(objectMVM, object->scale);
+		objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+		objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+		objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+		glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+		glUniformMatrix4fv(_forwardDrawData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
+		glUniformMatrix4fv(_forwardDrawData.programMM, 1, GL_FALSE, &objectMVM[0][0]);
+
+		glDepthMask(GL_TRUE);
+		glUniform1i(_forwardDrawData.programBillboard, GL_FALSE);
+	}
 
 	//draw!
 	if (hasModel)

@@ -11,6 +11,19 @@ renderType: object3d,
 model: quad,
 imageFrames: 1;
 
+gameObjectType: GameObject,
+id: fObject,
+renderable: hexGridVersion2,
+xPos: 0,
+yPos: 0,
+zPos: -6,
+orientation: 0,
+width: 5,
+length: 5,
+renderType: forward3d,
+model: monkey,
+imageFrames: 1;
+
 gameObjectType: FullscreenObj,
 id: player1_tag,
 renderable: player1_tag.png,

@@ -98,10 +98,8 @@ void RenderSystem::startSystemLoop() {
 				scene->objects.push_back(obj);
 				break;
 			case RenderableType::FORWARD3D:
-				scene->forwardObjects.push_back(obj);
-				break;
 			case RenderableType::BILLBOARD:
-				scene->billboardObjects.push_back(obj);
+				scene->forwardObjects.push_back(obj);
 				break;
 			case RenderableType::OVERLAY:
 				overlay->elements.push_back(obj);
