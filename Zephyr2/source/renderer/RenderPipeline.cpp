@@ -1594,16 +1594,16 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 void RenderPipeline::drawOverlayElement(RenderableObject * element)
 {
 	//get texture
-	GLuint texture;
-	auto texData = _textures_p->find(element->albedoName)->second;
-	if (texData.texID != 0)
+	GLuint texture = _fallbackTextureID;
+	auto texEl = _textures_p->find(element->albedoName);
+	if (texEl != _textures_p->end())
 	{
-		texture = texData.texID;
-	}
-	else
-	{
-		texture = _fallbackTextureID;
-	}
+		auto texData = texEl->second;
+		if (texData.texID != 0)
+		{
+			texture = texData.texID;
+		}
+	}	
 
 	//compute matrix
 	glm::mat4 objectMVM = glm::mat4();
