@@ -11,6 +11,7 @@ uniform mat4 iPM;
 uniform mat4 iMM;
 uniform vec4 iOffsets;
 uniform bool iAnimated;
+uniform bool iBillboard;
 
 void main()
 {

@@ -24,6 +24,19 @@ renderType: forward3d,
 model: monkey,
 imageFrames: 1;
 
+gameObjectType: GameObject,
+id: bObject,
+renderable: sciFiTank,
+xPos: 15,
+yPos: 3,
+zPos: -4,
+orientation: 90,
+width: 5,
+length: 5,
+renderType: forward3d,
+model: quad,
+imageFrames: 1;
+
 gameObjectType: FullscreenObj,
 id: player1_tag,
 renderable: player1_tag.png,

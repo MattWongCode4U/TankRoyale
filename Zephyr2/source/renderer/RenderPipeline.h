@@ -128,6 +128,8 @@ private:
 	glm::mat4 _baseModelViewMatrix;
 	glm::mat4 _baseModelViewProjectionMatrix;
 	glm::mat4 _baseProjectionMatrix;
+	glm::vec3 _cameraUpWorld;
+	glm::vec3 _cameraRightWorld;
 	glm::mat4 _depthModelViewMatrix;
 	glm::mat4 _depthModelViewProjectionMatrix;
 	RenderableLight _mainDirectionalLight;

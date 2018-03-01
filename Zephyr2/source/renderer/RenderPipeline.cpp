@@ -773,6 +773,9 @@ void RenderPipeline::drawCamera(RenderableScene *scene) //TODO rename?
 	_baseModelViewProjectionMatrix = projection * view;
 	_baseProjectionMatrix = projection;
 
+	_cameraRightWorld = glm::vec3(view[0][0], view[1][0], view[2][0]);
+	_cameraUpWorld = glm::vec3(view[0][1], view[1][1], view[2][1]);
+
 	//also get main directional and ambient lighting here since multiple pipeline stages need it
 	bool foundMainDirectionalLight = false;
 	for (int eachLight = 0; eachLight < scene->lights.size(); eachLight++)
@@ -1417,7 +1420,31 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 	//normal or billboard transform
 	if (object->type == RenderableType::BILLBOARD)
 	{
-		//TODO billboard matrices
+		// billboard matrices
+		glm::mat4 objectMVM = glm::mat4();
+		objectMVM = glm::translate(objectMVM, object->position);
+		objectMVM = glm::scale(objectMVM, object->scale);
+		objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+		objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+		objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+		glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+
+		//reset part to identity
+		objectMVM2[0][0] = 1;
+		objectMVM2[0][1] = 0;
+		objectMVM2[0][2] = 0;
+		objectMVM2[1][0] = 0;
+		objectMVM2[1][1] = 1;
+		objectMVM2[1][2] = 0;
+		objectMVM2[2][0] = 0;
+		objectMVM2[2][1] = 0;
+		objectMVM2[2][2] = 1;
+
+		//rescale
+		objectMVM2 = glm::scale(objectMVM2, object->scale);
+
+		glUniformMatrix4fv(_forwardDrawData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
+		glUniformMatrix4fv(_forwardDrawData.programMM, 1, GL_FALSE, &objectMVM[0][0]);
 
 		glDepthMask(GL_FALSE);
 		glUniform1i(_forwardDrawData.programBillboard, GL_TRUE);
