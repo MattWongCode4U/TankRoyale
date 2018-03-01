@@ -6,7 +6,7 @@ yPos: 0,
 zPos: -80,
 orientation: 0,
 width: 50,
-length: 50,
+length: 54,
 renderType: object3d,
 model: quad,
 imageFrames: 1;
