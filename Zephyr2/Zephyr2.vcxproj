@@ -195,6 +195,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\scene_Gameplay.cpp" />
     <ClCompile Include="source\scene_InstructionsMenu.cpp" />
     <ClCompile Include="source\scene_MainMenu.cpp" />
+    <ClCompile Include="source\scene_Lobby.cpp" />
     <ClCompile Include="source\scene_SettingsMenu.cpp" />
     <ClCompile Include="source\System.cpp" />
     <ClCompile Include="source\Vector2.cpp" />
@@ -230,6 +231,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\scene_Gameplay.h" />
     <ClInclude Include="source\scene_InstructionsMenu.h" />
     <ClInclude Include="source\scene_MainMenu.h" />
+    <ClInclude Include="source\scene_Lobby.h" />
     <ClInclude Include="source\scene_SettingsMenu.h" />
     <ClInclude Include="source\System.h" />
     <ClInclude Include="source\Util.h" />
