@@ -42,20 +42,91 @@ struct TextureLoadingData
 	std::string name;
 };
 
-struct OverlaySetup
+struct FramebufferSetup
+{
+	GLuint fbo;
+	GLuint texture0; //color/smoothness
+	GLuint texture1; //position
+	GLuint texture2; //normal
+	GLuint depth;
+};
+
+struct FullscreenQuadSetup
 {
 	GLuint vao;
 	GLuint vbo;
-
-	GLuint program;
-	GLuint programMVPM;
-	GLuint programTexture;
-	GLuint programOffsets;
-	GLuint programAnimated;
-	glm::mat4 MVPM;
+	GLuint vertices;
 };
 
-struct ForwardSetup
+struct GeometryPassSetup
+{
+	GLuint program;
+	GLuint programMM;
+	GLuint programMVPM;
+	GLuint programTexture;
+	GLuint programNormal;
+	GLuint programHasNorm;
+	GLuint programSmoothness;
+};
+
+struct ShadowPassSetup
+{
+	GLuint program;
+	GLuint programMM;
+	GLuint programMVPM;
+
+	GLuint fbo;
+	GLuint texture;
+};
+
+struct LightingPassSetup
+{
+	GLuint program;
+	GLuint programTexture0;
+	GLuint programTexture1;
+	GLuint programTexture2;
+	GLuint programTexture3; //depth
+	GLuint programTextureS; //shadow
+	GLuint programColor;
+	GLuint programAmbient;
+	GLuint programDirColor;
+	GLuint programDirFacing;
+	GLuint programCameraPos;
+	GLuint programBiasM;
+
+};
+
+struct PointLightPassSetup
+{
+	GLuint program;
+	GLuint programTexture0;
+	GLuint programTexture1;
+	GLuint programTexture2;
+	GLuint programTexture3;
+	GLuint programCameraPos;
+	GLuint programLightPos;
+	GLuint programLightIntensity;
+	GLuint programLightColor;
+	GLuint programLightRange;
+};
+
+struct SpotLightPassSetup
+{
+	GLuint program;
+	GLuint programTexture0;
+	GLuint programTexture1;
+	GLuint programTexture2;
+	GLuint programTexture3;
+	GLuint programCameraPos;
+	GLuint programLightPos;
+	GLuint programLightDir;
+	GLuint programLightIntensity;
+	GLuint programLightColor;
+	GLuint programLightRange;
+	GLuint programLightAngle;
+};
+
+struct ForwardPassSetup
 {
 	GLuint program;
 	GLuint programMM;
@@ -70,6 +141,51 @@ struct ForwardSetup
 	GLuint programOffsets;
 	GLuint programAnimated;
 	GLuint programSmoothness;
+};
+
+struct PostProcessingSetup
+{
+	GLuint program;
+	GLuint programTexture;
+	GLuint programSmearTexture;
+	GLuint programDepthTexture;
+	GLuint programBlurAmount;
+	GLuint programDofAmount;
+	GLuint programDofFactor;
+	GLuint programFogAmount;
+	GLuint programFogFactor;
+	GLuint programFogColor;
+
+	GLuint copyProgram;
+	GLuint copyProgramFactor;
+	GLuint copyProgramBlurAmount;
+	GLuint copyProgramLastTexture;
+	GLuint copyProgramSmearTexture;
+
+	GLuint fbo;
+	GLuint texture;
+
+	GLuint smearFbo;
+	GLuint smearTexture;
+};
+
+struct PostBypassSetup
+{
+	GLuint program;
+	GLuint programTexture;
+};
+
+struct OverlaySetup
+{
+	GLuint vao;
+	GLuint vbo;
+
+	GLuint program;
+	GLuint programMVPM;
+	GLuint programTexture;
+	GLuint programOffsets;
+	GLuint programAnimated;
+	glm::mat4 MVPM;
 };
 
 
