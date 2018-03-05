@@ -15,6 +15,7 @@ GridObject::GridObject(ObjectData* _objData, std::string _id, std::string _rende
 	orientation = _orientation;
 	width = _width;
 	length = _length;
+	height = 1.0f;
 	imageFrames = _imageFrames;
 	gridX = _gridX;
 	gridY = _gridY;

@@ -13,10 +13,16 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		
 		x = stof(paramsMap.find("xPos")->second);
 		y = stof(paramsMap.find("yPos")->second);
-		z = stoi(paramsMap.find("zPos")->second);
+		z = stof(paramsMap.find("zPos")->second);
 		orientation = stoi(paramsMap.find("orientation")->second);
-		width = stoi(paramsMap.find("width")->second);
-		length = stoi(paramsMap.find("length")->second);
+		width = stof(paramsMap.find("width")->second);
+		length = stof(paramsMap.find("length")->second);
+
+		if (!(paramsMap.find("height") == paramsMap.end())) 
+			height = stof(paramsMap.find("height")->second);
+		else
+			height = 1;
+		
 		originalWidth = width;
 		originalLength = length;
 		if (!(paramsMap.find("parentId") == paramsMap.end()))
@@ -149,6 +155,7 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, int
 		<< orientation << ","
 		<< width << ","
 		<< length << ","
+		<< height << ","
 		<< getObjectType();
 
 	mm->data = oss.str();

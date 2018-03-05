@@ -257,8 +257,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case UPDATE_OBJECT_POSITION: {
-
-			vector<string> data = split(msg->data, ',');
+			//TODO: Needs to updated for new renderer or removed
+			/*vector<string> data = split(msg->data, ',');
 
 			for (GameObject* g : gameSystem->gameObjects) {
 
@@ -267,7 +267,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					g->y = stof(data[3].c_str());
 					g->orientation = stoi(data[5].c_str());
 				}
-			}
+			}*/
 			break;
 		}
 		case KEY_Z_PRESSED:
@@ -489,7 +489,8 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->z << ",";
 			oss << curHealthBar->orientation << ",";
 			oss << curHealthBar->originalWidth << ",";
-			oss << curHealthBar->length;
+			oss << curHealthBar->length << ",";
+			oss << curHealthBar->height;
 			m = new Msg(MSG_TYPE::UPDATE_HP_BAR, oss.str());
 		}
 		else if (curPlayer->getHealth() <= 30) {
@@ -512,7 +513,8 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->z << ",";
 			oss << curHealthBar->orientation << ",";
 			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length; // lenght
+			oss << curHealthBar->length << ","; // lenght
+			oss << curHealthBar->height;
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		}
 		else if (curPlayer->getHealth() <= 50) {
@@ -533,7 +535,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->z << ",";
 			oss << curHealthBar->orientation << ",";
 			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length; // lenght
+			oss << curHealthBar->length << ",";
+			oss << curHealthBar->height;
+
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		}
 		else {
@@ -554,7 +558,8 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->z << ",";
 			oss << curHealthBar->orientation << ",";
 			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length; // lenght
+			oss << curHealthBar->length << ","; // lenght
+			oss << curHealthBar->height; // lenght
 			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
 		}
 		msgBus->postMessage(m, gameSystem);

@@ -84,12 +84,12 @@ void GameSystem::createGameObject(GameObject* g) {
 	}
 
 	gameObjects.push_back(g);
-	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
+	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
 	oss << g->id << ','
 		<< g->renderable << ','
 		<< g->x << ',' << g->y << ',' << g->z << ','
 		<< g->orientation << ','
-		<< g->width << ',' << g->length << ','
+		<< g->width << ',' << g->length << ',' << g->height << ','
 		//<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
 		<< g->imageFrames << ","
@@ -252,6 +252,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 		<< g->orientation << ","
 		<< g->width << ","
 		<< g->length << ","
+		<< g->height << ","
 		//<< g->physicsEnabled << ","
 		<< g->getObjectType();
 

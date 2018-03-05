@@ -39,6 +39,8 @@ std::string Shaders::VSH_POST_PATH = "assets/shaders/postprocessing.vsh";
 std::string Shaders::FSH_POST_PATH = "assets/shaders/postprocessing.fsh";
 std::string Shaders::VSH_COPY_PATH = "assets/shaders/sbcopy.vsh";
 std::string Shaders::FSH_COPY_PATH = "assets/shaders/sbcopy.fsh";
+std::string Shaders::VSH_BYPASS_PATH = "assets/shaders/postbypass.vsh";
+std::string Shaders::FSH_BYPASS_PATH = "assets/shaders/postbypass.fsh";
 std::string Shaders::VSH_OVERLAY_PATH = "assets/shaders/overlay.vsh";
 std::string Shaders::FSH_OVERLAY_PATH = "assets/shaders/overlay.fsh";
 std::string Shaders::VSH_FORWARD_PATH = "assets/shaders/forward.vsh";
@@ -95,6 +97,14 @@ GLuint Shaders::LoadShadersSpotPass()
 GLuint Shaders::LoadShadersPostProcessing()
 {
 	return Shaders::LoadShadersGeneric(Shaders::VSH_POST_PATH, Shaders::FSH_POST_PATH);
+}
+
+///
+///
+///
+GLuint Shaders::LoadShadersPostBypass()
+{
+	return Shaders::LoadShadersGeneric(Shaders::VSH_BYPASS_PATH, Shaders::FSH_BYPASS_PATH);
 }
 
 ///
