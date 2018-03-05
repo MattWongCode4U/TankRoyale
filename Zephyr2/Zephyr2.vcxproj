@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{E2BCECD4-83CF-44C8-B1FB-BADB764955C4}</ProjectGuid>
     <RootNamespace>Zephyr2</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -171,6 +171,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="scene_PauseMenu.cpp" />
     <ClCompile Include="source\GridObject.cpp" />
     <ClCompile Include="source\HexTile.cpp" />
     <ClCompile Include="source\AudioEngine.cpp" />
@@ -200,6 +201,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\TankObject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="scene_PauseMenu.h" />
     <ClInclude Include="source\GridObject.h" />
     <ClInclude Include="source\HexTile.h" />
     <ClInclude Include="source\AudioEngine.h" />
