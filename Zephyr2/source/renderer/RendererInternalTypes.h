@@ -58,7 +58,10 @@ struct OverlaySetup
 struct ForwardSetup
 {
 	GLuint program;
-	GLuint programMVPM;
+	GLuint programMM;
+	GLuint programMVM;
+	GLuint programPM;
+	GLuint programBillboard;
 	GLuint programTexture;
 	GLuint programCameraPos;
 	GLuint programAmbient;

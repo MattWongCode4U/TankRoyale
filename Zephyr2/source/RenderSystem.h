@@ -61,6 +61,7 @@ private:
 	void updateObjSprite(Msg *m);
 	void updateObjRender(Msg *m);
 	void updateHealthHUD(Msg *m);
+	void updatePipelineConfig(Msg *m);
 
 	void panLeft();
 	void panRight();

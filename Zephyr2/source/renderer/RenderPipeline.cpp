@@ -74,7 +74,6 @@ void RenderPipeline::setupSceneOnThread()
 	setupFramebufferDraw();
 	setupShadowMapping();
 	setupForward();
-	setupBillboard();
 	setupPostProcessing();
 	setupOverlay();
 	setupFallbacks();
@@ -91,7 +90,6 @@ void RenderPipeline::cleanupSceneOnThread()
 	cleanupFramebufferDraw();
 	cleanupShadowMapping();
 	cleanupForward();
-	cleanupBillboard();
 	cleanupPostProcessing();
 	cleanupOverlay();
 	cleanupFallbacks();
@@ -218,7 +216,10 @@ void RenderPipeline::cleanupOverlay()
 void RenderPipeline::setupForward()
 {
 	_forwardDrawData.program = Shaders::LoadShadersForward();
-	_forwardDrawData.programMVPM = glGetUniformLocation(_forwardDrawData.program, "iMVPM");
+	_forwardDrawData.programMVM = glGetUniformLocation(_forwardDrawData.program, "iMVM");
+	_forwardDrawData.programPM = glGetUniformLocation(_forwardDrawData.program, "iPM");
+	_forwardDrawData.programMM = glGetUniformLocation(_forwardDrawData.program, "iMM");
+	_forwardDrawData.programBillboard = glGetUniformLocation(_forwardDrawData.program, "iBillboard");
 	_forwardDrawData.programTexture = glGetUniformLocation(_forwardDrawData.program, "iTexture");
 	_forwardDrawData.programAnimated = glGetUniformLocation(_forwardDrawData.program, "iAnimated");
 	_forwardDrawData.programOffsets = glGetUniformLocation(_forwardDrawData.program, "iOffsets");
@@ -237,24 +238,6 @@ void RenderPipeline::setupForward()
 void RenderPipeline::cleanupForward()
 {
 	glDeleteProgram(_forwardDrawData.program);
-}
-
-/// <summary>
-/// Helper method initial setup
-/// Set up shaders for billboard pass
-/// </summary>
-void RenderPipeline::setupBillboard()
-{
-	//TODO billboard implementation
-}
-
-/// <summary>
-/// Helper method for final cleanup
-/// Deletes billboard pass program
-/// </summary>
-void RenderPipeline::cleanupBillboard()
-{
-	//TODO billboard implementation
 }
 
 /// <summary>
@@ -725,25 +708,29 @@ void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay
 	else
 	{
 		drawCamera(scene); //set up the camera
-		drawObjects(scene); //do the geometry pass
-		drawShadows(scene); //do the shadow map
-		drawLighting(scene); //do the lighting pass
-		drawForward(scene); //do the forward pass
-		drawBillboard(scene); //do the billboard pass
-		drawPostProcessing(scene); //do the postprocessing
+
+		if (_deferredStageEnabled)
+		{
+			drawObjects(scene); //do the geometry pass
+			drawShadows(scene); //do the shadow map
+			drawLighting(scene); //do the lighting pass
+		}
+		
+		if (_forwardStageEnabled)
+		{ 
+			//TODO something something depth buffer
+			drawForward(scene); //do the forward pass
+		}
+		
+		if(_postprocessingEnabled)
+			drawPostProcessing(scene); //do the postprocessing
+		//TODO blit if postprocessing disabled
 	}
 
-	if (overlay == nullptr)
-	{
-		drawNullOverlay();
-	}
-	else
+	if(_overlayStageEnabled && overlay != nullptr)
 	{
 		drawOverlay(overlay); //do the overlay pass
 	}
-
-	//TODO vsync/no vsync
-	//SDL_GL_SwapWindow(_window_p); //will be moved back here once idle screen problems can be fixed
 }
 
 /// <summary>
@@ -785,6 +772,9 @@ void RenderPipeline::drawCamera(RenderableScene *scene) //TODO rename?
 	_baseModelViewMatrix = view;
 	_baseModelViewProjectionMatrix = projection * view;
 	_baseProjectionMatrix = projection;
+
+	_cameraRightWorld = glm::vec3(view[0][0], view[1][0], view[2][0]);
+	_cameraUpWorld = glm::vec3(view[0][1], view[1][1], view[2][1]);
 
 	//also get main directional and ambient lighting here since multiple pipeline stages need it
 	bool foundMainDirectionalLight = false;
@@ -952,11 +942,11 @@ void RenderPipeline::drawObject(RenderableObject *object)
 	objectMVM = glm::translate(objectMVM, object->position);
 	//SDL_Log("%f, %f, %f", object->position.x, object->position.y, object->position.z);
 	objectMVM = glm::scale(objectMVM, object->scale);
-	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
-	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
 	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
 	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
-	glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+	//glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
 	glUniformMatrix4fv(_shaderMVPMatrixID, 1, GL_FALSE, &objectMVPM[0][0]);
 	glUniformMatrix4fv(_shaderModelMatrixID, 1, GL_FALSE, &objectMVM[0][0]);
 
@@ -1071,9 +1061,7 @@ void RenderPipeline::drawLighting(RenderableScene *scene)
 {
 
 	//setup framebuffer
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebufferID);
 	glBindFramebuffer(GL_FRAMEBUFFER, _postFramebufferID);
-
 	glViewport(0, 0, _renderWidth, _renderHeight);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1308,18 +1296,18 @@ glm::vec3 RenderPipeline::computeAmbientLight(RenderableScene *scene)
 }
 
 /// <summary>
-/// Draws all forward objects in the scene
+/// Draws all forward (including billboard) objects in the scene
 /// 
 /// </summary>
 void RenderPipeline::drawForward(RenderableScene *scene)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, _framebufferID);
+	glBindFramebuffer(GL_FRAMEBUFFER, _postFramebufferID);
 	glViewport(0, 0, _renderWidth, _renderHeight);
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1333,19 +1321,22 @@ void RenderPipeline::drawForward(RenderableScene *scene)
 	glUniform3f(_forwardDrawData.programDLight, directional.r, directional.g, directional.b);
 
 	glm::mat4 rotMatrix = glm::mat4();
-	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.y, glm::vec3(0, 1, 0));
-	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.x, glm::vec3(1, 0, 0));
 	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.z, glm::vec3(0, 0, 1));
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.x, glm::vec3(1, 0, 0));
+	rotMatrix = glm::rotate(rotMatrix, _mainDirectionalLight.rotation.y, glm::vec3(0, 1, 0));
 	glm::vec3 lightFacing = rotMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	glUniform3f(_forwardDrawData.programDLightFacing, lightFacing.x, lightFacing.y, lightFacing.z);
 
 	glm::vec3 cPos = scene->camera.position;
 	glUniform3f(_forwardDrawData.programCameraPos, cPos.x, cPos.y, cPos.z);
 
+	glUniformMatrix4fv(_forwardDrawData.programPM, 1, GL_FALSE, &_baseProjectionMatrix[0][0]);
+
 	for (auto &obj : scene->forwardObjects)
 	{
 		drawForwardObject(&obj);
 	}
+
 }
 
 /// <summary>
@@ -1426,16 +1417,53 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 
 	glUniform1f(_shaderSmoothnessID, object->smoothness);
 
-	//transform!
-	glm::mat4 objectMVM = glm::mat4();
-	objectMVM = glm::translate(objectMVM, object->position);
-	objectMVM = glm::scale(objectMVM, object->scale);
-	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0)); //TODO change to z/y/x or z/x/y
-	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
-	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
-	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
-	glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
-	glUniformMatrix4fv(_forwardDrawData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
+	//normal or billboard transform
+	if (object->type == RenderableType::BILLBOARD)
+	{
+		// billboard matrices
+		glm::mat4 objectMVM = glm::mat4();
+		objectMVM = glm::translate(objectMVM, object->position);
+		objectMVM = glm::scale(objectMVM, object->scale);
+		objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+		objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+		objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+		glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+
+		//reset part to identity
+		objectMVM2[0][0] = 1;
+		objectMVM2[0][1] = 0;
+		objectMVM2[0][2] = 0;
+		objectMVM2[1][0] = 0;
+		objectMVM2[1][1] = 1;
+		objectMVM2[1][2] = 0;
+		objectMVM2[2][0] = 0;
+		objectMVM2[2][1] = 0;
+		objectMVM2[2][2] = 1;
+
+		//rescale
+		objectMVM2 = glm::scale(objectMVM2, object->scale);
+
+		glUniformMatrix4fv(_forwardDrawData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
+		glUniformMatrix4fv(_forwardDrawData.programMM, 1, GL_FALSE, &objectMVM[0][0]);
+
+		glDepthMask(GL_FALSE);
+		glUniform1i(_forwardDrawData.programBillboard, GL_TRUE);
+	}
+	else
+	{	
+		glm::mat4 objectMVM = glm::mat4();
+		objectMVM = glm::translate(objectMVM, object->position);
+		objectMVM = glm::scale(objectMVM, object->scale);
+		objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
+		objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
+		objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+		glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
+		glUniformMatrix4fv(_forwardDrawData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
+		glUniformMatrix4fv(_forwardDrawData.programMM, 1, GL_FALSE, &objectMVM[0][0]);
+
+		glDepthMask(GL_TRUE);
+		glUniform1i(_forwardDrawData.programBillboard, GL_FALSE);
+	}
 
 	//draw!
 	if (hasModel)
@@ -1449,25 +1477,6 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 	
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-/// <summary>
-/// Draws all billboard objects in the scene
-/// 
-/// </summary>
-void RenderPipeline::drawBillboard(RenderableScene *scene)
-{
-	glDepthMask(GL_FALSE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	for (auto &obj : scene->billboardObjects)
-	{
-
-	}
 }
 
 /// <summary>
@@ -1615,16 +1624,16 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 void RenderPipeline::drawOverlayElement(RenderableObject * element)
 {
 	//get texture
-	GLuint texture;
-	auto texData = _textures_p->find(element->albedoName)->second;
-	if (texData.texID != 0)
+	GLuint texture = _fallbackTextureID;
+	auto texEl = _textures_p->find(element->albedoName);
+	if (texEl != _textures_p->end())
 	{
-		texture = texData.texID;
-	}
-	else
-	{
-		texture = _fallbackTextureID;
-	}
+		auto texData = texEl->second;
+		if (texData.texID != 0)
+		{
+			texture = texData.texID;
+		}
+	}	
 
 	//compute matrix
 	glm::mat4 objectMVM = glm::mat4();
@@ -1759,4 +1768,36 @@ bool RenderPipeline::releaseContext()
 bool RenderPipeline::haveContext()
 {
 	return true;
+}
+
+/// <summary>
+/// Setter method for deferred stage
+/// </summary>
+void RenderPipeline::setDeferredStage(bool enabled)
+{
+	_deferredStageEnabled = enabled;
+}
+
+/// <summary>
+/// Setter method for forward stage
+/// </summary>
+void RenderPipeline::setForwardStage(bool enabled)
+{
+	_forwardStageEnabled = enabled;
+}
+
+/// <summary>
+/// Setter method for overlay stage
+/// </summary>
+void RenderPipeline::setOverlayStage(bool enabled)
+{
+	_overlayStageEnabled = enabled;
+}
+
+/// <summary>
+/// Setter method for postprocessing stage
+/// </summary>
+void RenderPipeline::setPostprocessingStage(bool enabled)
+{
+	_postprocessingEnabled = enabled;
 }

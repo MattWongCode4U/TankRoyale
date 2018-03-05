@@ -33,6 +33,12 @@ private:
 	int _renderWidth = 0;
 	int _renderHeight = 0;
 
+	//stage enablement
+	bool _deferredStageEnabled = true;
+	bool _forwardStageEnabled = true;
+	bool _overlayStageEnabled = true;
+	bool _postprocessingEnabled = true;
+
 	//framebuffer textures
 	GLuint _framebufferID = 0;
 	GLuint _framebufferTexture0ID = 0;
@@ -122,6 +128,8 @@ private:
 	glm::mat4 _baseModelViewMatrix;
 	glm::mat4 _baseModelViewProjectionMatrix;
 	glm::mat4 _baseProjectionMatrix;
+	glm::vec3 _cameraUpWorld;
+	glm::vec3 _cameraRightWorld;
 	glm::mat4 _depthModelViewMatrix;
 	glm::mat4 _depthModelViewProjectionMatrix;
 	RenderableLight _mainDirectionalLight;
@@ -142,7 +150,6 @@ private:
 
 	void drawForward(RenderableScene * scene);
 	void drawForwardObject(RenderableObject * object);
-	void drawBillboard(RenderableScene * scene);
 
 	void drawOverlay(RenderableOverlay * overlay);
 	void drawNullOverlay();
@@ -167,8 +174,6 @@ private:
 	void cleanupPostProcessing();
 	void setupForward();
 	void cleanupForward();
-	void setupBillboard();
-	void cleanupBillboard();
 	void setupOverlay();
 	void cleanupOverlay();
 
@@ -193,5 +198,10 @@ public:
 	bool acquireContext();
 	bool releaseContext();
 	bool haveContext();
+
+	void setDeferredStage(bool enabled);
+	void setForwardStage(bool enabled);
+	void setOverlayStage(bool enabled);
+	void setPostprocessingStage(bool enabled);
 
 };

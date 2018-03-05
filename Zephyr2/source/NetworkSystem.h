@@ -9,7 +9,7 @@ public:
 
 	// use config file to set this later
 	// for testing we'll leave both echo mode to true and serverIP to empty (which should also be set via confgig file)
-	bool echoMode = true;
+	bool echoMode = false;
 	std::string serverIP = "";
 
 	NetworkSystem(MessageBus* mbus);
@@ -58,4 +58,8 @@ public:
 	void sendPacket(DataType d, std::string data);
 
 	int timerValue = 0;
+
+	bool connected = false;
+
+	void setupNetwork(std::string classType);
 };
