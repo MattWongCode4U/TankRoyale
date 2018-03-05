@@ -93,7 +93,7 @@ public:
 
 	vector<string> actionsToExecute; //the actions to be executed this turn. Received from the network system
 
-	int hexSize = 50; //"radius" of a single hexagon in the grid
+	float hexSize = 7.1f; //"radius" of a single hexagon in the grid
 
 	//for getting the position of the highlighted button
 	GameObject* buttonHighlighted;
