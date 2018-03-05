@@ -45,8 +45,8 @@ void RenderSystem::init() {
 	cam.viewAngle = glm::radians(60.0f);
 	//cam.position = glm::vec3(0, 0, -100.0f);
 	//cam.rotation = glm::vec3(0, glm::pi<float>(), 0);
-	cam.position = glm::vec3(0, 0, 10.0f);
-	cam.rotation = glm::vec3(0, 0, 0);
+	cam.position = glm::vec3(0, -70.0f, 3.0f);
+	cam.rotation = glm::vec3(-0.8f, 0, 0);
 	scene->camera = cam;
 
 	RenderableLight mainLight;

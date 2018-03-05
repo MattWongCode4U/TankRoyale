@@ -12,7 +12,7 @@ public:
 	std::string id;
 	float x;
 	float y;
-	int z;
+	float z;
 	int width;
 	int length;
 	int originalWidth; // necessary for the scale of the healthbar. Also for scaling maybe?

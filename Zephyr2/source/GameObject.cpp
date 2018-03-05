@@ -13,7 +13,7 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		
 		x = stof(paramsMap.find("xPos")->second);
 		y = stof(paramsMap.find("yPos")->second);
-		z = stoi(paramsMap.find("zPos")->second);
+		z = stof(paramsMap.find("zPos")->second);
 		orientation = stoi(paramsMap.find("orientation")->second);
 		width = stoi(paramsMap.find("width")->second);
 		length = stoi(paramsMap.find("length")->second);
