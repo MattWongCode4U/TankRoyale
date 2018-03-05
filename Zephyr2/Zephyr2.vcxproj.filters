@@ -197,5 +197,8 @@
     <ClInclude Include="source\scene_GameOver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="scene_PauseMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
