@@ -29,7 +29,7 @@ private:
 	bool _deferredStageEnabled = true;
 	bool _forwardStageEnabled = true;
 	bool _overlayStageEnabled = true;
-	bool _postprocessingEnabled = true;
+	bool _postprocessingEnabled = false;
 
 	//framebuffer textures
 	FramebufferSetup _framebufferData;
@@ -57,6 +57,9 @@ private:
 
 	//postprocessing program and buffers
 	PostProcessingSetup _postProcessingData;
+
+	//postprocessing bypass program and buffers
+	PostBypassSetup _postBypassData;
 
 	//overlay draw program and buffers (TODO move all to structs)
 	OverlaySetup _overlayDrawData;
@@ -86,6 +89,7 @@ private:
 	void drawLightingPointLight(RenderableLight light, RenderableScene * scene);
 	void drawLightingSpotLight(RenderableLight light, RenderableScene * scene);
 	void drawPostProcessing(RenderableScene * scene);
+	void drawPostBypass(RenderableScene * scene);
 	void drawPostProcessingCopySmearbuffer(float blurFactor, float blurAmount);
 
 	void drawForward(RenderableScene * scene);

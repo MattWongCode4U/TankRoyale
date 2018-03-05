@@ -169,6 +169,12 @@ struct PostProcessingSetup
 	GLuint smearTexture;
 };
 
+struct PostBypassSetup
+{
+	GLuint program;
+	GLuint programTexture;
+};
+
 struct OverlaySetup
 {
 	GLuint vao;

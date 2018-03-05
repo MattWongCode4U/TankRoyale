@@ -484,6 +484,10 @@ void RenderPipeline::cleanupShadowMapping()
 /// </summary>
 void RenderPipeline::setupPostProcessing()
 {
+	//load bypass/alternate shader
+	_postBypassData.program = Shaders::LoadShadersPostBypass();
+	_postBypassData.programTexture = glGetUniformLocation(_postBypassData.program, "fBuffer");
+
 	//load shader
 	_postProcessingData.program = Shaders::LoadShadersPostProcessing();
 	_postProcessingData.programTexture = glGetUniformLocation(_postProcessingData.program, "fBuffer");
@@ -544,6 +548,7 @@ void RenderPipeline::cleanupPostProcessing()
 	glDeleteTextures(1, &_postProcessingData.smearTexture);
 	glDeleteFramebuffers(1, &_postProcessingData.smearFbo);
 
+	glDeleteProgram(_postBypassData.program);
 	glDeleteProgram(_postProcessingData.program);
 	glDeleteProgram(_postProcessingData.copyProgram);
 }
@@ -727,9 +732,10 @@ void RenderPipeline::doRender(RenderableScene *scene, RenderableOverlay *overlay
 			drawForward(scene); //do the forward pass
 		}
 		
-		if(_postprocessingEnabled)
+		if (_postprocessingEnabled)
 			drawPostProcessing(scene); //do the postprocessing
-		//TODO blit if postprocessing disabled
+		else
+			drawPostBypass(scene);
 	}
 
 	if(_overlayStageEnabled && overlay != nullptr)
@@ -1482,6 +1488,33 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 	
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+/// <summary>
+/// Apply "null" postprocessing: just blit the buffer
+/// </summary>
+void RenderPipeline::drawPostBypass(RenderableScene *scene)
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, _postFramebufferID);
+
+	int w, h;
+	SDL_GL_GetDrawableSize(_window_p, &w, &h);
+	glViewport(0, 0, w, h);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(_postBypassData.program);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _postProcessingData.texture);
+	glUniform1i(_postBypassData.programTexture, 0);
+
+	glBindVertexArray(_fullscreenQuadData.vao);
+	glDrawArrays(GL_TRIANGLES, 0, _fullscreenQuadData.vertices);
+
+	glBindVertexArray(0);
 }
 
 /// <summary>
