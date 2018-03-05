@@ -422,8 +422,8 @@ void RenderWrapper::levelLoaded(Msg* m) {
 	state = RendererState::rendering;
 	loadedLevel = atoi(m->data.c_str()); //what does this do?
 	if (loadedLevel != 2) { //Reset camera when not in game
-		scene->camera.position.x = 0.0f;
-		scene->camera.position.y = 0.0f;
+		//scene->camera.position.x = 0.0f;
+		//scene->camera.position.y = 0.0f;
 	}
 }
 /*
