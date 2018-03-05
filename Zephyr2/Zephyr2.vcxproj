@@ -104,7 +104,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib;$(SolutionDir)Dependencies/sdl/lib;$(SolutionDir)Dependencies/glew/lib;$(SolutionDir)Dependencies/freeglut/lib;$(SolutionDir)Dependencies/fmod/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -158,7 +158,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib;$(SolutionDir)Dependencies/sdl/lib;$(SolutionDir)Dependencies/glew/lib;$(SolutionDir)Dependencies/freeglut/lib;$(SolutionDir)Dependencies/fmod/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -187,6 +187,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\renderer\GlobalPrefs.cpp" />
     <ClCompile Include="source\renderer\OBJImport.cpp" />
     <ClCompile Include="source\renderer\RenderPipeline.cpp" />
+    <ClCompile Include="source\renderer\RenderWrapper.cpp" />
     <ClCompile Include="source\renderer\Shaders.cpp" />
     <ClCompile Include="source\RenderSystem.cpp" />
     <ClCompile Include="source\Scene.cpp" />
@@ -221,6 +222,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\renderer\RenderableTypes.h" />
     <ClInclude Include="source\renderer\RendererInternalTypes.h" />
     <ClInclude Include="source\renderer\RenderPipeline.h" />
+    <ClInclude Include="source\renderer\RenderWrapper.h" />
     <ClInclude Include="source\renderer\Shaders.h" />
     <ClInclude Include="source\RenderSystem.h" />
     <ClInclude Include="source\Scene.h" />

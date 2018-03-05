@@ -1,11 +1,15 @@
 #include "RenderPipeline.h"
-#include "SDL.h"
-#include "SDL_image.h"
+
+#include <glew.h>
+#include <glm.hpp>
+#include <gtc\matrix_transform.hpp>
+#include <gtx\euler_angles.hpp>
+#include <SDL.h>
+#include <SDL_image.h>
+
 #include "..\Util.h"
 #include "GlobalPrefs.h"
 #include "Shaders.h"
-#include <gtc\matrix_transform.hpp>
-#include <gtx\euler_angles.hpp>
 #include "Quad.h"
 #include "OBJImport.h"
 //#include "Cube.h";
