@@ -101,9 +101,6 @@ public:
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
-	//is the game actively receiving player input? false when it game is waiting/animating
-	bool gameActive = false;
-
 
 	Msg *m;
 

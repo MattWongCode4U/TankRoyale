@@ -96,7 +96,7 @@
     <ClCompile Include="source\scene_GameOver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="scene_PauseMenu.cpp">
+    <ClCompile Include="source\scene_Lobby.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -200,7 +200,7 @@
     <ClInclude Include="source\scene_GameOver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scene_PauseMenu.h">
+    <ClInclude Include="source\scene_Lobby.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

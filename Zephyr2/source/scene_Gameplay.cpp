@@ -83,7 +83,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		//messages to be read in both active and inactive game state
 		switch (msg->type) {
 		case NETWORK_R_START_TURN:
-			gameSystem->gameActive = true;
+			gameActive = true;
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
 			actionOrigin = playerTank;
 
@@ -103,7 +103,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			gameSystem->actionsToExecute = split(msg->data, '\n');
 			gameSystem->currentAction = 0;
 			framesSinceTurnStart = 0;
-			gameSystem->gameActive = false;
+			gameActive = false;
 			OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
 			break;
 		case NETWORK_R_GAMESTART_OK: {//"id1,ClientID,id3,id4," only for server version
@@ -130,7 +130,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		}
 		//messages that are only read when game is in active state (used for blocking player input during animations)
 
-		if (gameSystem->gameActive) switch (msg->type) {
+		if (gameActive) switch (msg->type) {
 		case MOUSE_MOVE:
 		{
 			vector<string> objectData = split(msg->data, ',');
@@ -272,8 +272,70 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		case KEY_Z_PRESSED:
 			// PREVIOUSLY USED FOR TESTING HEALTHBAR // NOW UNUSED
 			break;
+		case KEY_ESC_PRESSED:
+			// Pause the game (lock control, display 2 buttons)
+			loadPauseMenu();
+			gameActive = false;
+			break;
 		default:
 			break;
+		}
+		else {
+			// can still move mouse around on game scene
+			vector<string> objectData;
+			INT32 x, y, width, length;
+			bool change;
+			switch (msg->type) {
+			case MOUSE_MOVE:
+				objectData = split(msg->data, ',');
+				x = atoi(objectData[0].c_str());
+				y = atoi(objectData[1].c_str());
+				width = atoi(objectData[2].c_str());
+				length = atoi(objectData[3].c_str());
+				x -= width / 2; y -= length / 2;
+				y = -y;
+				
+				// press one of the buttons
+				// 0 is exit
+				// 1 is resume
+				change = false;
+
+				for (GameObject *g : gameSystem->gameObjects)
+				{
+					if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+						(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+					{
+						if (g->id.compare("PauseMenuItem0") == 0)
+						{
+							// Load main menu
+							gameSystem->loadScene(MAIN_MENU);
+							change = true;
+							break;
+						} else if (g->id.compare("PauseMenuItem1") == 0)
+						{
+							// unload game objects from pause menu
+							unloadPauseMenuObjects();
+							// continue game
+							gameActive = true;
+							break;
+						}
+					}
+				}
+				if (change)
+				{
+					msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
+
+				}
+				break;
+			case KEY_ESC_PRESSED:
+				// resume gameplay
+				// basically button 1
+				unloadPauseMenuObjects();
+				gameActive = true;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -513,4 +575,13 @@ void Scene_Gameplay::setPlayerTank(std::string playerID) {
 			OutputDebugString(debugS.c_str());
 		}
 	}
+}
+
+void Scene_Gameplay::loadPauseMenu() {
+	gameSystem->addGameObjects("pause_menu.txt");
+}
+
+void Scene_Gameplay::unloadPauseMenuObjects() {
+	gameSystem->gameObjectRemoved(gameSystem->findGameObject("PauseMenuItem0"));
+	gameSystem->gameObjectRemoved(gameSystem->findGameObject("PauseMenuItem1"));
 }

@@ -238,10 +238,6 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 //	return worldPos;
 //}
 
-
-
-
-
 void GameSystem::displayTimeLeft(int time) {
 	int p0, p1;
 	if (time < 0) {
@@ -310,6 +306,7 @@ FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 
 
 void  GameSystem::loadScene(SceneType _scene){
+	
 	//calling destructor on the old scene just in case. 
 	if(scene!= nullptr)
 		scene->~Scene();
