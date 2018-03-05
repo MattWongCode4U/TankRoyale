@@ -50,6 +50,8 @@ public:
 
 	ObjectData objData;
 	void removeAllGameObjects();
+	void deleteGameObject(string id);
+	void deleteGameObject(GameObject* go);
 
 	//the currently loaded scene
 	Scene* scene;

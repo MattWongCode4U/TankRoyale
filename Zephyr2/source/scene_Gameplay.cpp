@@ -61,18 +61,19 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		std::ostringstream oss;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-		for (GameObject* g : gameSystem->gameObjects) {
-			if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
-				gameSystem->reticle = (GridObject*)g;
+		//for (GameObject* g : gameSystem->gameObjects) {
+		//	if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
+		//		gameSystem->reticle = (GridObject*)g;
 
-				//for testing of object parenting
-				/*GameObject* testObj = gameSystem->findGameObject("testObject");
-				if (testObj->parentObject == nullptr) {
-					testObj->setParent(g);
-				}*/
-				
-			}
-		}
+		//		//for testing of object parenting
+		//		/*GameObject* testObj = gameSystem->findGameObject("testObject");
+		//		if (testObj->parentObject == nullptr) {
+		//			testObj->setParent(g);
+		//		}*/
+		//		
+		//	}
+		//}
+		gameSystem->reticle = gameSystem->findGridObject("reticle");
 
 		vector<string> playersArray;
 		vector<string> playerAction;
@@ -243,7 +244,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				+ to_string(gameSystem->reticle->x)
 				+ "," + to_string(gameSystem->reticle->y)
 				+ ")\n";
-			OutputDebugString(s.c_str());
+			//OutputDebugString(s.c_str());
 			break;
 		}
 		case TEST_KEY_PRESSED:
@@ -272,7 +273,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		case KEY_Z_PRESSED:
 			// PREVIOUSLY USED FOR TESTING HEALTHBAR // NOW UNUSED
 			break;
-		case KEY_ESC_PRESSED:
+		case KEY_ESC_RELEASED:
 			// Pause the game (lock control, display 2 buttons)
 			loadPauseMenu();
 			gameActive = false;
@@ -286,7 +287,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			INT32 x, y, width, length;
 			bool change;
 			switch (msg->type) {
-			case MOUSE_MOVE:
+			case LEFT_MOUSE_BUTTON:
 				objectData = split(msg->data, ',');
 				x = atoi(objectData[0].c_str());
 				y = atoi(objectData[1].c_str());
@@ -324,10 +325,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				if (change)
 				{
 					msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
-
 				}
 				break;
-			case KEY_ESC_PRESSED:
+			case KEY_ESC_RELEASED:
 				// resume gameplay
 				// basically button 1
 				unloadPauseMenuObjects();
@@ -582,6 +582,6 @@ void Scene_Gameplay::loadPauseMenu() {
 }
 
 void Scene_Gameplay::unloadPauseMenuObjects() {
-	gameSystem->gameObjectRemoved(gameSystem->findGameObject("PauseMenuItem0"));
-	gameSystem->gameObjectRemoved(gameSystem->findGameObject("PauseMenuItem1"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem0"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem1"));
 }

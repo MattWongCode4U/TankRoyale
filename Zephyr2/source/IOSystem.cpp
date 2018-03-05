@@ -91,6 +91,14 @@ void IOSystem::checkKeyPresses() {
 			}
 		}
 
+		if (GetKeyState(VK_ESCAPE) < 0) {
+			m->type = KEY_ESC_RELEASED;
+			if ((clock() - keyspressed["left"]) >= timebetweenPresses) {
+				keyspressed["left"] = clock();
+				msgBus->postMessage(m, this);
+			}
+		}
+
 		if (GetKeyState('A') & 0x8000) {
 			//OutputDebugString("A Pressed\n"); 
 			m->type = KEY_A_PRESSED;
