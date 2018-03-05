@@ -13,15 +13,17 @@ public:
 	float x;
 	float y;
 	float z;
-	int width;
-	int length;
+	float width;
+	float length;
+	float height = 1.0f;
 	int originalWidth; // necessary for the scale of the healthbar. Also for scaling maybe?
 	int originalLength;
 	int orientation; // in degrees, 0 pointing up on the screen, clockwise rotation = positive
 	//int physicsEnabled; // 0 or 1.
 	//int windScale; //how effected the object is by wind 0-1
 	int imageFrames;
-	
+	int imageFramesDelay;
+
 	// in degrees, same as orientation; difference is that orientation is used for rendering, direction is the direction of movement
 	// this CAN BE DIFFERENT from orientation; eg: cannon ball orientated one direction, but affecteed by the wind will curve.
 	int direction; 
