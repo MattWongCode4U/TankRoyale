@@ -310,17 +310,17 @@ void Scene_Gameplay::executeAction(int a) {
 
 				gameSystem->createGameObject(gr);
 				gr->updateWorldCoords();
-				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-
-				int length = 4;
-				//int damage = 19;
-				//axis = chooseAxisFromClick();
-				for (GameObject* g : gameSystem->gameObjects) {
+				dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
+				
+				/*for (GameObject* g : gameSystem->gameObjects) {
 					if (g->id == currentObjectId) {
-						TankObject* t = (TankObject*)g;
-						dealLineDamage(t->gridX, t->gridY, length, 2, damage);
+						TankObject* t = (TankObject*)g; //the player's TankObject
+						//axis = onAxis(t->gridX, t->gridY, cursorX, cursorY, range); //CursorX and cursorY need to be where the player tried to shoot in a line
+						if(axis != -1){
+							dealLineDamage(t->gridX, t->gridY, range, axis, damage);
+						}
 					}
-				}
+				}*/
 				break;
 			}
 
@@ -412,7 +412,7 @@ void Scene_Gameplay::dealLineDamage(int _originX, int _originY, int length, int 
 		int dist = -1;
 		for (TankObject* t : thingsHit) {
 			OutputDebugString((t->id).c_str());
-			OutputDebugString("hit\n");
+			OutputDebugString(" hit\n");
 			if (dist < getGridDistance(_originX, _originY, t->gridX, t->gridY)) {
 				dist = getGridDistance(_originX, _originY, t->gridX, t->gridY);
 				currClosestTank = t;
@@ -480,6 +480,7 @@ bool Scene_Gameplay::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int 
 		break;
 	}
 
+	//Test if the point line up on the specified axis
 	for (int i = 1; i < length; i++) {
 		int tempaXCube = aXCube + axisBase[0] * i;
 		int tempaYCube = aYCube + axisBase[1] * i;
@@ -505,7 +506,10 @@ bool Scene_Gameplay::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int 
 }
 
 //For selecting a direction to shoot along an axis
-int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2) {
+//position of player's tank: (x1, y1)
+//position of click: (x2, y2)
+//returns 0=r 1=l 2=ur 3=dl 4=ul 5=dr -1=none
+int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 	if (x1 == x2 && y1 == y2) { //same location
 		return -1;
 	}
@@ -518,12 +522,99 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2) {
 	int bZCube = y2;
 	int bYCube = -bXCube - bZCube;
 
+	//Check directions then return if it is in that direction
+
 	//r (+1, -1, 0)
+	int r[3] = { 1, -1, 0 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + r[0] * i;
+		int tempaYCube = aYCube + r[1] * i;
+		int tempaZCube = aZCube + r[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("right\n");
+			return 0;
+		}
+	}
+
 	//l (-1, +1, 0)
+	int l[3] = { -1, 1, 0 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + l[0] * i;
+		int tempaYCube = aYCube + l[1] * i;
+		int tempaZCube = aZCube + l[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("left\n");
+			return 1;
+		}
+	}
+
 	//ur (+1, 0, -1)
+	int ur[3] = { 1, 0, -1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + ur[0] * i;
+		int tempaYCube = aYCube + ur[1] * i;
+		int tempaZCube = aZCube + ur[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("up right\n");
+			return 2;
+		}
+	}
+
 	//dl (-1, 0, +1)
+	int dl[3] = { -1, 0, 1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + dl[0] * i;
+		int tempaYCube = aYCube + dl[1] * i;
+		int tempaZCube = aZCube + dl[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("down left\n");
+			return 3;
+		}
+	}
+
 	//ul (0, +1, -1)
+	int ul[3] = { 0, 1, -1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + ul[0] * i;
+		int tempaYCube = aYCube + ul[1] * i;
+		int tempaZCube = aZCube + ul[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("up left\n");
+			return 4;
+		}
+	}
+
 	//dr (0, -1, +1)
+	int dr[3] = { 0, -1, 1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + dr[0] * i;
+		int tempaYCube = aYCube + dr[1] * i;
+		int tempaZCube = aZCube + dr[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("down right\n");
+			return 5;
+		}
+	}
+
+	return -1; //Not on any axis or in range
 }
 
 int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
