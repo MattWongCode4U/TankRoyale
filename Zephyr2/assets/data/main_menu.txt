@@ -24,6 +24,7 @@ length: 720,
 physicsEnabled: 0,
 windScale: 0,
 renderType: overlay,
+animationDelay: 5,
 imageFrames: 33;
 
 gameObjectType: FullscreenObj,
