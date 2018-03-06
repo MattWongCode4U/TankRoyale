@@ -12,7 +12,7 @@ GridObject::GridObject(ObjectData* _objData, std::string _id, std::string _rende
 	x = _x;
 	y = _y;
 	z = _z;
-	orientation = _orientation;
+	zRotation = _orientation;
 	width = _width;
 	length = _length;
 	height = 1.0f;

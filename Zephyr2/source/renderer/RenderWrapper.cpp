@@ -233,8 +233,9 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	//derived from old renderObject implementation, could be optimized
 	//TODO need to redefine object data message
 	std::string sprite, model, normal;
-	float x, y, z, orientation, w, l, h, smoothness;
+	float x, y, z, xRotation, yRotation, zRotation, w, l, h, smoothness;
 	int frames = 1;
+	int delay = 1;
 	int type = (int)RenderableType::OBJECT3D;
 
 	id = objectData[0];
@@ -242,26 +243,30 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	x = (float)(atof(objectData[2].c_str()));
 	y = (float)(atof(objectData[3].c_str()));
 	z = (float)(atof(objectData[4].c_str()));
-	orientation = (float)(atof(objectData[5].c_str()));
-	w = (float)(atof(objectData[6].c_str()));
-	l = (float)(atof(objectData[7].c_str()));
-	h = (float)(atof(objectData[8].c_str()));
-	frames = atoi(objectData[10].c_str());
-	type = atoi(objectData[11].c_str());
-	model = trimResourceName(objectData[12]);
-	normal = trimResourceName(objectData[13]);
-	smoothness = (float)(atof(objectData[14].c_str()));
+	xRotation = (float)(atof(objectData[5].c_str()));
+	yRotation = (float)(atof(objectData[6].c_str()));
+	zRotation = (float)(atof(objectData[7].c_str()));
+	w = (float)(atof(objectData[8].c_str()));
+	l = (float)(atof(objectData[9].c_str()));
+	h = (float)(atof(objectData[10].c_str()));
+	frames = atoi(objectData[12].c_str());
+	type = atoi(objectData[13].c_str());
+	model = trimResourceName(objectData[14]);
+	normal = trimResourceName(objectData[15]);
+	smoothness = (float)(atof(objectData[16].c_str()));
+	delay = atoi(objectData[17].c_str());
 
 	//set obj data
 	obj.type = (RenderableType)type;
 	obj.position = glm::vec3(x, y, z);
-	obj.rotation = glm::vec3(0, 0, glm::radians(orientation));
+	obj.rotation = glm::vec3(glm::radians(xRotation), glm::radians(yRotation), glm::radians(zRotation));
 	obj.scale = glm::vec3(w, l, h);
 	obj.modelName = model;
 	obj.albedoName = spriteName;
 	obj.normalName = normal;
 	obj.smoothness = smoothness;
 	obj.frameCount = frames;
+	obj.frameDelay = delay;
 
 	return std::make_pair(id, obj);
 }
@@ -306,8 +311,8 @@ void RenderWrapper::updateObjPosition(Msg* m) {
 
 	RenderableObject *obj = &objects->at(id);
 	obj->position = glm::vec3((float)(atof(dataVector[2].c_str())), (float)(atof(dataVector[3].c_str())), (float)(atof(dataVector[4].c_str())));
-	obj->rotation = glm::vec3(0, 0, glm::radians((float)(atof(dataVector[5].c_str()))));
-	obj->scale = glm::vec3((float)(atof(dataVector[6].c_str())), (float)(atof(dataVector[7].c_str())), (float)(atof(dataVector[8].c_str())));
+	obj->rotation = glm::vec3(glm::radians((float)(atof(dataVector[5].c_str()))), glm::radians((float)(atof(dataVector[6].c_str()))), glm::radians((float)(atof(dataVector[7].c_str()))));
+	obj->scale = glm::vec3((float)(atof(dataVector[8].c_str())), (float)(atof(dataVector[9].c_str())), (float)(atof(dataVector[10].c_str())));
 }
 
 /*
@@ -335,7 +340,7 @@ void RenderWrapper::updateObjRender(Msg * m)
 {
 	//SDL_Log(m->data.c_str());
 
-	//id,renderable,renderType,model,normalMap,smoothness
+	//id,renderable,renderType,model,normalMap,smoothness,frameCount, frameDelay
 	std::vector<std::string> objectData = split(m->data, ',');
 	std::string id = objectData[0];
 
@@ -351,6 +356,10 @@ void RenderWrapper::updateObjRender(Msg * m)
 		obj->normalName = trimResourceName(objectData[4]);
 	if (!objectData[5].empty())
 		obj->smoothness = stof(objectData[5]);
+	if (!objectData[6].empty())
+		obj->frameCount = stoi(objectData[6]);
+	if (!objectData[7].empty())
+		obj->frameDelay = stoi(objectData[7]);
 }
 
 /*

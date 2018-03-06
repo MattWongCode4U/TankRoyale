@@ -10,7 +10,7 @@ enum MSG_TYPE {
 
 	// Render System
 	UPDATE_OBJ_SPRITE,
-	UPDATE_OBJ_RENDER, //id,renderable,renderType,model,normalMap,smoothness
+	UPDATE_OBJ_RENDER, //id,renderable,renderType,model,normalMap,smoothness, frameCount, frameDelay
 
 	// Physics System
 	UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,height,physEnabled,type
