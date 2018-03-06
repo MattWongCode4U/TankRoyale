@@ -50,6 +50,8 @@ public:
 
 	ObjectData objData;
 	void removeAllGameObjects();
+	void deleteGameObject(string id);
+	void deleteGameObject(GameObject* go);
 
 	//the currently loaded scene
 	Scene* scene;
@@ -100,9 +102,6 @@ public:
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;
-
-	//is the game actively receiving player input? false when it game is waiting/animating
-	bool gameActive = false;
 
 
 	Msg *m;
