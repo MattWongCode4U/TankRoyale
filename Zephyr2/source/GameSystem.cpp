@@ -76,7 +76,7 @@ void GameSystem::createGameObject(GameObject* g) {
 		for (GameObject* p : gameObjects) {
 			if (p->id == g->parentId) {
 				g->setParent(p);
-				g->offsetPosition(p->x, p->y, 0, p->orientation);
+				g->offsetPosition(p->x, p->y, 0, p->zRotation);
 			}
 				
 			
@@ -88,7 +88,9 @@ void GameSystem::createGameObject(GameObject* g) {
 	oss << g->id << ','
 		<< g->renderable << ','
 		<< g->x << ',' << g->y << ',' << g->z << ','
-		<< g->orientation << ','
+		<< g->xRotation << ","
+		<< g->yRotation << ","
+		<< g->zRotation << ","
 		<< g->width << ',' << g->length << ',' << g->height << ','
 		//<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
@@ -96,7 +98,8 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< (int)g->renderType << ","
 		<< g->model << ","
 		<< g->normalMap << ","
-		<< g->smoothness;
+		<< g->smoothness << ","
+		<< g->animationDelay;
 	//<< g->renderable;
 	// maybe add the rest of the variables into the oss as well, but can decide later depending on
 	// what physics needs
@@ -252,7 +255,9 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 		<< g->x << ","
 		<< g->y << ","
 		<< g->z << ","
-		<< g->orientation << ","
+		<< g->xRotation << ","
+		<< g->yRotation << ","
+		<< g->zRotation << ","
 		<< g->width << ","
 		<< g->length << ","
 		<< g->height << ","

@@ -4,6 +4,51 @@ using namespace std;
 
 NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 	m = new Msg(EMPTY_MESSAGE, "");
+}
+
+NetworkSystem::~NetworkSystem()
+{
+}
+
+void NetworkSystem::startSystemLoop() {
+	clock_t thisTime = clock();
+
+	int currentGameTime = 0;
+	int timerGameTime = 0;
+
+	while (alive) {
+		thisTime = clock();
+		if (thisTime < currentGameTime) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
+		}
+		handleMsgQ();
+
+		// if testing mode
+		if (echoMode && timerActive) {
+			int timeLeft = 30 - ((clock() - turnStartTime) / 1000);
+
+			//post the time left message (includes the actual time left in the message data)
+			m->type = NETWORK_R_PING;
+			m->data = to_string(timeLeft);
+			msgBus->postMessage(m, this);
+
+			if (timeLeft <= 0) {
+				broadcastTurnInfo();
+				timerActive = false;
+			}
+
+		} 
+		else {
+			networkUpdate();
+		}
+
+		currentGameTime = thisTime + timeFrame;
+
+
+	}
+}
+
+void NetworkSystem::setupNetwork(std::string classType) {
 
 	if (!echoMode) {
 		// create WSADATA object
@@ -93,51 +138,11 @@ NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 		Data packet;
 		packet.packet_type = INIT_CONNECTION;
 
+		packet.setData(classType.c_str());
+
 		packet.serialize(packet_data);
 
 		NetworkHelpers::sendMessage(ConnectSocket, packet_data, packet_size);
-	}
-}
-
-NetworkSystem::~NetworkSystem()
-{
-}
-
-void NetworkSystem::startSystemLoop() {
-	clock_t thisTime = clock();
-
-	int currentGameTime = 0;
-	int timerGameTime = 0;
-
-	while (alive) {
-		thisTime = clock();
-		if (thisTime < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
-		}
-		handleMsgQ();
-
-		// if testing mode
-		if (echoMode && timerActive) {
-			int timeLeft = 30 - ((clock() - turnStartTime) / 1000);
-
-			//post the time left message (includes the actual time left in the message data)
-			m->type = NETWORK_R_PING;
-			m->data = to_string(timeLeft);
-			msgBus->postMessage(m, this);
-
-			if (timeLeft <= 0) {
-				broadcastTurnInfo();
-				timerActive = false;
-			}
-
-		} 
-		else {
-			networkUpdate();
-		}
-
-		currentGameTime = thisTime + timeFrame;
-
-
 	}
 }
 
@@ -154,6 +159,7 @@ void NetworkSystem::handleMessage(Msg *msg) {
 			break;
 		case READY_TO_START_GAME:
 			if (!echoMode) {
+				setupNetwork(msg->data);
 				sendActionPackets();
 			}
 			else {
@@ -162,7 +168,8 @@ void NetworkSystem::handleMessage(Msg *msg) {
 				OutputDebugString("SENT NETWORK_R_START_TURN from NetworkSystem\n");
 
 				//testing sending NETWORK_R_GAMESTART_OK message
-				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,defaultClientID,id3,id4,"), this);
+				//id1,class1|id2,class2|etc.
+				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,light|defaultClientID,heavy|id3,arty|id4,heavy|"), this);
 			}
 			break;
 		case NETWORK_S_ANIMATIONS:
@@ -274,7 +281,7 @@ void NetworkSystem::sendActionPackets()
 
 void NetworkSystem::networkUpdate() {
 	Data packet;
-	int data_length = receivePackets(network_data);
+	int data_length = receivePackets(network_data); 
 	Msg* m = new Msg(EMPTY_MESSAGE);
 
 	if (data_length <= 0)

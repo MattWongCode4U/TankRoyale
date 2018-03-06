@@ -1707,7 +1707,7 @@ glm::vec4 RenderPipeline::computeAnimationOffsets(const RenderableObject & objec
 {
 	//crudely adapted from existing code
 	int frames = object.frameCount;
-	int animationCount = (int)_frameCount;
+	int animationCount = (int)_frameCount / object.frameDelay;
 
 	if (frames == 0) {
 		frames = 1;

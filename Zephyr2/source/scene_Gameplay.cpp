@@ -17,7 +17,7 @@ void Scene_Gameplay::startScene() {
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
 	
-	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
+	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
 }
 
 //called every frame of the gameloop
@@ -108,7 +108,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
 			break;
 		case NETWORK_R_GAMESTART_OK: {//"id1,ClientID,id3,id4," only for server version
-			vector<string> clientIDVector = split(msg->data, ',');
+			//id1,class1|id2,class2|etc.
+			vector<string> clientIDVector = split(msg->data, '|');
+			vector<string> tankIdClassVector;
 			//OutputDebugString(to_string(clientIDVector.size()).c_str());
 
 			OutputDebugString("GS: NETWORK_R_GAMESTART_OK RECEIVED:  ");
@@ -116,7 +118,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString("\n");
 
 			for (int i = 0; i < clientIDVector.size(); i++) {
-				if (clientIDVector[i] == gameSystem->clientID) {
+				tankIdClassVector = split(clientIDVector[i], ',');
+				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
 					setPlayerTank("player" + to_string(i + 1));
 				}
@@ -487,7 +490,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << curHealthBar->originalWidth << ",";
 			oss << curHealthBar->length << ",";
 			oss << curHealthBar->height;
@@ -511,7 +516,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << hpBarSize << ","; // width
 			oss << curHealthBar->length << ","; // lenght
 			oss << curHealthBar->height;
@@ -533,7 +540,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << hpBarSize << ","; // width
 			oss << curHealthBar->length << ",";
 			oss << curHealthBar->height;
@@ -556,7 +565,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << hpBarSize << ","; // width
 			oss << curHealthBar->length << ","; // lenght
 			oss << curHealthBar->height; // lenght

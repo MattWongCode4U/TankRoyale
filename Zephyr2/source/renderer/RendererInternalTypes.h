@@ -206,6 +206,7 @@ struct RenderableObject
 	std::string normalName;
 	GLfloat smoothness;
 	int frameCount;
+	int frameDelay;
 };
 
 /// <summary>

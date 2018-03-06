@@ -104,6 +104,8 @@ public:
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
+	std::string tankClass = "heavy";
+
 
 	Msg *m;
 
