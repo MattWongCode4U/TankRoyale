@@ -1,10 +1,10 @@
 #pragma once
 #include "Scene.h"
 
-class Scene_PauseMenu : public Scene {
+class Scene_Lobby : public Scene {
 public:
-	Scene_PauseMenu(MessageBus* _mbus, GameSystem* _gs);
-	~Scene_PauseMenu();
+	Scene_Lobby(MessageBus* _mbus, GameSystem* _gs);
+	~Scene_Lobby();
 
 	//Runs once per gameloop frame
 	void sceneUpdate();

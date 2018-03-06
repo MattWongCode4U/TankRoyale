@@ -358,6 +358,9 @@ void  GameSystem::loadScene(SceneType _scene){
 	case MAIN_MENU:
 		scene = new Scene_MainMenu(msgBus, this);
 		break;
+	case LOBBY_MENU:
+		scene = new Scene_Lobby(msgBus, this);
+		break;
 	case GAMEPLAY:
 		scene = new Scene_Gameplay(msgBus, this);
 		break;
