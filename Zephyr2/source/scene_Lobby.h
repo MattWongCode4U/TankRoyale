@@ -1,10 +1,12 @@
 #pragma once
 #include "Scene.h"
 
-class Scene_PauseMenu : public Scene {
+class Scene_Lobby : public Scene {
 public:
-	Scene_PauseMenu(MessageBus* _mbus, GameSystem* _gs);
-	~Scene_PauseMenu();
+	Scene_Lobby(MessageBus* _mbus, GameSystem* _gs);
+	~Scene_Lobby();
+
+	std::string playerSelectedClass;
 
 	//Runs once per gameloop frame
 	void sceneUpdate();
@@ -14,4 +16,6 @@ public:
 
 	//code that runs once when  scene is loaded goes here
 	void startScene();
+
+	std::string playerSelection(int option);
 };

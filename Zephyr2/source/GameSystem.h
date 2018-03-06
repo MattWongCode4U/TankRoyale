@@ -15,6 +15,7 @@
 #include "TankObject.h"
 #include "ObjectData.h"
 #include "Scene_MainMenu.h"
+#include "Scene_Lobby.h"
 #include "Scene_Gameplay.h"
 #include "Scene_SettingsMenu.h"
 #include "Scene_InstructionsMenu.h"
@@ -28,7 +29,7 @@ enum PlayerID {
 	PLAYER4 = 4
 };
 
-enum SceneType { MAIN_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
+enum SceneType { MAIN_MENU, LOBBY_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
 
 class GameSystem : public System {
 public:
