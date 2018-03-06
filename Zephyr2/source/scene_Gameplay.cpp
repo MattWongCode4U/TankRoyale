@@ -32,16 +32,20 @@ void Scene_Gameplay::sceneUpdate() {
 			}
 		}
 		executeAction(0);
+		updateActionBar(4);
 		turnStartTime = clock();
 	}
 	else if (framesSinceTurnStart == 100) {
 		executeAction(1);
+		updateActionBar(3);
 	}
 	else if (framesSinceTurnStart == 200) {
 		executeAction(2);
+		updateActionBar(2);
 	}
 	else if (framesSinceTurnStart == 300) {
 		executeAction(3);
+		updateActionBar(1);
 		msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), gameSystem);//tells network system action animation is done on client																 //spam out actions if dead
 	}
 	else if (framesSinceTurnStart == 350) {
@@ -52,13 +56,29 @@ void Scene_Gameplay::sceneUpdate() {
 				gameSystem->gameObjectRemoved(ex);
 			}
 		}
+		
 	}
 	framesSinceTurnStart++;
 }
 
+void Scene_Gameplay::updateActionBar(int a)
+{
+	FullscreenObj *bar = NULL;
+	std::string barID = "actionBar" + to_string(a);
+	for (GameObject* g : gameSystem->gameObjects) {
+		if (g->id == barID)
+		{
+			bar = (FullscreenObj*)g;
+			break;
+		}
+	}
+	bar->renderable = "bar" + to_string(a) + "_Yellow.png";
+	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
+}
+
 //called everytime a message is received by the gameSystem
 void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
-		std::ostringstream oss;
+		std::ostringstream oss, oss2;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
 		for (GameObject* g : gameSystem->gameObjects) {
@@ -183,6 +203,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 		case SPACEBAR_PRESSED: {
 			if (gameSystem->currentAction >= gameSystem->maxActions || !validMove) break;
+			if (ActionType == SHOOT && gameSystem->currentAction >= gameSystem->maxActions - 1) break;
 
 			//Send Message to network
 			//message format: playerID,actionName,actionNumber,targetX,targetY
@@ -196,22 +217,56 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			mm->data = oss.str();
 			msgBus->postMessage(mm, gameSystem);
 
-			GridObject* indicator = NULL;
+			if (ActionType == SHOOT)	// DUMMY PASSING DATA AFTER SHOOT
+			{
+				oss2 << gameSystem->clientID << ","//playerID
+					<< to_string(PASS) << ","//action type (e.g. MOVE or SHOOT)
+												   //<< currentAction << ","//the action number 0 to <number of actions/turn>
+					<< gameSystem->reticle->gridX << "," //target x pos
+					<< gameSystem->reticle->gridY; //target y pos
+
+				msgBus->postMessage(new Msg(NETWORK_S_ACTION, oss2.str()), gameSystem);
+			}
+
+			GridObject *indicator = NULL;
+			FullscreenObj *bar = NULL, *bar2 = NULL;
 
 			string indicatorId = "TileIndicator" + to_string(gameSystem->currentAction);
+			string actionBarId = "actionBar" + to_string(gameSystem->currentAction + 1);
+			string actionBarId2;
+			if (gameSystem->currentAction <= gameSystem->maxActions - 1 && ActionType == SHOOT)
+			{
+				actionBarId2 = "actionBar" + to_string(gameSystem->currentAction + 2);
+			}
+			
 
 			for (GameObject* g : gameSystem->gameObjects) {
 				if (g->id == indicatorId) {
 					indicator = (GridObject*)g;
 				}
+				if (g->id == actionBarId)
+				{
+					bar = (FullscreenObj*)g;
+				}
+				if (!actionBarId2.empty() && g->id == actionBarId2)
+				{
+					bar2 = (FullscreenObj*)g;
+				}
 			}
 
-			if (ActionType == MOVE) {
+			bar->renderable = "bar" + to_string(gameSystem->currentAction + 1) + "_Green.png";
+			if (ActionType == MOVE) 
+			{
 				actionOrigin = indicator;
 				indicator->renderable = "MoveIndicator.png";
 			}
-			else if (ActionType == SHOOT) {
+			else if (ActionType == SHOOT)
+			{
 				indicator->renderable = "ShootIndicator.png";
+				if (bar2 != NULL)
+				{
+					bar2->renderable = "bar" + to_string(gameSystem->currentAction + 2) + "_Green.png";
+				}
 			}
 
 			indicator->gridX = gameSystem->reticle->gridX;
@@ -222,8 +277,21 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 			//send update sprite message. maybe this sould be included in update position?
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
+			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
+			if (bar2 != NULL)
+			{
+				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
+			}
 
-			gameSystem->currentAction++;
+			if (ActionType == MOVE) 
+			{
+				gameSystem->currentAction++;
+			}
+			else if (ActionType == SHOOT)
+			{
+				gameSystem->currentAction += 2;
+			}
+			
 
 			break;
 		}
@@ -278,72 +346,80 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 	}
 
 void Scene_Gameplay::executeAction(int a) {
-		//clear Explosions from previous actions
-		for (GameObject* ex : gameSystem->gameObjects) {
-			if (ex->id.find("xplosion") != std::string::npos) {
-				gameSystem->gameObjects.erase(remove(gameSystem->gameObjects.begin(), gameSystem->gameObjects.end(), ex), gameSystem->gameObjects.end());
-				gameSystem->gameObjectRemoved(ex);
-			}
+	//clear Explosions from previous actions
+	for (GameObject* ex : gameSystem->gameObjects) {
+		if (ex->id.find("xplosion") != std::string::npos) {
+			gameSystem->gameObjects.erase(remove(gameSystem->gameObjects.begin(), gameSystem->gameObjects.end(), ex), gameSystem->gameObjects.end());
+			gameSystem->gameObjectRemoved(ex);
+		}
+	}
+
+	vector<string> playerAction;
+	vector<string> players = split(gameSystem->actionsToExecute[a], ']');
+
+	for (int playerNum = 0; playerNum < 4; playerNum++) {
+
+		playerAction = split(players[playerNum], ',');
+		string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
+		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
+
+		//switch on the action type received from the network system, and execute the action
+		switch (receivedAction) {
+		case SHOOT: {
+			string newID = "explosion" + to_string(rand());
+			GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
+				
+			gameSystem->createGameObject(gr);
+			gr->updateWorldCoords();
+			dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 1, 19);
+			break;
 		}
 
-		vector<string> playerAction;
-		vector<string> players = split(gameSystem->actionsToExecute[a], ']');
-
-		for (int playerNum = 0; playerNum < 4; playerNum++) {
-
-			playerAction = split(players[playerNum], ',');
-			string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
-			ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
-
-			//switch on the action type received from the network system, and execute the action
-			switch (receivedAction) {
-			case SHOOT: {
-				string newID = "explosion" + to_string(rand());
-				GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
-				
-				gameSystem->createGameObject(gr);
-				gr->updateWorldCoords();
-				dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), 1, 19);
-				break;
-			}
-
-			case MOVE:
-				//display player MOVE actions for players whose id's are found
-				for (GameObject* g : gameSystem->gameObjects) {
-					if (g->id == currentObjectId) {
-						//OutputDebugString(playerAction[2].c_str());
-						TankObject* t = (TankObject*)g;
-						if (t->health > 0) {
-							t->gridX = stoi(playerAction[2]);
-							t->gridY = stoi(playerAction[3]);
-							t->updateWorldCoords();
-							gameSystem->sendUpdatePosMessage(t);
-						}
+		case MOVE:
+			//display player MOVE actions for players whose id's are found
+			for (GameObject* g : gameSystem->gameObjects) {
+				if (g->id == currentObjectId) {
+					//OutputDebugString(playerAction[2].c_str());
+					TankObject* t = (TankObject*)g;
+					if (t->health > 0) {
+						t->gridX = stoi(playerAction[2]);
+						t->gridY = stoi(playerAction[3]);
+						t->updateWorldCoords();
+						gameSystem->sendUpdatePosMessage(t);
 					}
 				}
-				break;
 			}
+			break;
+		case PASS:
+		{
+			std::cout << "Turn passed";
+			break;
 		}
+		}
+		
 	}
+	
+}
 
 void Scene_Gameplay::setActionType(ActionTypes a) {
-		ActionType = a;
-		std::ostringstream oss;
-		Msg* mm;
+	ActionType = a;
+	std::ostringstream oss;
+	Msg* mm;
 
-		switch (a) {
-		case SHOOT:
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
-			range = 5;
-			break;
-		case MOVE:
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);
-			range = 1;
-			break;
-		}
+	switch (a) {
+	case SHOOT:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
+		range = 5;
+		break;
+	case MOVE:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);
+		range = 1;
+		break;
 	}
+}
+
 void Scene_Gameplay::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
 	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
 	int aZCube = _originY;

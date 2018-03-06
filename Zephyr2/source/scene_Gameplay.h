@@ -14,6 +14,8 @@ public:
 	//Runs once per gameloop frame
 	void sceneUpdate();
 
+	void updateActionBar(int a);
+
 	//runs whenever a message is received by GameSystem
 	void sceneHandleMessage(Msg * msg);
 
