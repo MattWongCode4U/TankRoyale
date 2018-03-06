@@ -4,7 +4,7 @@
 class Client {
 public:
 	
-	Client(int id, SOCKET s);
+	Client(int id, SOCKET ss);
 
 	~Client() {}
 

@@ -3,9 +3,11 @@
 #include "Lobby.h"
 #include "Client.h"
 #include "NetworkHelpers.h"
+#include <vector>
 #define DEFAULT_PORT "9876" 
 #define MAX_PACKET_SIZE sizeof(Data)
 
+class Lobby;
 
 class Server
 {
@@ -43,13 +45,11 @@ public:
 	void sendToPlaying(char* packets, int totalSize, std::vector<int> playing);
 
 
-
-
 	std::vector<Lobby*> lobbies;
 	std::vector<Client*> clients;
-
 	void update();
 
 	void sendToSocket(char* packets, int totalSize, SOCKET s);
+	int receiveDataS(SOCKET& s, char * recvbuf);
 
 };

@@ -106,9 +106,10 @@ bool Server::acceptNewClient(unsigned int & id) {
 				l->players.push_back(new Client(client_id, ClientSocket));
 				inserted = true;
 
-				if (l->players.size == 4) {
+				if (l->players.size() == 4) {
 					l->full = true;
 				}
+				printf("Now Inserted\n");
 
 				break;
 			}
@@ -120,6 +121,7 @@ bool Server::acceptNewClient(unsigned int & id) {
 			Lobby* l = new Lobby(this);
 			l->players.push_back(new Client(client_id, ClientSocket));
 			lobbies.push_back(l);
+			printf("Not Inserted Now Inserted\n");
 		}
 
 		return true;
@@ -144,6 +146,18 @@ int Server::receiveData(unsigned int client_id, char * recvbuf)
 	return 0;
 }
 
+int Server::receiveDataS(SOCKET& s, char * recvbuf) {
+	
+	iResult = NetworkHelpers::receiveMessage(s, recvbuf, MAX_PACKET_SIZE);
+	if (iResult == 0)
+	{
+		printf("Connection closed\n");
+		closesocket(s);
+	}
+	return iResult;
+
+}
+
 void Server::sendToAll(char * packets, int totalSize)
 {
 	SOCKET currentSocket;
@@ -162,13 +176,6 @@ void Server::sendToAll(char * packets, int totalSize)
 		}
 	}
 }
-
-
-
-
-
-
-
 
 
 void Server::sendToPlaying(char* packets, int totalSize, std::vector<int> playing) {
