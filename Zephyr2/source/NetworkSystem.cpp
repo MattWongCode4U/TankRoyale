@@ -168,7 +168,8 @@ void NetworkSystem::handleMessage(Msg *msg) {
 				OutputDebugString("SENT NETWORK_R_START_TURN from NetworkSystem\n");
 
 				//testing sending NETWORK_R_GAMESTART_OK message
-				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,defaultClientID,id3,id4,"), this);
+				//id1,class1|id2,class2|etc.
+				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,light|defaultClientID,heavy|id3,arty|id4,heavy|"), this);
 			}
 			break;
 		case NETWORK_S_ANIMATIONS:
