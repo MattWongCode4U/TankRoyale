@@ -18,4 +18,5 @@ public:
 	void startScene();
 
 	std::string playerSelection(int option);
+	void Scene_Lobby::sendPlayerSelection();
 };

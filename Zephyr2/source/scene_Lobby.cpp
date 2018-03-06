@@ -100,10 +100,11 @@ std::string Scene_Lobby::playerSelection(int option) {
 			// option 1 by default if nothing selected
 		break;
 	}
+	return "";
 }
 
 void Scene_Lobby::sendPlayerSelection() {
 	// playerSelectedClass is the string for the game object selected
-	Msg* m = new Msg(PLAYER_SELECTION, playerSelectedClass)
+	Msg* m = new Msg(PLAYER_SELECT, playerSelectedClass);
 	msgBus->postMessage(m, gameSystem);
 }
