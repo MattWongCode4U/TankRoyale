@@ -34,5 +34,5 @@ public:
 
 	GridVector3 gridPos;
 
-	const int hexSize = 50;
+	const float hexSize = 7.1f;
 };

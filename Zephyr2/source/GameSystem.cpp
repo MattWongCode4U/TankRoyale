@@ -84,12 +84,12 @@ void GameSystem::createGameObject(GameObject* g) {
 	}
 
 	gameObjects.push_back(g);
-	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
+	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
 	oss << g->id << ','
 		<< g->renderable << ','
 		<< g->x << ',' << g->y << ',' << g->z << ','
 		<< g->orientation << ','
-		<< g->width << ',' << g->length << ','
+		<< g->width << ',' << g->length << ',' << g->height << ','
 		//<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
 		<< g->imageFrames << ","
@@ -187,6 +187,44 @@ void GameSystem::removeAllGameObjects() {
 	gameObjects.clear();
 }
 
+void GameSystem::deleteGameObject(string id) {
+	if (findGameObject(id) != nullptr) {
+		gameObjectRemoved(findGameObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGameObject(id)), gameObjects.end());
+	}
+	else if (findFullscreenObject(id) != nullptr) {
+		gameObjectRemoved(findFullscreenObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findFullscreenObject(id)), gameObjects.end());
+	}
+	else if (findGridObject(id) != nullptr) {
+		gameObjectRemoved(findGridObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGridObject(id)), gameObjects.end());
+	}
+	else if (findTankObject(id) != nullptr) {
+		gameObjectRemoved(findTankObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findTankObject(id)), gameObjects.end());
+	}
+}
+
+void GameSystem::deleteGameObject(GameObject* go) {
+	if (findGameObject(go->id) != nullptr) {
+		gameObjectRemoved(findGameObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGameObject(go->id)), gameObjects.end());
+	}
+	else if (findFullscreenObject(go->id) != nullptr) {
+		gameObjectRemoved(findFullscreenObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findFullscreenObject(go->id)), gameObjects.end());
+	}
+	else if (findGridObject(go->id) != nullptr) {
+		gameObjectRemoved(findGridObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGridObject(go->id)), gameObjects.end());
+	}
+	else if (findTankObject(go->id) != nullptr) {
+		gameObjectRemoved(findTankObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findTankObject(go->id)), gameObjects.end());
+	}
+}
+
 void GameSystem::gameObjectRemoved(GameObject* g) {
 	Msg* m = new Msg(GO_REMOVED, g->id);
 	msgBus->postMessage(m, this);
@@ -214,6 +252,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 		<< g->orientation << ","
 		<< g->width << ","
 		<< g->length << ","
+		<< g->height << ","
 		//<< g->physicsEnabled << ","
 		<< g->getObjectType();
 
@@ -237,10 +276,6 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 //
 //	return worldPos;
 //}
-
-
-
-
 
 void GameSystem::displayTimeLeft(int time) {
 	int p0, p1;
@@ -310,6 +345,7 @@ FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 
 
 void  GameSystem::loadScene(SceneType _scene){
+	
 	//calling destructor on the old scene just in case. 
 	if(scene!= nullptr)
 		scene->~Scene();

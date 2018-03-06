@@ -71,5 +71,10 @@ public:
 	//the origin of the current action. (The Tank's expected position at the start of the action)
 	GridObject* actionOrigin;
 
+	//is the game actively receiving player input? false when it game is waiting/animating
+	bool gameActive = false;
+
+	void loadPauseMenu();
+	void unloadPauseMenuObjects();
 };
 

@@ -50,6 +50,8 @@ public:
 
 	ObjectData objData;
 	void removeAllGameObjects();
+	void deleteGameObject(string id);
+	void deleteGameObject(GameObject* go);
 
 	//the currently loaded scene
 	Scene* scene;
@@ -93,16 +95,13 @@ public:
 
 	vector<string> actionsToExecute; //the actions to be executed this turn. Received from the network system
 
-	int hexSize = 50; //"radius" of a single hexagon in the grid
+	float hexSize = 7.1f; //"radius" of a single hexagon in the grid
 
 	//for getting the position of the highlighted button
 	GameObject* buttonHighlighted;
 
 	//maximumNumber of actions per turn
 	int maxActions = 4;
-
-	//is the game actively receiving player input? false when it game is waiting/animating
-	bool gameActive = false;
 
 
 	Msg *m;
