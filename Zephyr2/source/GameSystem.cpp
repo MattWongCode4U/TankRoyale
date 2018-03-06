@@ -187,6 +187,7 @@ void GameSystem::removeAllGameObjects() {
 	gameObjects.clear();
 }
 
+// Delete game objects and removes them from the renderer
 void GameSystem::deleteGameObject(string id) {
 	if (findGameObject(id) != nullptr) {
 		gameObjectRemoved(findGameObject(id));
@@ -206,6 +207,7 @@ void GameSystem::deleteGameObject(string id) {
 	}
 }
 
+// Delete game objects and removes them from the renderer
 void GameSystem::deleteGameObject(GameObject* go) {
 	if (findGameObject(go->id) != nullptr) {
 		gameObjectRemoved(findGameObject(go->id));
@@ -225,6 +227,7 @@ void GameSystem::deleteGameObject(GameObject* go) {
 	}
 }
 
+// Sends message to render system to remove the game object
 void GameSystem::gameObjectRemoved(GameObject* g) {
 	Msg* m = new Msg(GO_REMOVED, g->id);
 	msgBus->postMessage(m, this);

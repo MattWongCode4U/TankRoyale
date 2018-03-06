@@ -81,3 +81,29 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 		break;
 	}
 };
+
+std::string Scene_Lobby::playerSelection(int option) {
+	switch (option) {
+		case 0:
+			// tank 1
+		break;
+		case 1:
+			// tank 2
+		break;
+		case 2:
+			// tank 3
+		break;
+		case 3:
+			// tank 4
+		break;
+		default:
+			// option 1 by default if nothing selected
+		break;
+	}
+}
+
+void Scene_Lobby::sendPlayerSelection() {
+	// playerSelectedClass is the string for the game object selected
+	Msg* m = new Msg(PLAYER_SELECTION, playerSelectedClass)
+	msgBus->postMessage(m, gameSystem);
+}
