@@ -425,7 +425,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << curHealthBar->originalWidth << ",";
 			oss << curHealthBar->length << ",";
 			oss << curHealthBar->height;
@@ -449,7 +451,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << hpBarSize << ","; // width
 			oss << curHealthBar->length << ","; // lenght
 			oss << curHealthBar->height;
@@ -471,7 +475,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << hpBarSize << ","; // width
 			oss << curHealthBar->length << ",";
 			oss << curHealthBar->height;
@@ -494,7 +500,9 @@ void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
 			oss << curHealthBar->x << ",";
 			oss << curHealthBar->y << ",";
 			oss << curHealthBar->z << ",";
-			oss << curHealthBar->orientation << ",";
+			oss << curHealthBar->xRotation << ",";
+			oss << curHealthBar->yRotation << ",";
+			oss << curHealthBar->zRotation << ",";
 			oss << hpBarSize << ","; // width
 			oss << curHealthBar->length << ","; // lenght
 			oss << curHealthBar->height; // lenght
