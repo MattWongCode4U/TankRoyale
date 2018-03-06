@@ -42,6 +42,10 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 			parentId = paramsMap.find("parentId")->second;
 
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);
+
+		if (!(paramsMap.find("animationDelay") == paramsMap.end()))
+			animationDelay = stoi(paramsMap.find("animationDelay")->second);
+
 		if (!(paramsMap.find("renderType") == paramsMap.end()))
 			renderType = getRenderableTypeFromName(paramsMap.find("renderType")->second);
 		else

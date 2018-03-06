@@ -98,7 +98,8 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< (int)g->renderType << ","
 		<< g->model << ","
 		<< g->normalMap << ","
-		<< g->smoothness;
+		<< g->smoothness << ","
+		<< g->animationDelay;
 	//<< g->renderable;
 	// maybe add the rest of the variables into the oss as well, but can decide later depending on
 	// what physics needs
