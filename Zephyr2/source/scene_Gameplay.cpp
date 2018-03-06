@@ -372,17 +372,17 @@ void Scene_Gameplay::executeAction(int a) {
 
 				gameSystem->createGameObject(gr);
 				gr->updateWorldCoords();
-				dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
+				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
 				
-				/*for (GameObject* g : gameSystem->gameObjects) {
+				for (GameObject* g : gameSystem->gameObjects) {
 					if (g->id == currentObjectId) {
 						TankObject* t = (TankObject*)g; //the player's TankObject
-						//axis = onAxis(t->gridX, t->gridY, cursorX, cursorY, range); //CursorX and cursorY need to be where the player tried to shoot in a line
+						int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range); //CursorX and cursorY need to be where the player tried to shoot in a line
 						if(axis != -1){
 							dealLineDamage(t->gridX, t->gridY, range, axis, damage);
 						}
 					}
-				}*/
+				}
 				break;
 			}
 
