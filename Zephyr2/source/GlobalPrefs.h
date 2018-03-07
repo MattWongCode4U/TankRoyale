@@ -1,9 +1,18 @@
 #pragma once
 #include <cstdint>
+#include <string>
+#include <map>
 
 class GlobalPrefs
 {
+private:
+	static void assignBool(bool &dest, const std::string &key, const std::map<std::string, std::string> &input);
+	static void assignInt(int32_t &dest, const std::string &key, const std::map<std::string, std::string> &input);
+	static void assignFloat(float &dest, const std::string &key, const std::map<std::string, std::string> &input);
+	static void assignString(std::string &dest, const std::string &key, const std::map<std::string, std::string> &input);
 public:
+	//load method
+	static void load();
 
 	//Window vars
 	static int32_t windowWidth;
@@ -23,6 +32,8 @@ public:
 	static float rDofFactor;
 	static float rFogAmount;
 	static float rFogFactor;
+	static bool rEnableShadows;
+	static bool rEnablePost;
 
 	//UI vars
 	static float uiWidth;

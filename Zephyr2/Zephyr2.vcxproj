@@ -184,7 +184,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\Msg.cpp" />
     <ClCompile Include="source\NetworkSystem.cpp" />
     <ClCompile Include="source\ObjectData.cpp" />
-    <ClCompile Include="source\renderer\GlobalPrefs.cpp" />
+    <ClCompile Include="source\GlobalPrefs.cpp" />
     <ClCompile Include="source\renderer\OBJImport.cpp" />
     <ClCompile Include="source\renderer\RenderPipeline.cpp" />
     <ClCompile Include="source\renderer\RenderWrapper.cpp" />
@@ -217,7 +217,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\NetworkSystem.h" />
     <ClInclude Include="source\ObjectData.h" />
     <ClInclude Include="source\renderer\Cube.h" />
-    <ClInclude Include="source\renderer\GlobalPrefs.h" />
+    <ClInclude Include="source\GlobalPrefs.h" />
     <ClInclude Include="source\renderer\OBJImport.h" />
     <ClInclude Include="source\renderer\Quad.h" />
     <ClInclude Include="source\renderer\RenderableTypes.h" />
