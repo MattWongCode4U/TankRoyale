@@ -3,32 +3,21 @@
 #include "Main.h"
 
 
-Lobby * server;
-
-static unsigned int client_id;
-static int playerNum = 4;
-static int playersReady = 0;
-std::vector<std::pair<int, std::vector<std::string>>> turnInfo;
-
-void serverLoop()
-{
-	while (true)
-	{
-		server->update();
-	}
-}
-
 int main()
 {
 	std::cout << "Starting Server\n";
 	
-	server = new Lobby();
+	Server* server = new Server();
 
 	std::cout << "Server Ready\n";
 
-	serverLoop();
+	// potential for console stuff to be done here if we shift the stuff in the
+	// while loop to a new thread
+	while (true)
+	{
+		server->update();
+	}
 
-	std::cout << "\nSERVER TERMINATED\n";
 	system("pause");
 	return 0;
 }

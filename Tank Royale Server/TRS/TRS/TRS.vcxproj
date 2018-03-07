@@ -116,9 +116,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Client.h" />
     <ClInclude Include="Lobby.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="NetworkHelpers.h" />
