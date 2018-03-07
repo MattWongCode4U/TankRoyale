@@ -31,6 +31,9 @@ bool GlobalPrefs::rEnablePost = false;
 float GlobalPrefs::uiWidth = 1280;
 float GlobalPrefs::uiHeight = 720;
 
+//Audio vars
+float GlobalPrefs::aMasterVolume = 0.75f;
+
 //*****LOAD METHOD
 void GlobalPrefs::load()
 {
@@ -90,6 +93,7 @@ void GlobalPrefs::load()
 	assignFloat(uiHeight, "uiHeight", dataMap);
 
 	//assign audio settings
+	assignFloat(aMasterVolume, "aMasterVolume", dataMap);
 }
 
 void GlobalPrefs::assignBool(bool & dest, const std::string & key, const std::map<std::string, std::string>& input)

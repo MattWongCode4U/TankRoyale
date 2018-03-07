@@ -1,3 +1,4 @@
 windowFullscreen: 0,
 windowWidth: 1280,
 windowHeight: 720,
+aMasterVolume: 0.5

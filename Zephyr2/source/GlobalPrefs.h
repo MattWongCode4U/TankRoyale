@@ -38,5 +38,8 @@ public:
 	//UI vars
 	static float uiWidth;
 	static float uiHeight;
+
+	//Audio vars
+	static float aMasterVolume;
 };
 
