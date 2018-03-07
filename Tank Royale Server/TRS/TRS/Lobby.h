@@ -1,12 +1,15 @@
 #pragma once
 #include "NetworkHelpers.h"
 #include "Server.h"
+#include "Client.h"
 #include <iostream>
 #include <sstream>
 #include <chrono>
 #include <vector>
 #define MAX_PACKET_SIZE sizeof(Data)
 #define ACTIONS_PER_TURN 4
+
+class Server;
 
 // this is basically the "in game" that deals with only the players connected to a game
 class Lobby
@@ -23,7 +26,7 @@ public:
 
 	Lobby(Server* n);
 
-	~Lobby(void) {}
+	~Lobby(void);
 
 	void update();
 
@@ -31,8 +34,8 @@ public:
 	
 	// The ServerNetwork object 
 	Server* network;
-	std::vector<Client*> players;
 
+	std::vector<Client*> players;
 
 	int connectedPlayers = 0;
 

@@ -8,6 +8,10 @@ Lobby::Lobby(Server* n) {
 	initializeTurnInformation();
 }
 
+Lobby::~Lobby(void) {
+
+}
+
 void Lobby::update() {
 	// check clients for info
 	receiveFromClients();
@@ -34,7 +38,7 @@ void Lobby::receiveFromClients() {
 	Data packet;
 
 	for (auto & p : players) {
-		int data_length = network->receiveData(p->clientID, network_data);
+		int data_length = network->receiveDataS(p->s, network_data); //network->receiveData(p->clientID, network_data);
 
 		if (data_length <= 0)
 		{
@@ -60,6 +64,7 @@ void Lobby::receiveFromClients() {
 				break;
 			case INIT_CONNECTION:
 				p->classType = packet.actualData;
+				printf("Data:\n"); printf(packet.actualData);
 				sendConnID(p);
 				break;
 			case ACTION_EVENT:
@@ -76,12 +81,14 @@ void Lobby::receiveFromClients() {
 void Lobby::handleActionEvent() {
 	printf("not enough players ready\n");
 	// update and set that this guy is ready
-	if (players.size == 4) {
+	if (players.size() == 4) {
 		ingame = true;
 		gameStartTime = clock();
 		sendStartGamePackets();
 		sendStartTurnPackets();
 	}
+
+	printf("%d\n", players.size());
 }
 
 void Lobby::handlePlayerAction(Data p, int id) {

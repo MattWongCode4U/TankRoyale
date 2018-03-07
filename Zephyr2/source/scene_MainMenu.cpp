@@ -57,7 +57,7 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 				else if (g->id.compare("Menu_Item1") == 0)
 				{
 
-					gameSystem->loadScene(GAMEPLAY);
+					gameSystem->loadScene(LOBBY_MENU);
 					change = true;
 					break;
 				}
