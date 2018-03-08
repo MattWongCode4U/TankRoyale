@@ -99,7 +99,7 @@ private:
 	void drawNullOverlay();
 	void drawOverlayElement(RenderableObject * element);
 
-	glm::vec4 computeAnimationOffsets(const RenderableObject &object);
+	glm::vec4 computeAnimationOffsets(RenderableObject &object);
 	glm::vec3 computeAmbientLight(RenderableScene * scene);
 
 	void setupWindow();
