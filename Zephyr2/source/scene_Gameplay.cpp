@@ -375,12 +375,13 @@ void Scene_Gameplay::executeAction(int a) {
 
 				gameSystem->createGameObject(gr);
 				gr->updateWorldCoords();
-				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
 				
 				for (GameObject* g : gameSystem->gameObjects) {
 					if (g->id == currentObjectId) {
 						TankObject* t = (TankObject*)g; //the player's TankObject
-						int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range); //CursorX and cursorY need to be where the player tried to shoot in a line
+						//if t->shootType == //dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
+						//else 
+						int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range);
 						if(axis != -1){
 							dealLineDamage(t->gridX, t->gridY, range, axis, damage);
 						}
@@ -520,28 +521,28 @@ bool Scene_Gameplay::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int 
 		axisBase[2] = 0;
 		break;
 
-	case 2: //ur (+1, 0, -1)
-		axisBase[0] = 1;
-		axisBase[1] = 0;
-		axisBase[2] = -1;
-		break;
-
-	case 3: //dl (-1, 0, +1)
-		axisBase[0] = -1;
-		axisBase[1] = 0;
+	case 2: //ur (0, -1, 1)
+		axisBase[0] = 0;
+		axisBase[1] = -1;
 		axisBase[2] = 1;
 		break;
 
-	case 4: //ul (0, +1, -1)
+	case 3: //dl (0, 1, -1)
 		axisBase[0] = 0;
 		axisBase[1] = 1;
 		axisBase[2] = -1;
 		break;
 
-	case 5: //dr (0, -1, +1)
-		axisBase[0] = 0;
-		axisBase[1] = -1;
+	case 4: //ul (-1, 0, 1)
+		axisBase[0] = -1;
+		axisBase[1] = 0;
 		axisBase[2] = 1;
+		break;
+
+	case 5: //dr (1, 0, -1)
+		axisBase[0] = 1;
+		axisBase[1] = 0;
+		axisBase[2] = -1;
 		break;
 	}
 
@@ -619,8 +620,8 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 		}
 	}
 
-	//ur (+1, 0, -1)
-	int ur[3] = { 1, 0, -1 };
+	//ur (0, -1, 1)
+	int ur[3] = { 0, -1, 1 };
 	for (int i = 1; i < range; i++) {
 		int tempaXCube = aXCube + ur[0] * i;
 		int tempaYCube = aYCube + ur[1] * i;
@@ -634,8 +635,8 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 		}
 	}
 
-	//dl (-1, 0, +1)
-	int dl[3] = { -1, 0, 1 };
+	//dl (0, 1, -1)
+	int dl[3] = { 0, 1, -1 };
 	for (int i = 1; i < range; i++) {
 		int tempaXCube = aXCube + dl[0] * i;
 		int tempaYCube = aYCube + dl[1] * i;
@@ -649,8 +650,8 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 		}
 	}
 
-	//ul (0, +1, -1)
-	int ul[3] = { 0, 1, -1 };
+	//ul (-1, 0, 1)
+	int ul[3] = { -1, 0, 1 };
 	for (int i = 1; i < range; i++) {
 		int tempaXCube = aXCube + ul[0] * i;
 		int tempaYCube = aYCube + ul[1] * i;
@@ -664,8 +665,8 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 		}
 	}
 
-	//dr (0, -1, +1)
-	int dr[3] = { 0, -1, 1 };
+	//dr (1, 0, -1)
+	int dr[3] = { 1, 0, -1 };
 	for (int i = 1; i < range; i++) {
 		int tempaXCube = aXCube + dr[0] * i;
 		int tempaYCube = aYCube + dr[1] * i;
