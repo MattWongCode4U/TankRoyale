@@ -37,6 +37,23 @@ renderType: forward3d,
 model: quad,
 imageFrames: 1;
 
+gameObjectType: GridObject,
+id: explosionTest,
+renderable: explosion2,
+xPos: -18.57,
+yPos: 32,
+zPos: -80,
+zRotation: 90,
+width: 15,
+length: 15,
+renderType: billboard,
+model: quad,
+animationDelay: 3,
+animateOnce: 1,
+gridX: -2,
+gridY: 3,
+imageFrames: 16;
+
 gameObjectType: FullscreenObj,
 id: player1_tag,
 renderable: player1_tag.png,

@@ -205,8 +205,12 @@ struct RenderableObject
 	std::string albedoName;
 	std::string normalName;
 	GLfloat smoothness;
+
 	int frameCount;
-	int frameDelay;
+	int frameDelay;	
+	bool animateOnce;
+
+	int_least64_t startFrame;
 };
 
 /// <summary>

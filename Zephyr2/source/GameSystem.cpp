@@ -84,7 +84,7 @@ void GameSystem::createGameObject(GameObject* g) {
 	}
 
 	gameObjects.push_back(g);
-	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
+	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness, animationDelay, animateOnce
 	oss << g->id << ','
 		<< g->renderable << ','
 		<< g->x << ',' << g->y << ',' << g->z << ','
@@ -99,7 +99,8 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< g->model << ","
 		<< g->normalMap << ","
 		<< g->smoothness << ","
-		<< g->animationDelay;
+		<< g->animationDelay << ","
+		<< (int)g->animateOnce;
 	//<< g->renderable;
 	// maybe add the rest of the variables into the oss as well, but can decide later depending on
 	// what physics needs

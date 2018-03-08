@@ -239,6 +239,7 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	float x, y, z, xRotation, yRotation, zRotation, w, l, h, smoothness;
 	int frames = 1;
 	int delay = 1;
+	bool animateOnce = true;
 	int type = (int)RenderableType::OBJECT3D;
 
 	id = objectData[0];
@@ -258,6 +259,7 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	normal = trimResourceName(objectData[15]);
 	smoothness = (float)(atof(objectData[16].c_str()));
 	delay = atoi(objectData[17].c_str());
+	animateOnce = atoi(objectData[18].c_str());
 
 	//set obj data
 	obj.type = (RenderableType)type;
@@ -270,6 +272,9 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	obj.smoothness = smoothness;
 	obj.frameCount = frames;
 	obj.frameDelay = delay;
+	obj.animateOnce = animateOnce;
+	obj.startFrame = pipeline->currentFrame();
+
 
 	return std::make_pair(id, obj);
 }
@@ -343,7 +348,7 @@ void RenderWrapper::updateObjRender(Msg * m)
 {
 	//SDL_Log(m->data.c_str());
 
-	//id,renderable,renderType,model,normalMap,smoothness,frameCount, frameDelay
+	//id,renderable,renderType,model,normalMap,smoothness,frameCount, frameDelay, animateOnce
 	std::vector<std::string> objectData = split(m->data, ',');
 	std::string id = objectData[0];
 
@@ -363,6 +368,8 @@ void RenderWrapper::updateObjRender(Msg * m)
 		obj->frameCount = stoi(objectData[6]);
 	if (!objectData[7].empty())
 		obj->frameDelay = stoi(objectData[7]);
+	if (!objectData[8].empty())
+		obj->animateOnce = stoi(objectData[8]);
 }
 
 /*

@@ -1705,9 +1705,19 @@ void RenderPipeline::drawOverlayElement(RenderableObject * element)
 /// </summary>
 glm::vec4 RenderPipeline::computeAnimationOffsets(const RenderableObject & object)
 {
+	//SDL_Log("%s : %i", object.albedoName, object.currentFrame);
+
 	//crudely adapted from existing code
 	int frames = object.frameCount;
-	int animationCount = (int)_frameCount / object.frameDelay;
+	int animationCount = (int)(_frameCount - object.startFrame) / object.frameDelay;
+
+	//clamp if necessary
+	if (object.animateOnce && animationCount >= object.frameCount-1)
+	{
+		//SDL_Log("%s : %i", object.albedoName.c_str(), animationCount);
+		animationCount = object.frameCount-2; //there is at least one off-by-one error in the old code
+	}
+		
 
 	if (frames == 0) {
 		frames = 1;
@@ -1806,6 +1816,15 @@ bool RenderPipeline::releaseContext()
 bool RenderPipeline::haveContext()
 {
 	return true;
+}
+
+/// <summary>
+/// Helper method for animation
+/// Gets the current frame count
+/// </summary>
+int_least64_t RenderPipeline::currentFrame()
+{
+	return _frameCount;
 }
 
 /// <summary>

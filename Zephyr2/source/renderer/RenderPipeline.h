@@ -143,6 +143,8 @@ public:
 	bool releaseContext();
 	bool haveContext();
 
+	int_least64_t currentFrame();
+
 	void setDeferredStage(bool enabled);
 	void setForwardStage(bool enabled);
 	void setOverlayStage(bool enabled);
