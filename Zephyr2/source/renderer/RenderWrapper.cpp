@@ -273,7 +273,10 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	obj.frameCount = frames;
 	obj.frameDelay = delay;
 	obj.animateOnce = animateOnce;
-	obj.currentFrame = 0;
+	if (animateOnce)
+		obj.startFrame = pipeline->currentFrame();
+	else
+		obj.startFrame = 0;
 
 	return std::make_pair(id, obj);
 }

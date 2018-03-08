@@ -210,7 +210,7 @@ struct RenderableObject
 	int frameDelay;	
 	bool animateOnce;
 
-	int currentFrame;
+	int_least64_t startFrame;
 };
 
 /// <summary>
