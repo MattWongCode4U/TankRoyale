@@ -10,14 +10,10 @@ RenderWrapper Constructor.
 RenderWrapper::RenderWrapper(RenderSystem *system) {
 	this->system = system;
 
-	//Initialize SDL
-	SDL_Init(SDL_INIT_EVERYTHING); //TODO move to main
-
 	window = SDL_CreateWindow("Zephyr2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, GlobalPrefs::windowWidth, GlobalPrefs::windowHeight, SDL_WINDOW_OPENGL);
 	if (GlobalPrefs::windowFullscreen)
 		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-	//SDL_GL_SwapWindow(window); //needed?
 
 	//create pipeline, scene, overlay
 	pipeline = new RenderPipeline(window);
@@ -34,7 +30,7 @@ RenderWrapper::~RenderWrapper() {
 	delete pipeline;
 	delete scene;
 	delete objects;
-	SDL_DestroyWindow(window);
+	//SDL_DestroyWindow(window);
 }
 
 /*
@@ -42,7 +38,7 @@ Initialize RenderWrapper.
 */
 void RenderWrapper::init() {
 
-	//TEMPORARY: setup initial camera rig and main light	
+	//setup initial camera rig and main light	
 	RenderableCamera cam;
 	cam.farPlane = 1000;
 	cam.nearPlane = 1;
@@ -82,12 +78,11 @@ void RenderWrapper::startSystemLoop() {
 
 
 	while (running)
-	{ //TODO change to "alive"?
+	{ 
 		
 		system->checkMessageQueue();
 
-		//TODO can we do this without copying?
-		//TODO pointers?!
+		//we tried switching to a pointer-based no-copy implementation, but it didn't save a meaningful amount of RAM, caused weird glitches, and was actually slower
 		scene->objects.clear();
 		scene->forwardObjects.clear();
 		scene->billboardObjects.clear();
@@ -119,7 +114,7 @@ void RenderWrapper::startSystemLoop() {
 
 	}
 
-	//TODO cleaner shutdown?
+	
 }
 
 /*
@@ -134,7 +129,6 @@ void RenderWrapper::stopSystemLoop() {
 
 
 	SDL_DestroyWindow(window);
-	SDL_Quit(); //you realize this ENDS THE PROGRAM, right?
 }
 
 /*
@@ -234,7 +228,6 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	std::string id;
 
 	//derived from old renderObject implementation, could be optimized
-	//TODO need to redefine object data message
 	std::string sprite, model, normal;
 	float x, y, z, xRotation, yRotation, zRotation, w, l, h, smoothness;
 	int frames = 1;
@@ -324,7 +317,7 @@ void RenderWrapper::updateObjPosition(Msg* m) {
 }
 
 /*
-Update the sprite of an object
+Update the sprite of an object (legacy)
 */
 void RenderWrapper::updateObjSprite(Msg* m)
 {
@@ -336,8 +329,8 @@ void RenderWrapper::updateObjSprite(Msg* m)
 	//strip file extension
 	std::string spriteName = trimResourceName(sprite);
 
-	RenderableObject *obj = &objects->at(id); //TODO handle if missing
-	obj->albedoName = spriteName; //TODO handling swapping normal maps and models
+	RenderableObject *obj = &objects->at(id);
+	obj->albedoName = spriteName;
 
 }
 
@@ -376,7 +369,7 @@ void RenderWrapper::updateObjRender(Msg * m)
 Update the health bar on the HUD.
 */
 void RenderWrapper::updateHealthHUD(Msg* m) {
-	// TODO: Put healthbar stuff here and send a message instead of updating in GameSystem (not used anymore?)
+	// no longer used
 }
 
 void RenderWrapper::updatePipelineConfig(Msg * m)
