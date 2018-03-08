@@ -1715,7 +1715,7 @@ glm::vec4 RenderPipeline::computeAnimationOffsets(const RenderableObject & objec
 	if (object.animateOnce && animationCount >= object.frameCount-1)
 	{
 		//SDL_Log("%s : %i", object.albedoName.c_str(), animationCount);
-		animationCount = object.frameCount-2;
+		animationCount = object.frameCount-2; //there is at least one off-by-one error in the old code
 	}
 		
 

@@ -49,6 +49,7 @@ length: 15,
 renderType: billboard,
 model: quad,
 animationDelay: 3,
+animateOnce: 1,
 gridX: -2,
 gridY: 3,
 imageFrames: 16;

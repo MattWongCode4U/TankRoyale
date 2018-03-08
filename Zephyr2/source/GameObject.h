@@ -25,6 +25,7 @@ public:
 	//int windScale; //how effected the object is by wind 0-1
 	int imageFrames;
 	int animationDelay = 1;
+	bool animateOnce = false;
 
 	// in degrees, same as orientation; difference is that orientation is used for rendering, direction is the direction of movement
 	// this CAN BE DIFFERENT from orientation; eg: cannon ball orientated one direction, but affecteed by the wind will curve.

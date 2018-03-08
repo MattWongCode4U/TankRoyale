@@ -259,7 +259,7 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	normal = trimResourceName(objectData[15]);
 	smoothness = (float)(atof(objectData[16].c_str()));
 	delay = atoi(objectData[17].c_str());
-	//animateOnce = atoi(objectData[18].c_str());
+	animateOnce = atoi(objectData[18].c_str());
 
 	//set obj data
 	obj.type = (RenderableType)type;
@@ -273,10 +273,8 @@ std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string 
 	obj.frameCount = frames;
 	obj.frameDelay = delay;
 	obj.animateOnce = animateOnce;
-	if (animateOnce)
-		obj.startFrame = pipeline->currentFrame();
-	else
-		obj.startFrame = 0;
+	obj.startFrame = pipeline->currentFrame();
+
 
 	return std::make_pair(id, obj);
 }
