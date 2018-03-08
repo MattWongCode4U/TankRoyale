@@ -10,6 +10,7 @@
 #include <thread>
 #include "fmod.hpp"
 #include "fmod_errors.h"
+#include "GlobalPrefs.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ struct Vector3 {
 
 struct AudioManager {
 	AudioManager();
+	~AudioManager();
 
 	void Update();
 	void Mute();

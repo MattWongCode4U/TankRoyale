@@ -1,7 +1,7 @@
 #include "RenderWrapper.h"
 #include "RenderPipeline.h"
-#include "GlobalPrefs.h"
 #include <gtc\constants.hpp>
+#include "..\GlobalPrefs.h"
 #include "..\GameObject.h"
 
 /*
@@ -14,11 +14,14 @@ RenderWrapper::RenderWrapper(RenderSystem *system) {
 	SDL_Init(SDL_INIT_EVERYTHING); //TODO move to main
 
 	window = SDL_CreateWindow("Zephyr2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, GlobalPrefs::windowWidth, GlobalPrefs::windowHeight, SDL_WINDOW_OPENGL);
+	if (GlobalPrefs::windowFullscreen)
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
 	//SDL_GL_SwapWindow(window); //needed?
 
 	//create pipeline, scene, overlay
 	pipeline = new RenderPipeline(window);
+	pipeline->setPostprocessingStage(GlobalPrefs::rEnablePost);
 	scene = new RenderableScene();
 	overlay = new RenderableOverlay();
 	objects = new std::map<std::string, RenderableObject>();

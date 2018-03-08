@@ -8,7 +8,7 @@
 #include <SDL_image.h>
 
 #include "..\Util.h"
-#include "GlobalPrefs.h"
+#include "..\GlobalPrefs.h"
 #include "Shaders.h"
 #include "Quad.h"
 #include "OBJImport.h"

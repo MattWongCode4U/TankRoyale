@@ -49,7 +49,6 @@ void NetworkSystem::startSystemLoop() {
 }
 
 void NetworkSystem::setupNetwork(std::string classType) {
-
 	if (!echoMode) {
 		// create WSADATA object
 		WSADATA wsaData;
@@ -131,6 +130,8 @@ void NetworkSystem::setupNetwork(std::string classType) {
 			exit(1);
 		}
 
+		Sleep(1000);
+
 		// send init packet
 		const unsigned int packet_size = sizeof(Data);
 		char packet_data[packet_size];
@@ -143,6 +144,8 @@ void NetworkSystem::setupNetwork(std::string classType) {
 		packet.serialize(packet_data);
 
 		NetworkHelpers::sendMessage(ConnectSocket, packet_data, packet_size);
+
+		OutputDebugString("MESSAGE SHOULD BE SENT\n");
 	}
 }
 
@@ -159,6 +162,7 @@ void NetworkSystem::handleMessage(Msg *msg) {
 			break;
 		case READY_TO_START_GAME:
 			if (!echoMode) {
+				OutputDebugString("READY TO START GAME RECIEVED\n");
 				setupNetwork(msg->data);
 				sendActionPackets();
 			}
@@ -277,6 +281,8 @@ void NetworkSystem::sendActionPackets()
 		// send failed
 		OutputDebugString("SEND FAILED");
 	}
+
+	OutputDebugString("ACTIONS SENT \n");
 }
 
 void NetworkSystem::networkUpdate() {
