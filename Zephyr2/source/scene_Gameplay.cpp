@@ -238,7 +238,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 		case KEY_D_PRESSED: {
 			gameSystem->findGameObject("testObject")->offsetPosition(0, 0, 0, 30);
-
+			
 			//return the position of the reticle for debugging purposes
 			string s = "RETICLE AT GRID("
 				+ to_string(gameSystem->reticle->gridX)
@@ -368,13 +368,23 @@ void Scene_Gameplay::executeAction(int a) {
 			//switch on the action type received from the network system, and execute the action
 			switch (receivedAction) {
 			case SHOOT: {
-				string newID = "explosion" + to_string(rand());
-				GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
+				//string newID = "explosion" + to_string(rand());
+				//GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
+				
+				
+				
+				GridObject* go = (GridObject*)gameSystem->makeGameObject("explostion.txt");
+
+				go->id = "explosion" + to_string(rand());
+				go->gridX = stoi(playerAction[2]);
+				go->gridY = stoi(playerAction[3]);
+				gameSystem->createGameObject(go);
+				go->updateWorldCoords();
+
 				int radius = 1;
 				int damage = 19;
 
-				gameSystem->createGameObject(gr);
-				gr->updateWorldCoords();
+				
 				
 				for (GameObject* g : gameSystem->gameObjects) {
 					if (g->id == currentObjectId) {

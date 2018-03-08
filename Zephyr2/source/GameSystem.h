@@ -41,6 +41,7 @@ public:
 	void startSystemLoop();
 	//void startTestLevel();
 	void addGameObjects(string fileName);
+	GameObject* GameSystem::makeGameObject(string fileName);
 	void saveToFIle(string fileName);
 	void createGameObject(GameObject* g);
 	void gameObjectRemoved(GameObject* g);

@@ -8,12 +8,45 @@ GameSystem::GameSystem(MessageBus* mbus) : System(mbus) {
 GameSystem::~GameSystem() {
 }
 
+//creates a gameobject from a file and returns a pointer to it
+//DOES NOT ADD OBJECT TO gameobjects vector
+GameObject* GameSystem::makeGameObject(string fileName) {
+	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
+	vector<string> splitObjData = split(data, ',');
+
+	std::map<std::string, std::string> gameObjDataMap;
+	//loop through elements of each GameObject and add them to the object parameter map
+	for (int i = 0; i < splitObjData.size(); i++) {
+		vector<string> keyValue = split(splitObjData[i], ':');
+		gameObjDataMap[keyValue[0]] = keyValue[1];
+	}
+	GameObject* g = NULL;
+	//gets the gameObject type
+	string gameObjectType = gameObjDataMap.find("gameObjectType")->second;
+	
+	//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
+	if (gameObjectType.compare("GridObject") == 0) {
+		g = new GridObject(gameObjDataMap, &objData);
+		//OutputDebugString(g->toString().c_str());
+	}
+	else if (gameObjectType.compare("GameObject") == 0) {
+		g = new GameObject(gameObjDataMap, &objData);
+	}
+	else if (gameObjectType.compare("FullscreenObj") == 0) {
+		g = new FullscreenObj(gameObjDataMap, &objData);
+	}
+	else if (gameObjectType.compare("TankObject") == 0) {
+		g = new TankObject(gameObjDataMap, &objData);
+	}
+	return g;
+}
+
 //reads gameobjects from a file. instantiates them and adds them to the list of active objects
 void GameSystem::addGameObjects(string fileName) {
 
 	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
 	
-	vector<string> splitDataVector = split(data, ';');//split gameobjects by
+	vector<string> splitDataVector = split(data, ';');//split gameobjects by ;
 
 	GameObject* g; //new gameobject to be created
 	//loop through objects read in from file
