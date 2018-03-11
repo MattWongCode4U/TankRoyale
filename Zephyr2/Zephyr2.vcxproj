@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{E2BCECD4-83CF-44C8-B1FB-BADB764955C4}</ProjectGuid>
     <RootNamespace>Zephyr2</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -77,9 +77,10 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib32;$(SolutionDir)Dependencies/sdl/lib32;$(SolutionDir)Dependencies/glew/lib32;$(SolutionDir)Dependencies/freeglut/lib32;$(SolutionDir)Dependencies/fmod/lib32;%(Additionallib32raryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -103,7 +104,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib;$(SolutionDir)Dependencies/sdl/lib;$(SolutionDir)Dependencies/glew/lib;$(SolutionDir)Dependencies/freeglut/lib;$(SolutionDir)Dependencies/fmod/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -124,11 +125,12 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib32;$(SolutionDir)Dependencies/sdl/lib32;$(SolutionDir)Dependencies/glew/lib32;$(SolutionDir)Dependencies/freeglut/lib32;$(SolutionDir)Dependencies/fmod/lib32;%(Additionallib32raryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -150,12 +152,13 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies/sdl_image/include;$(SolutionDir)Dependencies/sdl/include;$(SolutionDir)Dependencies/glm/include;$(SolutionDir)Dependencies/glew/include;$(SolutionDir)Dependencies/freeglut/include;$(SolutionDir)Dependencies/fmod/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINSOCKAPI_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies/sdl_image/lib;$(SolutionDir)Dependencies/sdl/lib;$(SolutionDir)Dependencies/glew/lib;$(SolutionDir)Dependencies/freeglut/lib;$(SolutionDir)Dependencies/fmod/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -181,11 +184,19 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\Msg.cpp" />
     <ClCompile Include="source\NetworkSystem.cpp" />
     <ClCompile Include="source\ObjectData.cpp" />
-    <ClCompile Include="source\renderer\GlobalPrefs.cpp" />
+    <ClCompile Include="source\GlobalPrefs.cpp" />
     <ClCompile Include="source\renderer\OBJImport.cpp" />
     <ClCompile Include="source\renderer\RenderPipeline.cpp" />
+    <ClCompile Include="source\renderer\RenderWrapper.cpp" />
     <ClCompile Include="source\renderer\Shaders.cpp" />
     <ClCompile Include="source\RenderSystem.cpp" />
+    <ClCompile Include="source\Scene.cpp" />
+    <ClCompile Include="source\scene_GameOver.cpp" />
+    <ClCompile Include="source\scene_Gameplay.cpp" />
+    <ClCompile Include="source\scene_InstructionsMenu.cpp" />
+    <ClCompile Include="source\scene_MainMenu.cpp" />
+    <ClCompile Include="source\scene_Lobby.cpp" />
+    <ClCompile Include="source\scene_SettingsMenu.cpp" />
     <ClCompile Include="source\System.cpp" />
     <ClCompile Include="source\Vector2.cpp" />
     <ClCompile Include="source\TankObject.cpp" />
@@ -206,14 +217,22 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\NetworkSystem.h" />
     <ClInclude Include="source\ObjectData.h" />
     <ClInclude Include="source\renderer\Cube.h" />
-    <ClInclude Include="source\renderer\GlobalPrefs.h" />
+    <ClInclude Include="source\GlobalPrefs.h" />
     <ClInclude Include="source\renderer\OBJImport.h" />
     <ClInclude Include="source\renderer\Quad.h" />
     <ClInclude Include="source\renderer\RenderableTypes.h" />
     <ClInclude Include="source\renderer\RendererInternalTypes.h" />
     <ClInclude Include="source\renderer\RenderPipeline.h" />
+    <ClInclude Include="source\renderer\RenderWrapper.h" />
     <ClInclude Include="source\renderer\Shaders.h" />
     <ClInclude Include="source\RenderSystem.h" />
+    <ClInclude Include="source\Scene.h" />
+    <ClInclude Include="source\scene_GameOver.h" />
+    <ClInclude Include="source\scene_Gameplay.h" />
+    <ClInclude Include="source\scene_InstructionsMenu.h" />
+    <ClInclude Include="source\scene_MainMenu.h" />
+    <ClInclude Include="source\scene_Lobby.h" />
+    <ClInclude Include="source\scene_SettingsMenu.h" />
     <ClInclude Include="source\System.h" />
     <ClInclude Include="source\Util.h" />
     <ClInclude Include="source\Vector2.h" />

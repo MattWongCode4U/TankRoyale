@@ -6,6 +6,15 @@ AudioManager::AudioManager()
 	mpSystem = NULL;
 	AudioEngine::FmodError(FMOD::System_Create(&mpSystem));
 	AudioEngine::FmodError(mpSystem->init(512, FMOD_INIT_NORMAL, 0));
+
+	FMOD::ChannelGroup *masterChannelGroup;
+	AudioEngine::FmodError(mpSystem->getMasterChannelGroup(&masterChannelGroup));
+	masterChannelGroup->setVolume(GlobalPrefs::aMasterVolume);
+}
+
+AudioManager::~AudioManager()
+{
+	AudioEngine::FmodError(mpSystem->release());
 }
 
 void AudioManager::Update()

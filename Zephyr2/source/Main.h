@@ -6,6 +6,7 @@
 #include "IOSystem.h"
 #include "AudioSystem.h"
 #include "NetworkSystem.h"
+#include "GlobalPrefs.h"
 #include <time.h>
 
 
