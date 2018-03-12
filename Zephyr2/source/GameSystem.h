@@ -15,6 +15,7 @@
 #include "TankObject.h"
 #include "ObjectData.h"
 #include "Scene_MainMenu.h"
+#include "Scene_Lobby.h"
 #include "Scene_Gameplay.h"
 #include "Scene_SettingsMenu.h"
 #include "Scene_InstructionsMenu.h"
@@ -28,7 +29,7 @@ enum PlayerID {
 	PLAYER4 = 4
 };
 
-enum SceneType { MAIN_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
+enum SceneType { MAIN_MENU, LOBBY_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
 
 class GameSystem : public System {
 public:
@@ -40,6 +41,7 @@ public:
 	void startSystemLoop();
 	//void startTestLevel();
 	void addGameObjects(string fileName);
+	GameObject* GameSystem::makeGameObject(string fileName);
 	void saveToFIle(string fileName);
 	void createGameObject(GameObject* g);
 	void gameObjectRemoved(GameObject* g);
@@ -50,6 +52,8 @@ public:
 
 	ObjectData objData;
 	void removeAllGameObjects();
+	void deleteGameObject(string id);
+	void deleteGameObject(GameObject* go);
 
 	//the currently loaded scene
 	Scene* scene;
@@ -93,7 +97,7 @@ public:
 
 	vector<string> actionsToExecute; //the actions to be executed this turn. Received from the network system
 
-	int hexSize = 50; //"radius" of a single hexagon in the grid
+	float hexSize = 7.1f; //"radius" of a single hexagon in the grid
 
 	//for getting the position of the highlighted button
 	GameObject* buttonHighlighted;
@@ -101,8 +105,7 @@ public:
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
-	//is the game actively receiving player input? false when it game is waiting/animating
-	bool gameActive = false;
+	std::string tankClass = "heavy";
 
 
 	Msg *m;

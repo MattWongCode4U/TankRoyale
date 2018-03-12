@@ -9,6 +9,13 @@ int main(int argc, char *argv[]) {
 	mbus = new MessageBus();
 
 	//////////////////////////////////////////////////////////////////
+	//						Loading Config							//
+	//////////////////////////////////////////////////////////////////
+	//int numberOfWorkerThreads = 16; // Default to 16
+	std::cout << "\nLoading Config\n";
+	GlobalPrefs::load();
+
+	//////////////////////////////////////////////////////////////////
 	//						SYSTEM CREATION							//
 	// DO NOT START SYSTEM LOOPS IN HERE (if a loop is required)	//
 	//////////////////////////////////////////////////////////////////	
@@ -28,23 +35,6 @@ int main(int argc, char *argv[]) {
 	mbus->addSystem(ns);
 
 	std::cout << "All systems created";
-
-	//////////////////////////////////////////////////////////////////
-	//						Loading Config							//
-	//////////////////////////////////////////////////////////////////
-	//int numberOfWorkerThreads = 16; // Default to 16
-
-	std::string rawConfigData = openFileFromAsset("config.txt", ASSET_TYPE::DATA, true);
-	
-	// Temporary config file is structured to only list the time frames for
-	// GameSystem, RenderThread, and ioThread
-	std::vector<std::string> configData = split(rawConfigData, ',');
-	std::string::size_type sz;
-
-	//gs->timeFrame = std::stoi(configData.at(0), &sz);
-	//rs->timeFrame = std::stoi(configData.at(1), &sz);
-	//ios->timeFrame = std::stoi(configData.at(2), &sz);
-	//ps->timeFrame = std::stoi(configData.at(3), &sz);
 
 	// Not using this right now, move it to game system/Render/Physics later maybe
 	//// Create worker thread pool

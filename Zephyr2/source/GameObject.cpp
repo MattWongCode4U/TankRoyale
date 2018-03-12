@@ -13,16 +13,42 @@ GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
 		
 		x = stof(paramsMap.find("xPos")->second);
 		y = stof(paramsMap.find("yPos")->second);
-		z = stoi(paramsMap.find("zPos")->second);
-		orientation = stoi(paramsMap.find("orientation")->second);
-		width = stoi(paramsMap.find("width")->second);
-		length = stoi(paramsMap.find("length")->second);
+		z = stof(paramsMap.find("zPos")->second);
+		if (!(paramsMap.find("xRotation") == paramsMap.end()))
+			xRotation = stof(paramsMap.find("xRotation")->second);
+		else
+			xRotation = 0;
+
+		if (!(paramsMap.find("yRotation") == paramsMap.end()))
+			yRotation = stof(paramsMap.find("yRotation")->second);
+		else
+			yRotation = 0;
+
+		if (!(paramsMap.find("zRotation") == paramsMap.end()))
+			zRotation = stof(paramsMap.find("zRotation")->second);
+		else
+			zRotation = 0;
+		width = stof(paramsMap.find("width")->second);
+		length = stof(paramsMap.find("length")->second);
+
+		if (!(paramsMap.find("height") == paramsMap.end())) 
+			height = stof(paramsMap.find("height")->second);
+		else
+			height = 1;
+		
 		originalWidth = width;
 		originalLength = length;
 		if (!(paramsMap.find("parentId") == paramsMap.end()))
 			parentId = paramsMap.find("parentId")->second;
 
 		imageFrames = stoi(paramsMap.find("imageFrames")->second);
+
+		if (!(paramsMap.find("animationDelay") == paramsMap.end()))
+			animationDelay = stoi(paramsMap.find("animationDelay")->second);
+
+		if (!(paramsMap.find("animateOnce") == paramsMap.end()))
+			animateOnce = stoi(paramsMap.find("animateOnce")->second);
+
 		if (!(paramsMap.find("renderType") == paramsMap.end()))
 			renderType = getRenderableTypeFromName(paramsMap.find("renderType")->second);
 		else
@@ -51,7 +77,7 @@ string GameObject::toString() {
 	output += "\nrenderable: " + renderable + ",";
 	output += "\nxPos: " + to_string(x)+ ",";
 	output += "\nyPos: " + to_string(y) + ",";
-	output += "\norientation: " + to_string(orientation) + ",";
+	output += "\norientation: " + to_string(zRotation) + ",";
 	output += "\nwidth: " + to_string(width) + ",";
 	output += "\nlength: " + to_string(length) + ",";
 	//output += "\nphysicsEnabled: " + to_string(physicsEnabled) + ",";
@@ -119,14 +145,14 @@ RenderableType GameObject::getRenderableTypeFromName(std::string name)
 	return RenderableType::OBJECT3D;
 }
 
-void GameObject::setPosition(float newX, float newY, float newZ, int rotation) {
+void GameObject::setPosition(float newX, float newY, float newZ, float rotation) {
 	if(rotation < 99999)
 		offsetPosition(newX - x, newY - y, newZ - z, rotation);
 	else
 		offsetPosition(newX - x, newY - y, newZ - z);
 }
 
-void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, int rotation) {
+void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, float rotation) {
 	if (!childObjects.empty()) {
 		for (GameObject* g : childObjects) {
 			g->offsetPosition(offsetX, offsetY, offsetZ, rotation);
@@ -135,7 +161,7 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, int
 	x += offsetX;
 	y += offsetY;
 	z += offsetZ;
-	orientation += rotation;
+	zRotation += rotation;
 
 	std::ostringstream oss;
 	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");
@@ -146,9 +172,12 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, int
 		<< x << ","
 		<< y << ","
 		<< z << ","
-		<< orientation << ","
+		<< xRotation << ","
+		<< yRotation << ","
+		<< zRotation << ","
 		<< width << ","
 		<< length << ","
+		<< height << ","
 		<< getObjectType();
 
 	mm->data = oss.str();

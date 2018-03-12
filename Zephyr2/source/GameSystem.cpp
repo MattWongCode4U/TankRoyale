@@ -8,12 +8,45 @@ GameSystem::GameSystem(MessageBus* mbus) : System(mbus) {
 GameSystem::~GameSystem() {
 }
 
+//creates a gameobject from a file and returns a pointer to it
+//DOES NOT ADD OBJECT TO gameobjects vector
+GameObject* GameSystem::makeGameObject(string fileName) {
+	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
+	vector<string> splitObjData = split(data, ',');
+
+	std::map<std::string, std::string> gameObjDataMap;
+	//loop through elements of each GameObject and add them to the object parameter map
+	for (int i = 0; i < splitObjData.size(); i++) {
+		vector<string> keyValue = split(splitObjData[i], ':');
+		gameObjDataMap[keyValue[0]] = keyValue[1];
+	}
+	GameObject* g = NULL;
+	//gets the gameObject type
+	string gameObjectType = gameObjDataMap.find("gameObjectType")->second;
+	
+	//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
+	if (gameObjectType.compare("GridObject") == 0) {
+		g = new GridObject(gameObjDataMap, &objData);
+		//OutputDebugString(g->toString().c_str());
+	}
+	else if (gameObjectType.compare("GameObject") == 0) {
+		g = new GameObject(gameObjDataMap, &objData);
+	}
+	else if (gameObjectType.compare("FullscreenObj") == 0) {
+		g = new FullscreenObj(gameObjDataMap, &objData);
+	}
+	else if (gameObjectType.compare("TankObject") == 0) {
+		g = new TankObject(gameObjDataMap, &objData);
+	}
+	return g;
+}
+
 //reads gameobjects from a file. instantiates them and adds them to the list of active objects
 void GameSystem::addGameObjects(string fileName) {
 
 	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
 	
-	vector<string> splitDataVector = split(data, ';');//split gameobjects by
+	vector<string> splitDataVector = split(data, ';');//split gameobjects by ;
 
 	GameObject* g; //new gameobject to be created
 	//loop through objects read in from file
@@ -76,7 +109,7 @@ void GameSystem::createGameObject(GameObject* g) {
 		for (GameObject* p : gameObjects) {
 			if (p->id == g->parentId) {
 				g->setParent(p);
-				g->offsetPosition(p->x, p->y, 0, p->orientation);
+				g->offsetPosition(p->x, p->y, 0, p->zRotation);
 			}
 				
 			
@@ -84,19 +117,23 @@ void GameSystem::createGameObject(GameObject* g) {
 	}
 
 	gameObjects.push_back(g);
-	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness
+	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness, animationDelay, animateOnce
 	oss << g->id << ','
 		<< g->renderable << ','
 		<< g->x << ',' << g->y << ',' << g->z << ','
-		<< g->orientation << ','
-		<< g->width << ',' << g->length << ','
+		<< g->xRotation << ","
+		<< g->yRotation << ","
+		<< g->zRotation << ","
+		<< g->width << ',' << g->length << ',' << g->height << ','
 		//<< g->physicsEnabled << ','
 		<< g->getObjectType() << ','
 		<< g->imageFrames << ","
 		<< (int)g->renderType << ","
 		<< g->model << ","
 		<< g->normalMap << ","
-		<< g->smoothness;
+		<< g->smoothness << ","
+		<< g->animationDelay << ","
+		<< (int)g->animateOnce;
 	//<< g->renderable;
 	// maybe add the rest of the variables into the oss as well, but can decide later depending on
 	// what physics needs
@@ -187,6 +224,47 @@ void GameSystem::removeAllGameObjects() {
 	gameObjects.clear();
 }
 
+// Delete game objects and removes them from the renderer
+void GameSystem::deleteGameObject(string id) {
+	if (findGameObject(id) != nullptr) {
+		gameObjectRemoved(findGameObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGameObject(id)), gameObjects.end());
+	}
+	else if (findFullscreenObject(id) != nullptr) {
+		gameObjectRemoved(findFullscreenObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findFullscreenObject(id)), gameObjects.end());
+	}
+	else if (findGridObject(id) != nullptr) {
+		gameObjectRemoved(findGridObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGridObject(id)), gameObjects.end());
+	}
+	else if (findTankObject(id) != nullptr) {
+		gameObjectRemoved(findTankObject(id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findTankObject(id)), gameObjects.end());
+	}
+}
+
+// Delete game objects and removes them from the renderer
+void GameSystem::deleteGameObject(GameObject* go) {
+	if (findGameObject(go->id) != nullptr) {
+		gameObjectRemoved(findGameObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGameObject(go->id)), gameObjects.end());
+	}
+	else if (findFullscreenObject(go->id) != nullptr) {
+		gameObjectRemoved(findFullscreenObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findFullscreenObject(go->id)), gameObjects.end());
+	}
+	else if (findGridObject(go->id) != nullptr) {
+		gameObjectRemoved(findGridObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGridObject(go->id)), gameObjects.end());
+	}
+	else if (findTankObject(go->id) != nullptr) {
+		gameObjectRemoved(findTankObject(go->id));
+		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findTankObject(go->id)), gameObjects.end());
+	}
+}
+
+// Sends message to render system to remove the game object
 void GameSystem::gameObjectRemoved(GameObject* g) {
 	Msg* m = new Msg(GO_REMOVED, g->id);
 	msgBus->postMessage(m, this);
@@ -211,9 +289,12 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 		<< g->x << ","
 		<< g->y << ","
 		<< g->z << ","
-		<< g->orientation << ","
+		<< g->xRotation << ","
+		<< g->yRotation << ","
+		<< g->zRotation << ","
 		<< g->width << ","
 		<< g->length << ","
+		<< g->height << ","
 		//<< g->physicsEnabled << ","
 		<< g->getObjectType();
 
@@ -237,10 +318,6 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 //
 //	return worldPos;
 //}
-
-
-
-
 
 void GameSystem::displayTimeLeft(int time) {
 	int p0, p1;
@@ -310,6 +387,7 @@ FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 
 
 void  GameSystem::loadScene(SceneType _scene){
+	
 	//calling destructor on the old scene just in case. 
 	if(scene!= nullptr)
 		scene->~Scene();
@@ -321,6 +399,9 @@ void  GameSystem::loadScene(SceneType _scene){
 	switch (_scene) {
 	case MAIN_MENU:
 		scene = new Scene_MainMenu(msgBus, this);
+		break;
+	case LOBBY_MENU:
+		scene = new Scene_Lobby(msgBus, this);
 		break;
 	case GAMEPLAY:
 		scene = new Scene_Gameplay(msgBus, this);
