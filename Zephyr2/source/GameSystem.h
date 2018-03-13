@@ -10,10 +10,10 @@
 #include <ctime>
 #include <thread>
 #include "System.h"
+#include "GameSystemUtil.h"
 #include "FullscreenObj.h"
 #include "GridObject.h"
 #include "TankObject.h"
-#include "ObjectData.h"
 #include "Scene_MainMenu.h"
 #include "Scene_Lobby.h"
 #include "Scene_Gameplay.h"
@@ -31,7 +31,7 @@ enum PlayerID {
 
 enum SceneType { MAIN_MENU, LOBBY_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
 
-class GameSystem : public System {
+class GameSystem : public System, GameSystemUtil {
 public:
 	GameSystem(MessageBus* mbus);
 	~GameSystem();
@@ -41,6 +41,7 @@ public:
 	void startSystemLoop();
 	//void startTestLevel();
 	void addGameObjects(string fileName);
+	GameObject* GameSystem::makeGameObject(string fileName);
 	void saveToFIle(string fileName);
 	void createGameObject(GameObject* g);
 	void gameObjectRemoved(GameObject* g);
@@ -48,11 +49,15 @@ public:
 
 	//closes the old scene and opens a new one 
 	void  loadScene(SceneType _scene);
-
-	ObjectData objData;
 	void removeAllGameObjects();
 	void deleteGameObject(string id);
 	void deleteGameObject(GameObject* go);
+	std::vector<GameObject*>* getGameObjectsVector();
+	int getGridDistance(int aX, int aY, int bX, int bY);//gets the distance between 2 points on the hex grid
+
+	//post message on the bus
+	void postMessageToBus(Msg* message);
+
 
 	//the currently loaded scene
 	Scene* scene;
@@ -81,7 +86,6 @@ public:
 	TankObject* findTankObject(std::string objectID);
 	GridObject* findGridObject(std::string objectID);
 	FullscreenObj* findFullscreenObject(std::string objectID);
-
 
 	//the reticle controlled by the arrow keys. used for aiming and queing up actions
 	GridObject* reticle;

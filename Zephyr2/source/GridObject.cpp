@@ -1,32 +1,32 @@
 #include "GridObject.h"
 
-GridObject::GridObject(map <string, string> paramsMap, ObjectData* objData) : GameObject(paramsMap, objData) {
+GridObject::GridObject(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : GameObject(paramsMap, _gameSystemUtil) {
 	gridX = stoi(paramsMap.find("gridX")->second);
 	gridY = stoi(paramsMap.find("gridY")->second);
 }
 
-GridObject::GridObject(ObjectData* _objData, std::string _id, std::string _renderable, float _x, float _y, int _z, int _orientation, int _width, int _length, int _imageFrames, int _gridX, int _gridY, string _parent) {
-	objData = _objData;
-	id = _id;
-	renderable = _renderable;
-	x = _x;
-	y = _y;
-	z = _z;
-	zRotation = _orientation;
-	width = _width;
-	length = _length;
-	height = 1.0f;
-	imageFrames = _imageFrames;
-	gridX = _gridX;
-	gridY = _gridY;
-	parentId = _parent;
-
-	//set New renderable variables to default
-	renderType = RenderableType::OVERLAY;
-	model = "cube";
-	normalMap = std::string();
-	smoothness = 0.5f;
-}
+//GridObject::GridObject(ObjectData* _objData, std::string _id, std::string _renderable, float _x, float _y, int _z, int _orientation, int _width, int _length, int _imageFrames, int _gridX, int _gridY, string _parent) {
+//	objData = _objData;
+//	id = _id;
+//	renderable = _renderable;
+//	x = _x;
+//	y = _y;
+//	z = _z;
+//	zRotation = _orientation;
+//	width = _width;
+//	length = _length;
+//	height = 1.0f;
+//	imageFrames = _imageFrames;
+//	gridX = _gridX;
+//	gridY = _gridY;
+//	parentId = _parent;
+//
+//	//set New renderable variables to default
+//	renderType = RenderableType::OVERLAY;
+//	model = "cube";
+//	normalMap = std::string();
+//	smoothness = 0.5f;
+//}
 
 string GridObject::toString() {
 	string output = GameObject::toString();

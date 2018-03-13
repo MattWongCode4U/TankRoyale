@@ -14,6 +14,8 @@ public:
 	//Runs once per gameloop frame
 	void sceneUpdate();
 
+	void updateActionBar(int a);
+
 	//runs whenever a message is received by GameSystem
 	void sceneHandleMessage(Msg * msg);
 
@@ -40,7 +42,8 @@ public:
 	ActionTypes ActionType = MOVE;
 
 	//deal aoe damage to all tiles in the affected area
-	void dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
+	//MOVED TO THE TankObject class
+	//void dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
 
 	//deal damage in a straight line from the origin position along an axis
 	void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
@@ -59,8 +62,6 @@ public:
 
 	//updates the reticle spright, and postion.
 	void updateReticle();
-
-	void updatePlayerHealthBar(std::string playerID);
 
 	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
 	bool validMove = false;
