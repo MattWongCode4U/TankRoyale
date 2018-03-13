@@ -318,6 +318,10 @@ void RenderWrapper::updateObjPosition(Msg* m) {
 	std::string id = dataVector[0];
 
 	RenderableObject *obj = &objects->at(id);
+
+	//added sprite updating to updateObjPosition, to limit how many messages need to be sent each frame -Denis
+	obj->albedoName = trimResourceName(dataVector[1].c_str());
+
 	obj->position = glm::vec3((float)(atof(dataVector[2].c_str())), (float)(atof(dataVector[3].c_str())), (float)(atof(dataVector[4].c_str())));
 	obj->rotation = glm::vec3(glm::radians((float)(atof(dataVector[5].c_str()))), glm::radians((float)(atof(dataVector[6].c_str()))), glm::radians((float)(atof(dataVector[7].c_str()))));
 	obj->scale = glm::vec3((float)(atof(dataVector[8].c_str())), (float)(atof(dataVector[9].c_str())), (float)(atof(dataVector[10].c_str())));

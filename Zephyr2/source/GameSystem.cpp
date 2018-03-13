@@ -1,11 +1,43 @@
 #include "GameSystem.h"
 
 GameSystem::GameSystem(MessageBus* mbus) : System(mbus) {
-	objData = *(new ObjectData());
 }
 
 
 GameSystem::~GameSystem() {
+}
+
+//creates a gameobject from a file and returns a pointer to it
+//DOES NOT ADD OBJECT TO gameobjects vector
+GameObject* GameSystem::makeGameObject(string fileName) {
+	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
+	vector<string> splitObjData = split(data, ',');
+
+	std::map<std::string, std::string> gameObjDataMap;
+	//loop through elements of each GameObject and add them to the object parameter map
+	for (int i = 0; i < splitObjData.size(); i++) {
+		vector<string> keyValue = split(splitObjData[i], ':');
+		gameObjDataMap[keyValue[0]] = keyValue[1];
+	}
+	GameObject* g = NULL;
+	//gets the gameObject type
+	string gameObjectType = gameObjDataMap.find("gameObjectType")->second;
+	
+	//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
+	if (gameObjectType.compare("GridObject") == 0) {
+		g = new GridObject(gameObjDataMap, this);
+		//OutputDebugString(g->toString().c_str());
+	}
+	else if (gameObjectType.compare("GameObject") == 0) {
+		g = new GameObject(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("FullscreenObj") == 0) {
+		g = new FullscreenObj(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("TankObject") == 0) {
+		g = new TankObject(gameObjDataMap, this);
+	}
+	return g;
 }
 
 //reads gameobjects from a file. instantiates them and adds them to the list of active objects
@@ -13,7 +45,7 @@ void GameSystem::addGameObjects(string fileName) {
 
 	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
 	
-	vector<string> splitDataVector = split(data, ';');//split gameobjects by
+	vector<string> splitDataVector = split(data, ';');//split gameobjects by ;
 
 	GameObject* g; //new gameobject to be created
 	//loop through objects read in from file
@@ -33,17 +65,17 @@ void GameSystem::addGameObjects(string fileName) {
 		g = NULL;
 		//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
 		if (gameObjectType.compare("GridObject") == 0) {
-			g = new GridObject(gameObjDataMap, &objData);
+			g = new GridObject(gameObjDataMap, this);
 			//OutputDebugString(g->toString().c_str());
 		}
 		else if (gameObjectType.compare("GameObject") == 0) {
-			g = new GameObject(gameObjDataMap, &objData);
+			g = new GameObject(gameObjDataMap, this);
 		}
 		else if (gameObjectType.compare("FullscreenObj") == 0) {
-			g = new FullscreenObj(gameObjDataMap, &objData);
+			g = new FullscreenObj(gameObjDataMap, this);
 		}
 		else if (gameObjectType.compare("TankObject") == 0) {
-			g = new TankObject(gameObjDataMap, &objData);
+			g = new TankObject(gameObjDataMap, this);
 		}
 
 		if (g != NULL) {
@@ -71,17 +103,7 @@ void GameSystem::createGameObject(GameObject* g) {
 			return;
 		}
 	}
-	//set the object's parent
-	if (g->parentId != "") {
-		for (GameObject* p : gameObjects) {
-			if (p->id == g->parentId) {
-				g->setParent(p);
-				g->offsetPosition(p->x, p->y, 0, p->zRotation);
-			}
-				
-			
-		}	
-	}
+
 
 	gameObjects.push_back(g);
 	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness, animationDelay, animateOnce
@@ -106,6 +128,17 @@ void GameSystem::createGameObject(GameObject* g) {
 	// what physics needs
 
 	msgBus->postMessage(new Msg(GO_ADDED, oss.str()), this);
+
+	//set the object's parent
+	if (g->parentId != "") {
+		for (GameObject* p : gameObjects) {
+			if (p->id == g->parentId) {
+				g->setParent(p);
+				//g->offsetPosition(p->x, p->y, p->z, p->zRotation);
+				//g->offsetPosition(0, 0, 0, 0);
+			}
+		}
+	}
 }
 
 
@@ -155,27 +188,6 @@ void GameSystem::startSystemLoop() {
 		for (GameObject* obj : gameObjects) {
 			obj->lateUpdate();
 		}
-
-		//loop through list of objects to create added by the gameobjects
-		for (GameObject* c : objData.toCreateVector) {
-			createGameObject(c);
-		}
-		objData.toCreateVector.clear();
-
-		//loop through list of objects to destroy added by the gameobjects
-		for (GameObject* g : objData.toDestroyVector) {
-			gameObjectRemoved(g);
-			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
-		}
-		objData.toDestroyVector.clear();
-
-		//loop through list of messages to send that were added by Game objects
-		for (Msg* m : objData.toPostVector) {
-			msgBus->postMessage(m, this);
-		}
-		objData.toPostVector.clear();
-
-		delete(m);
 	}
 }
 
@@ -213,21 +225,11 @@ void GameSystem::deleteGameObject(string id) {
 
 // Delete game objects and removes them from the renderer
 void GameSystem::deleteGameObject(GameObject* go) {
-	if (findGameObject(go->id) != nullptr) {
-		gameObjectRemoved(findGameObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGameObject(go->id)), gameObjects.end());
-	}
-	else if (findFullscreenObject(go->id) != nullptr) {
-		gameObjectRemoved(findFullscreenObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findFullscreenObject(go->id)), gameObjects.end());
-	}
-	else if (findGridObject(go->id) != nullptr) {
-		gameObjectRemoved(findGridObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGridObject(go->id)), gameObjects.end());
-	}
-	else if (findTankObject(go->id) != nullptr) {
-		gameObjectRemoved(findTankObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findTankObject(go->id)), gameObjects.end());
+	for (GameObject* g : gameObjects) {
+		if (g == go) {
+			gameObjectRemoved(g);
+			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
+		}
 	}
 }
 
@@ -322,14 +324,14 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 	return obj;
 }
 TankObject* GameSystem::findTankObject(std::string objectID) {
-	TankObject* obj = nullptr;
+	TankObject* tank = nullptr;
 	for (GameObject *g : gameObjects) {
-		if (g->id == objectID && g->getObjectType() == "TankObject") {
-			obj = (TankObject*)g;
-			return obj;
-		}
+		if(g->id == objectID)
+			if (TankObject* tank = dynamic_cast<TankObject*>(g)){
+				return tank;
+			}
 	}
-	return obj;
+	return nullptr;
 }
 GridObject* GameSystem::findGridObject(std::string objectID) {
 	GridObject* obj = nullptr;
@@ -382,4 +384,26 @@ void  GameSystem::loadScene(SceneType _scene){
 	}
 
 	scene->startScene();
+}
+
+//post message on the message bus
+//implementation of gameSystemUtil virtual function
+//used to allow Gameobjects to send messages without giving them full access to GameSystem and messageSystem
+void GameSystem::postMessageToBus(Msg* message) {
+	msgBus->postMessage(message, this);
+}
+
+std::vector<GameObject*>* GameSystem::getGameObjectsVector() {
+	return &gameObjects;
+}
+
+int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
+	int aXCube = aX - (aY - (aY & 1)) / 2;
+	int aZCube = aY;
+	int aYCube = -aXCube - aZCube;
+	int bXCube = bX - (bY - (bY & 1)) / 2;
+	int bZCube = bY;
+	int bYCube = -bXCube - bZCube;
+
+	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
 }

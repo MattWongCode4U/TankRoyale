@@ -55,6 +55,67 @@ gridY: 3,
 imageFrames: 16;
 
 gameObjectType: FullscreenObj,
+id: actionBarBack,
+renderable: action_barBacking.png,
+xPos: 0,
+yPos: -328,
+zPos: 10,
+orientation: 0,
+width: 750,
+length: 64,
+renderType: overlay,
+imageFrames: 1;
+
+gameObjectType: FullscreenObj,
+id: actionBar1,
+renderable: bar1_Yellow.png,
+xPos: -268,
+yPos: -328,
+zPos: 11,
+orientation: 0,
+width: 206,
+length: 46,
+renderType: overlay,
+imageFrames: 1;
+
+gameObjectType: FullscreenObj,
+id: actionBar2,
+renderable: bar2_Yellow.png,
+xPos: -95,
+yPos: -328,
+zPos: 11,
+orientation: 0,
+width: 206,
+length: 46,
+renderType: overlay,
+imageFrames: 1;
+
+gameObjectType: FullscreenObj,
+id: actionBar3,
+renderable: bar3_Yellow.png,
+xPos: 84,
+yPos: -328,
+zPos: 11,
+orientation: 0,
+width: 206,
+length: 46,
+renderType: overlay,
+imageFrames: 1;
+
+gameObjectType: FullscreenObj,
+id: actionBar4,
+renderable: bar4_Yellow.png,
+xPos: 265,
+yPos: -328,
+zPos: 11,
+orientation: 0,
+width: 206,
+length: 46,
+renderType: overlay,
+imageFrames: 1;
+
+
+gameObjectType: FullscreenObj,
 id: player1_tag,
 renderable: player1_tag.png,
 xPos: -565,
@@ -392,13 +453,17 @@ length: 100,
 imageFrames: 1;
 
 gameObjectType: GameObject,
-id: testObject,
-renderable: triangle.png,
+id: childTest,
+renderable: triangle,
 xPos: 0,
-yPos: 40,
+yPos: 0,
 zPos: 10,
-zRotation: -90,
-width: 50,
-length: 50,
+width: 5,
+length: 5,
+renderType: billboard,
+model: quad,
 imageFrames: 1,
-parentId: player2;
+parentId: reticle;
+
+
+
