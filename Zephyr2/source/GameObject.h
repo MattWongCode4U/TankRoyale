@@ -71,6 +71,9 @@ public:
 	//sends an UPDATE_POSIION message to the bus. includes sprite info
 	void postPostionMsg();
 
+	//sends an UPDATE_SPRITE message to the bus. includes sprite info
+	void postSpriteMsg();
+
 	GameObject* parentObject = nullptr;
 	std::vector<GameObject*> childObjects;
 

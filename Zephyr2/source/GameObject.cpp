@@ -189,6 +189,7 @@ bool GameObject::removeChild(GameObject* child2Remove) {
 	}
 	return false;
 }
+
 //destroy the objects with its children
 void GameObject::destroyWithChildren() {
 	for (GameObject* g : childObjects) {
@@ -216,6 +217,20 @@ void GameObject::postPostionMsg() {
 		<< height << ","
 		<< getObjectType();
 
+	mm->data = oss.str();
+
+	gameSystemUtil->postMessageToBus(mm);
+}
+
+void GameObject::postSpriteMsg() {
+	ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJ_SPRITE, "");
+
+	//UPDATE_OBJ_SPRITE, id,Frames,renderable
+	oss << id << ","
+		<< "1,"
+		<< renderable;
+	
 	mm->data = oss.str();
 
 	gameSystemUtil->postMessageToBus(mm);
