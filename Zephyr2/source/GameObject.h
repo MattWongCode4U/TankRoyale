@@ -49,7 +49,7 @@ public:
 	virtual std::string getObjectType();
 	virtual std::string toString();
 	void earlyUpdate();
-	virtual void midUpdate();
+	void midUpdate();
 	void lateUpdate();
 	virtual void onCollide(GameObject* otherObj);
 
@@ -67,6 +67,9 @@ public:
 	bool removeChild(GameObject* child2Remove);
 
 	void destroyWithChildren();
+
+	//sends an UPDATE_POSIION message to the bus. includes sprite info
+	void postPostionMsg();
 
 	GameObject* parentObject = nullptr;
 	std::vector<GameObject*> childObjects;

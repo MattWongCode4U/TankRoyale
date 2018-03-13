@@ -63,8 +63,6 @@ public:
 	//updates the reticle spright, and postion.
 	void updateReticle();
 
-	void updatePlayerHealthBar(std::string playerID);
-
 	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
 	bool validMove = false;
 

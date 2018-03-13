@@ -18,6 +18,8 @@ void Scene_Gameplay::startScene() {
 	msgBus->postMessage(m, gameSystem);
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
+
+	//add healthBars to tanks
 }
 
 //called every frame of the gameloop
@@ -137,13 +139,21 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString(msg->data.c_str());
 			OutputDebugString("\n");
 
+			//Set tank class info here
 			for (int i = 0; i < clientIDVector.size(); i++) {
 				tankIdClassVector = split(clientIDVector[i], ',');
+
+				//create healthbar for each player
+				gameSystem->findTankObject("player" + to_string(i + 1))->createhpBar();
+
+
 				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
 					setPlayerTank("player" + to_string(i + 1));
 				}
 			}
+
+
 			break;
 		}
 		case NETWORK_R_PING:
@@ -448,7 +458,7 @@ void Scene_Gameplay::executeAction(int a) {
 				int damage = 19;
 
 				gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
-			
+				
 				
 				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
 				
@@ -510,24 +520,6 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 		break;
 	}
 }
-//
-//void Scene_Gameplay::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
-//	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
-//	int aZCube = _originY;
-//	int aYCube = -aXCube - aZCube;
-//
-//	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
-//		if (go->getObjectType() == "TankObject") {
-//			TankObject* tank = (TankObject*)go;
-//			if (getGridDistance(_originX, _originY, tank->gridX, tank->gridY) <= affectedRadius) {
-//				tank->health -= damage;
-//				if (tank->health <= 0)
-//					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), gameSystem);
-//				updatePlayerHealthBar(tank->id);
-//			}
-//		}
-//	}
-//}
 
 //Position of tank firing: _originX, _originY
 //how many tiles the shot can go: length
@@ -562,7 +554,7 @@ void Scene_Gameplay::dealLineDamage(int _originX, int _originY, int length, int 
 			currClosestTank->health -= damage;
 			if (currClosestTank->health <= 0)
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"), gameSystem);
-			updatePlayerHealthBar(currClosestTank->id);
+			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
 		}
 	}
 }
@@ -788,110 +780,6 @@ void Scene_Gameplay::updateReticle() {
 	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
 	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
 }
-
-//	Takes in the player number we are going to be udpating. Enum in GameSystem
-void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
-	Msg* m;
-	TankObject* curPlayer = nullptr;
-	FullscreenObj* curHealthBar = nullptr;
-	curPlayer = gameSystem->findTankObject(playerID);
-	curHealthBar = gameSystem->findFullscreenObject(playerID + "_hpbar");
-	if (curPlayer != nullptr && curHealthBar != nullptr) {
-		int hpBarSize = (int)((float)(curHealthBar->originalWidth * ((float)curPlayer->getHealth() / (float)TANK_MAX_HEALTH))); // TEST: Does this update the size correctly?
-		if (curPlayer->getHealth() == 100) {
-			std::ostringstream oss;
-			//id,renderable,x,y,z,orientation,width,length
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << curHealthBar->originalWidth << ",";
-			oss << curHealthBar->length << ",";
-			oss << curHealthBar->height;
-			m = new Msg(MSG_TYPE::UPDATE_HP_BAR, oss.str());
-		}
-		else if (curPlayer->getHealth() <= 30) {
-			std::ostringstream oss;
-			// change sprite
-			/*if (curHealthBar->renderable != "red_hpbar.png")
-			{
-			oss << curHealthBar->id << ",";
-			oss << " ,";
-			oss << "red_hpbar.png";
-			m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
-			msgBus->postMessage(m, this);
-			}*/
-			// update size
-			oss.clear();
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length << ","; // lenght
-			oss << curHealthBar->height;
-			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
-		}
-		else if (curPlayer->getHealth() <= 50) {
-			std::ostringstream oss;
-			/*if (curHealthBar->renderable != "orange_hpbar.png")
-			{
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->id << ",";
-			oss << "orange_hpbar.png";
-			m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
-			msgBus->postMessage(m, this);
-			}*/
-			oss.clear();
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length << ",";
-			oss << curHealthBar->height;
-
-			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
-		}
-		else {
-			std::ostringstream oss;
-			/*if (curHealthBar->renderable != "green_hpbar.png")
-			{
-			oss << curHealthBar->id << ",";
-			oss << " ,";
-			oss << "green_hpbar.png";
-			m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
-			msgBus->postMessage(m, this);
-			}*/
-			oss.clear();
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length << ","; // lenght
-			oss << curHealthBar->height; // lenght
-			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
-		}
-		msgBus->postMessage(m, gameSystem);
-	}
-};
 
 void Scene_Gameplay::setPlayerTank(std::string playerID) {
 	if (playerTank != nullptr) {

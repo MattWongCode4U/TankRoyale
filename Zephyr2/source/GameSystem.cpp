@@ -326,9 +326,10 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 TankObject* GameSystem::findTankObject(std::string objectID) {
 	TankObject* tank = nullptr;
 	for (GameObject *g : gameObjects) {
-		if (TankObject* tank = dynamic_cast<TankObject*>(g)){
-			return tank;
-		}
+		if(g->id == objectID)
+			if (TankObject* tank = dynamic_cast<TankObject*>(g)){
+				return tank;
+			}
 	}
 	return nullptr;
 }

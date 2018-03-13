@@ -16,8 +16,19 @@ public:
 
 	void shoot(int targetX,int targetY);
 
+
 	//the remaining hitpoints
 	int health = 100;
 	int getHealth();
 	void setHealth(int newHealth);
+	void takeDamage(int damage);//reduce health and update hpBar
+
+	GameObject* hpBar;//the id of this tank hp bar
+	void createhpBar();//creates an hp bar object for this tank
+	void updatehpBar();//updates the hpBar
+
+	//the width of a full hpBar
+	float hpBarWidth;//the original width of the hp bar
+	float maxHealth;//the maximum hp pool
+	
 };

@@ -163,26 +163,7 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, flo
 	z += offsetZ;
 	zRotation += rotation;
 
-	std::ostringstream oss;
-	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");
-
-	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
-	oss << id << ","
-		<< renderable << ","
-		<< x << ","
-		<< y << ","
-		<< z << ","
-		<< xRotation << ","
-		<< yRotation << ","
-		<< zRotation << ","
-		<< width << ","
-		<< length << ","
-		<< height << ","
-		<< getObjectType();
-
-	mm->data = oss.str();
-	
-	gameSystemUtil->postMessageToBus(mm);
+	postPostionMsg();
 }
 
 void GameObject::setParent(GameObject* newParent) {
@@ -215,4 +196,27 @@ void GameObject::destroyWithChildren() {
 	}
 	parentObject->removeChild(this);
 	gameSystemUtil->deleteGameObject(this);
+}
+
+void GameObject::postPostionMsg() {
+	ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");
+
+	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
+	oss << id << ","
+		<< renderable << ","
+		<< x << ","
+		<< y << ","
+		<< z << ","
+		<< xRotation << ","
+		<< yRotation << ","
+		<< zRotation << ","
+		<< width << ","
+		<< length << ","
+		<< height << ","
+		<< getObjectType();
+
+	mm->data = oss.str();
+
+	gameSystemUtil->postMessageToBus(mm);
 }
