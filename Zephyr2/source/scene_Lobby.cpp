@@ -14,6 +14,7 @@ void Scene_Lobby::startScene() {
 	Msg* m = new Msg(LEVEL_LOADED, "4");
 	msgBus->postMessage(m, gameSystem);
 	gameSystem->addGameObjects("lobby_menu.txt");
+	gameSystem->tankClass = "";
 	gameActive = true;
 };
 
@@ -65,8 +66,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 					else if (g->id.compare("SelectButton") == 0) {
 						// Select
 						// Load main menu
-						if (gameSystem->tankClass != "" 
-							|| gameSystem->tankClass != NULL) {
+						if (gameSystem->tankClass != "") {
 							gameSystem->loadScene(GAMEPLAY);
 							change = true;
 						} else {
@@ -115,10 +115,10 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 	}
 };
 
-void scene_Lobby::loadNoClassSelected() {
+void Scene_Lobby::loadNoClassSelected() {
 	gameSystem->addGameObjects("no_class_selected.txt");
 };
 
-void scene_Lobby::unloadNoClassSelected() {
+void Scene_Lobby::unloadNoClassSelected() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("NoClassButton"));
 };
