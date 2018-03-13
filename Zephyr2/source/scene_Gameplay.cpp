@@ -18,6 +18,8 @@ void Scene_Gameplay::startScene() {
 	msgBus->postMessage(m, gameSystem);
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
+
+	//add healthBars to tanks
 }
 
 //called every frame of the gameloop
@@ -32,16 +34,20 @@ void Scene_Gameplay::sceneUpdate() {
 			}
 		}
 		executeAction(0);
+		updateActionBar(4);
 		turnStartTime = clock();
 	}
 	else if (framesSinceTurnStart == 100) {
 		executeAction(1);
+		updateActionBar(3);
 	}
 	else if (framesSinceTurnStart == 200) {
 		executeAction(2);
+		updateActionBar(2);
 	}
 	else if (framesSinceTurnStart == 300) {
 		executeAction(3);
+		updateActionBar(1);
 		msgBus->postMessage(new Msg(NETWORK_S_ANIMATIONS, ""), gameSystem);//tells network system action animation is done on client																 //spam out actions if dead
 	}
 	else if (framesSinceTurnStart == 350) {
@@ -52,27 +58,31 @@ void Scene_Gameplay::sceneUpdate() {
 				gameSystem->gameObjectRemoved(ex);
 			}
 		}
+		
 	}
 	framesSinceTurnStart++;
 }
 
+void Scene_Gameplay::updateActionBar(int a)
+{
+	FullscreenObj *bar = NULL;
+	std::string barID = "actionBar" + to_string(a);
+	for (GameObject* g : gameSystem->gameObjects) {
+		if (g->id == barID)
+		{
+			bar = (FullscreenObj*)g;
+			break;
+		}
+	}
+	bar->renderable = "bar" + to_string(a) + "_Yellow.png";
+	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
+}
+
 //called everytime a message is received by the gameSystem
 void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
-		std::ostringstream oss;
+		std::ostringstream oss, oss2;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-		//for (GameObject* g : gameSystem->gameObjects) {
-		//	if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
-		//		gameSystem->reticle = (GridObject*)g;
-
-		//		//for testing of object parenting
-		//		/*GameObject* testObj = gameSystem->findGameObject("testObject");
-		//		if (testObj->parentObject == nullptr) {
-		//			testObj->setParent(g);
-		//		}*/
-		//		
-		//	}
-		//}
 		gameSystem->reticle = gameSystem->findGridObject("reticle");
 
 		vector<string> playersArray;
@@ -117,13 +127,21 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString(msg->data.c_str());
 			OutputDebugString("\n");
 
+			//Set tank class info here
 			for (int i = 0; i < clientIDVector.size(); i++) {
 				tankIdClassVector = split(clientIDVector[i], ',');
+
+				//create healthbar for each player
+				gameSystem->findTankObject("player" + to_string(i + 1))->createhpBar();
+
+
 				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
 					setPlayerTank("player" + to_string(i + 1));
 				}
 			}
+
+
 			break;
 		}
 		case NETWORK_R_PING:
@@ -186,36 +204,56 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case SPACEBAR_PRESSED: {
-			if (gameSystem->currentAction >= gameSystem->maxActions || !validMove) break;
+			if (gameSystem->currentAction >= gameSystem->maxActions || moveCost <= 0) break;
+			if (gameSystem->currentAction > gameSystem->maxActions - moveCost) break;
 
-			//Send Message to network
-			//message format: playerID,actionName,actionNumber,targetX,targetY
-			oss << gameSystem->clientID << ","//playerID
-				<< to_string(ActionType) << ","//action type (e.g. MOVE or SHOOT)
-											   //<< currentAction << ","//the action number 0 to <number of actions/turn>
-				<< gameSystem->reticle->gridX << "," //target x pos
-				<< gameSystem->reticle->gridY; //target y pos
+			//send the action to the network system
+			sendNetworkActionMsg(ActionType);
 
-			mm->type = NETWORK_S_ACTION;
-			mm->data = oss.str();
-			msgBus->postMessage(mm, gameSystem);
+			//pad with empty actions iff the move cost is > 1;
+			for (int i = 1; i < moveCost; i++) {
+				sendNetworkActionMsg(PASS);
+			}
 
-			GridObject* indicator = NULL;
+			GridObject *indicator = NULL;
+			FullscreenObj *bar = NULL, *bar2 = NULL;
 
 			string indicatorId = "TileIndicator" + to_string(gameSystem->currentAction);
+			string actionBarId = "actionBar" + to_string(gameSystem->currentAction + 1);
+			string actionBarId2;
+			if (gameSystem->currentAction <= gameSystem->maxActions - 1 && ActionType == SHOOT)
+			{
+				actionBarId2 = "actionBar" + to_string(gameSystem->currentAction + 2);
+			}
+			
 
 			for (GameObject* g : gameSystem->gameObjects) {
 				if (g->id == indicatorId) {
 					indicator = (GridObject*)g;
 				}
+				if (g->id == actionBarId)
+				{
+					bar = (FullscreenObj*)g;
+				}
+				if (!actionBarId2.empty() && g->id == actionBarId2)
+				{
+					bar2 = (FullscreenObj*)g;
+				}
 			}
 
-			if (ActionType == MOVE) {
+			bar->renderable = "bar" + to_string(gameSystem->currentAction + 1) + "_Green.png";
+			if (ActionType == MOVE) 
+			{
 				actionOrigin = indicator;
 				indicator->renderable = "MoveIndicator.png";
 			}
-			else if (ActionType == SHOOT) {
+			else if (ActionType == SHOOT)
+			{
 				indicator->renderable = "ShootIndicator.png";
+				if (bar2 != NULL)
+				{
+					bar2->renderable = "bar" + to_string(gameSystem->currentAction + 2) + "_Green.png";
+				}
 			}
 
 			indicator->gridX = gameSystem->reticle->gridX;
@@ -226,8 +264,21 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 			//send update sprite message. maybe this sould be included in update position?
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
+			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
+			if (bar2 != NULL)
+			{
+				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
+			}
 
-			gameSystem->currentAction++;
+			if (ActionType == MOVE) 
+			{
+				gameSystem->currentAction++;
+			}
+			else if (ActionType == SHOOT)
+			{
+				gameSystem->currentAction += 2;
+			}
+			
 
 			break;
 		}
@@ -348,122 +399,73 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 	}
 
 void Scene_Gameplay::executeAction(int a) {
-		//clear Explosions from previous actions
-		for (GameObject* ex : gameSystem->gameObjects) {
-			if (ex->id.find("xplosion") != std::string::npos) {
-				gameSystem->gameObjects.erase(remove(gameSystem->gameObjects.begin(), gameSystem->gameObjects.end(), ex), gameSystem->gameObjects.end());
-				gameSystem->gameObjectRemoved(ex);
-			}
+	//clear Explosions from previous actions
+	for (GameObject* ex : gameSystem->gameObjects) {
+		if (ex->id.find("xplosion") != std::string::npos) {
+			gameSystem->gameObjects.erase(remove(gameSystem->gameObjects.begin(), gameSystem->gameObjects.end(), ex), gameSystem->gameObjects.end());
+			gameSystem->gameObjectRemoved(ex);
 		}
+	}
 
-		vector<string> playerAction;
-		vector<string> players = split(gameSystem->actionsToExecute[a], ']');
+	vector<string> playerAction;
+	vector<string> players = split(gameSystem->actionsToExecute[a], ']');
 
-		for (int playerNum = 0; playerNum < 4; playerNum++) {
+	for (int playerNum = 0; playerNum < 4; playerNum++) {
 
-			playerAction = split(players[playerNum], ',');
-			string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
-			ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
+		playerAction = split(players[playerNum], ',');
+		string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
+		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
 			//switch on the action type received from the network system, and execute the action
 			switch (receivedAction) {
 			case SHOOT: {
-				//string newID = "explosion" + to_string(rand());
-				//GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
-				
-				
-				
-				GridObject* go = (GridObject*)gameSystem->makeGameObject("explostion.txt");
+				gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
 
-				go->id = "explosion" + to_string(rand());
-				go->gridX = stoi(playerAction[2]);
-				go->gridY = stoi(playerAction[3]);
-				gameSystem->createGameObject(go);
-				go->updateWorldCoords();
-
-				int radius = 1;
-				int damage = 19;
-
-				
-				
-				for (GameObject* g : gameSystem->gameObjects) {
-					if (g->id == currentObjectId) {
-						TankObject* t = (TankObject*)g; //the player's TankObject
-						//if t->shootType == //dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-						//else 
-						int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range);
-						if(axis != -1){
-							dealLineDamage(t->gridX, t->gridY, range, axis, damage);
-						}
-					}
-				}
 				break;
 			}
 
-			case MOVE:
-				//display player MOVE actions for players whose id's are found
-				for (GameObject* g : gameSystem->gameObjects) {
-					if (g->id == currentObjectId) {
-						//OutputDebugString(playerAction[2].c_str());
-						TankObject* t = (TankObject*)g;
-						if (t->health > 0) {
-							t->gridX = stoi(playerAction[2]);
-							t->gridY = stoi(playerAction[3]);
-							t->updateWorldCoords();
-							gameSystem->sendUpdatePosMessage(t);
-						}
+		case MOVE:
+			//display player MOVE actions for players whose id's are found
+			for (GameObject* g : gameSystem->gameObjects) {
+				if (g->id == currentObjectId) {
+					//OutputDebugString(playerAction[2].c_str());
+					TankObject* t = (TankObject*)g;
+					if (t->health > 0) {
+						t->gridX = stoi(playerAction[2]);
+						t->gridY = stoi(playerAction[3]);
+						t->updateWorldCoords();
+						gameSystem->sendUpdatePosMessage(t);
 					}
 				}
-				break;
 			}
+			break;
+		case PASS:
+		{
+			std::cout << "Turn passed";
+			break;
 		}
+		}
+		
 	}
+	
+}
 
 void Scene_Gameplay::setActionType(ActionTypes a) {
-		ActionType = a;
-		std::ostringstream oss;
-		Msg* mm;
+	ActionType = a;
+	std::ostringstream oss;
+	Msg* mm;
 
-		switch (a) {
-		case SHOOT:
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
-			range = 5;
-			break;
-		case MOVE:
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);
-			range = 1;
-			break;
-		}
-	}
-void Scene_Gameplay::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
-	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
-	int aZCube = _originY;
-	int aYCube = -aXCube - aZCube;
-	OutputDebugString("origin point of shot: ");
-	OutputDebugString(to_string(_originX).c_str());
-	OutputDebugString(" , ");
-	OutputDebugString(to_string(_originY).c_str());
-	OutputDebugString("\n");
-
-	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
-		if (go->getObjectType() == "TankObject") {
-			TankObject* tank = (TankObject*)go;
-			if (getGridDistance(_originX, _originY, tank->gridX, tank->gridY) <= affectedRadius) {
-				tank->health -= damage;
-				OutputDebugString(tank->id.c_str());
-				OutputDebugString(" GOT HIT AT:");
-				OutputDebugString(to_string(tank->gridX).c_str());
-				OutputDebugString(" , ");
-				OutputDebugString(to_string(tank->gridY).c_str());
-				OutputDebugString("\n");
-
-				if (tank->health <= 0)
-					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), gameSystem);
-				updatePlayerHealthBar(tank->id);
-			}
-		}
+	switch (a) {
+	case SHOOT:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
+		range = 5;
+		break;
+	case MOVE:
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);
+		range = 1;
+		break;
 	}
 }
 
@@ -500,7 +502,7 @@ void Scene_Gameplay::dealLineDamage(int _originX, int _originY, int length, int 
 			currClosestTank->health -= damage;
 			if (currClosestTank->health <= 0)
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"), gameSystem);
-			updatePlayerHealthBar(currClosestTank->id);
+			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
 		}
 	}
 }
@@ -709,16 +711,22 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 
-	int dist = getGridDistance(gameSystem->reticle->gridX, gameSystem->reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
 
-	if (dist > range) {
-		gameSystem->reticle->renderable = "TileIndicatorRed.png";
-		validMove = false;
-	}
-	else {
+	if (ActionType == SHOOT)
+		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	else if(ActionType == MOVE)
+		moveCost = playerTank->checkMoveValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+
+	if (moveCost > 0 && gameSystem->reticle->renderable != "TileIndicator.png") {
 		gameSystem->reticle->renderable = "TileIndicator.png";
-		validMove = true;
+		gameSystem->reticle->postSpriteMsg();
+	}	
+	else if(moveCost <= 0 && gameSystem->reticle->renderable != "TileIndicatorRed") {
+		gameSystem->reticle->renderable = "TileIndicatorRed";
+		gameSystem->reticle->postSpriteMsg();
 	}
+		
+
 
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
@@ -727,122 +735,19 @@ void Scene_Gameplay::updateReticle() {
 	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
 }
 
-//	Takes in the player number we are going to be udpating. Enum in GameSystem
-void Scene_Gameplay::updatePlayerHealthBar(string playerID) {
-	Msg* m;
-	TankObject* curPlayer = nullptr;
-	FullscreenObj* curHealthBar = nullptr;
-	curPlayer = gameSystem->findTankObject(playerID);
-	curHealthBar = gameSystem->findFullscreenObject(playerID + "_hpbar");
-	if (curPlayer != nullptr && curHealthBar != nullptr) {
-		int hpBarSize = (int)((float)(curHealthBar->originalWidth * ((float)curPlayer->getHealth() / (float)TANK_MAX_HEALTH))); // TEST: Does this update the size correctly?
-		if (curPlayer->getHealth() == 100) {
-			std::ostringstream oss;
-			//id,renderable,x,y,z,orientation,width,length
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << curHealthBar->originalWidth << ",";
-			oss << curHealthBar->length << ",";
-			oss << curHealthBar->height;
-			m = new Msg(MSG_TYPE::UPDATE_HP_BAR, oss.str());
-		}
-		else if (curPlayer->getHealth() <= 30) {
-			std::ostringstream oss;
-			// change sprite
-			/*if (curHealthBar->renderable != "red_hpbar.png")
-			{
-			oss << curHealthBar->id << ",";
-			oss << " ,";
-			oss << "red_hpbar.png";
-			m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
-			msgBus->postMessage(m, this);
-			}*/
-			// update size
-			oss.clear();
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length << ","; // lenght
-			oss << curHealthBar->height;
-			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
-		}
-		else if (curPlayer->getHealth() <= 50) {
-			std::ostringstream oss;
-			/*if (curHealthBar->renderable != "orange_hpbar.png")
-			{
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->id << ",";
-			oss << "orange_hpbar.png";
-			m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
-			msgBus->postMessage(m, this);
-			}*/
-			oss.clear();
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length << ",";
-			oss << curHealthBar->height;
-
-			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
-		}
-		else {
-			std::ostringstream oss;
-			/*if (curHealthBar->renderable != "green_hpbar.png")
-			{
-			oss << curHealthBar->id << ",";
-			oss << " ,";
-			oss << "green_hpbar.png";
-			m = new Msg(MSG_TYPE::UPDATE_OBJ_SPRITE, oss.str());
-			msgBus->postMessage(m, this);
-			}*/
-			oss.clear();
-			oss << curHealthBar->id << ",";
-			oss << curHealthBar->renderable << ",";
-			oss << curHealthBar->x << ",";
-			oss << curHealthBar->y << ",";
-			oss << curHealthBar->z << ",";
-			oss << curHealthBar->xRotation << ",";
-			oss << curHealthBar->yRotation << ",";
-			oss << curHealthBar->zRotation << ",";
-			oss << hpBarSize << ","; // width
-			oss << curHealthBar->length << ","; // lenght
-			oss << curHealthBar->height; // lenght
-			m = new Msg(MSG_TYPE::UPDATE_OBJECT_POSITION, oss.str());
-		}
-		msgBus->postMessage(m, gameSystem);
-	}
-};
-
 void Scene_Gameplay::setPlayerTank(std::string playerID) {
 	if (playerTank != nullptr) {
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), gameSystem);
 	}
 	for (GameObject* g : gameSystem->gameObjects) {
-		if (g->id == playerID && g->getObjectType() == "TankObject") {
-			playerTank = (TankObject*)g;
-			actionOrigin = playerTank;
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
+		if (g->id == playerID)
+			if(playerTank = dynamic_cast<TankObject*>(g)) {
+			//playerTank = (TankObject*)g;
+				actionOrigin = playerTank;
+				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
 
-			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
-			OutputDebugString(debugS.c_str());
+				string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
+				OutputDebugString(debugS.c_str());
 		}
 	}
 }
@@ -854,4 +759,17 @@ void Scene_Gameplay::loadPauseMenu() {
 void Scene_Gameplay::unloadPauseMenuObjects() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem0"));
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem1"));
+}
+
+void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
+	ostringstream oss;
+	Msg* mm = new Msg(NETWORK_S_ACTION, "");
+	oss << gameSystem->clientID << ","//playerID
+		<< to_string(actionType) << ","//action type (e.g. MOVE or SHOOT)
+									   //<< currentAction << ","//the action number 0 to <number of actions/turn>
+		<< gameSystem->reticle->gridX << "," //target x pos
+		<< gameSystem->reticle->gridY; //target y pos
+
+	mm->data = oss.str();
+	msgBus->postMessage(mm, gameSystem);
 }
