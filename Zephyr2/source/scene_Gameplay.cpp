@@ -167,7 +167,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		if (gameActive) switch (msg->type) {
 		case MOUSE_MOVE:
 		{
-			vector<string> objectData = split(msg->data, ',');
+			/*vector<string> objectData = split(msg->data, ',');
 			INT32 x = atoi(objectData[0].c_str());
 			INT32 y = atoi(objectData[1].c_str());
 			INT32 width = atoi(objectData[2].c_str());
@@ -190,9 +190,36 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			int gridLocationX = (offsetX * sqrt(3) / 3) / gameSystem->hexSize;
 
 			gameSystem->reticle->gridX = gridLocationX;
-			gameSystem->reticle->gridY = gridLocationY;
-			updateReticle();
+			gameSystem->reticle->gridY = gridLocationY;*/
 
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
+			INT32 width = atoi(objectData[2].c_str());
+			INT32 length = atoi(objectData[3].c_str());
+			//x -= width / 2; y -= length / 2;
+			//y = -y;
+
+			glm::vec3 position = glm::vec3(0, -70.0f, 3.0f);
+			glm::vec3 rotation = glm::vec3(-0.8f, 0, 0);
+
+			glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width / (float)length, 1.0f, 1000.0f);
+			glm::mat4 look = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+
+			glm::mat4 translation = glm::translate(look, position * -1.0f);
+			glm::mat4 rotation2 = glm::mat4();
+
+			rotation2 = glm::rotate(rotation2, rotation.z, glm::vec3(0, 0, 1));
+			rotation2 = glm::rotate(rotation2, rotation.x, glm::vec3(1, 0, 0));
+			rotation2 = glm::rotate(rotation2, rotation.y, glm::vec3(0, 1, 0));
+
+			glm::mat4 view = rotation2 * translation;
+			glm::mat4 InvProjectViewMatrix = glm::inverse(projection) * view;
+
+			glm::vec3 coord = glm::vec4(x, y, 0, 1) * InvProjectViewMatrix;
+			glm::vec3 direction = coord - position;
+			SDL_Log("Coord X: %f, Y: %f, Z: %f", direction.x, direction.y, direction.z);
+			//updateReticle();
 			break;
 		}
 		case DOWN_ARROW_PRESSED: {

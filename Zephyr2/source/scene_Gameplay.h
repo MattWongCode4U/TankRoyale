@@ -1,7 +1,12 @@
 #pragma once
+#include <SDL.h>
+#include <glm.hpp>
+#include <gtc\matrix_transform.hpp>
+#include <gtx\euler_angles.hpp>
 #include "Scene.h"
 #include "TankObject.h"
 #include "GridObject.h"
+
 
 class Scene_Gameplay : public Scene {
 public:
