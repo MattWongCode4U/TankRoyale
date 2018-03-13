@@ -181,10 +181,7 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, flo
 		<< getObjectType();
 
 	mm->data = oss.str();
-	gameSystemUtil->testMethod(this, UPDATE_OBJECT_POSITION, mm->data);
-
-	if (gameSystemUtil == nullptr)
-		OutputDebugString("\nGameSystemUtil NOT SET\n");
+	
 	gameSystemUtil->postMessageToBus(mm);
 }
 

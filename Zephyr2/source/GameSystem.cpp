@@ -324,14 +324,13 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 	return obj;
 }
 TankObject* GameSystem::findTankObject(std::string objectID) {
-	TankObject* obj = nullptr;
+	TankObject* tank = nullptr;
 	for (GameObject *g : gameObjects) {
-		if (g->id == objectID && g->getObjectType() == "TankObject") {
-			obj = (TankObject*)g;
-			return obj;
+		if (TankObject* tank = dynamic_cast<TankObject*>(g)){
+			return tank;
 		}
 	}
-	return obj;
+	return nullptr;
 }
 GridObject* GameSystem::findGridObject(std::string objectID) {
 	GridObject* obj = nullptr;
@@ -390,13 +389,20 @@ void  GameSystem::loadScene(SceneType _scene){
 //implementation of gameSystemUtil virtual function
 //used to allow Gameobjects to send messages without giving them full access to GameSystem and messageSystem
 void GameSystem::postMessageToBus(Msg* message) {
-	OutputDebugString("\npostMessageToBus\n");
 	msgBus->postMessage(message, this);
 }
 
-void GameSystem::testMethod(GameObject* go, MSG_TYPE type, std::string data){
+std::vector<GameObject*>* GameSystem::getGameObjectsVector() {
+	return &gameObjects;
+}
 
-	msgBus->postMessage(new Msg(type, data), this);
-	OutputDebugString("\ntestMethod Ran with: ");
-	OutputDebugString(go->id.c_str());
+int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
+	int aXCube = aX - (aY - (aY & 1)) / 2;
+	int aZCube = aY;
+	int aYCube = -aXCube - aZCube;
+	int bXCube = bX - (bY - (bY & 1)) / 2;
+	int bZCube = bY;
+	int bYCube = -bXCube - bZCube;
+
+	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
 }

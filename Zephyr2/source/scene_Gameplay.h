@@ -42,7 +42,8 @@ public:
 	ActionTypes ActionType = MOVE;
 
 	//deal aoe damage to all tiles in the affected area
-	void dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
+	//MOVED TO THE TankObject class
+	//void dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
 
 	//deal damage in a straight line from the origin position along an axis
 	void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);

@@ -14,9 +14,8 @@ public:
 	virtual void removeAllGameObjects() = 0;
 	virtual void deleteGameObject(std::string id) = 0;
 	virtual void deleteGameObject(GameObject* go) = 0;
-
-	//TODO Remove this method
-	virtual void testMethod(GameObject* go, MSG_TYPE type, std::string data) = 0;
+	virtual std::vector<GameObject*>* getGameObjectsVector() = 0;
+	virtual int getGridDistance(int aX, int aY, int bX, int bY) = 0;//gets the distance between 2 points on the hex grid
 
 	//post message on the bus
 	virtual void postMessageToBus(Msg* message) = 0;

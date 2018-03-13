@@ -436,11 +436,6 @@ void Scene_Gameplay::executeAction(int a) {
 			//switch on the action type received from the network system, and execute the action
 			switch (receivedAction) {
 			case SHOOT: {
-				//string newID = "explosion" + to_string(rand());
-				//GridObject* gr = new GridObject(&(gameSystem->objData), newID, "explosion.png", 0, 0, 4, 0, 250, 250, 1, stoi(playerAction[2]), stoi(playerAction[3]), "");
-				
-				
-				
 				GridObject* go = (GridObject*)gameSystem->makeGameObject("explostion.txt");
 
 				go->id = "explosion" + to_string(rand());
@@ -452,19 +447,22 @@ void Scene_Gameplay::executeAction(int a) {
 				int radius = 1;
 				int damage = 19;
 
+				gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
+			
 				
+				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
 				
-				for (GameObject* g : gameSystem->gameObjects) {
-					if (g->id == currentObjectId) {
-						TankObject* t = (TankObject*)g; //the player's TankObject
-						//if t->shootType == //dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-						//else 
-						int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range);
-						if(axis != -1){
-							dealLineDamage(t->gridX, t->gridY, range, axis, damage);
-						}
-					}
-				}
+				//for (GameObject* g : gameSystem->gameObjects) {
+				//	if (g->id == currentObjectId) {
+				//		TankObject* t = (TankObject*)g; //the player's TankObject
+				//		//if t->shootType == //dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
+				//		//else 
+				//		int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range);
+				//		if(axis != -1){
+				//			dealLineDamage(t->gridX, t->gridY, range, axis, damage);
+				//		}
+				//	}
+				//}
 				break;
 			}
 
@@ -512,36 +510,24 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 		break;
 	}
 }
-
-void Scene_Gameplay::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
-	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
-	int aZCube = _originY;
-	int aYCube = -aXCube - aZCube;
-	OutputDebugString("origin point of shot: ");
-	OutputDebugString(to_string(_originX).c_str());
-	OutputDebugString(" , ");
-	OutputDebugString(to_string(_originY).c_str());
-	OutputDebugString("\n");
-
-	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
-		if (go->getObjectType() == "TankObject") {
-			TankObject* tank = (TankObject*)go;
-			if (getGridDistance(_originX, _originY, tank->gridX, tank->gridY) <= affectedRadius) {
-				tank->health -= damage;
-				OutputDebugString(tank->id.c_str());
-				OutputDebugString(" GOT HIT AT:");
-				OutputDebugString(to_string(tank->gridX).c_str());
-				OutputDebugString(" , ");
-				OutputDebugString(to_string(tank->gridY).c_str());
-				OutputDebugString("\n");
-
-				if (tank->health <= 0)
-					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), gameSystem);
-				updatePlayerHealthBar(tank->id);
-			}
-		}
-	}
-}
+//
+//void Scene_Gameplay::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage) {
+//	int aXCube = _originX - (_originY - (_originY & 1)) / 2;
+//	int aZCube = _originY;
+//	int aYCube = -aXCube - aZCube;
+//
+//	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
+//		if (go->getObjectType() == "TankObject") {
+//			TankObject* tank = (TankObject*)go;
+//			if (getGridDistance(_originX, _originY, tank->gridX, tank->gridY) <= affectedRadius) {
+//				tank->health -= damage;
+//				if (tank->health <= 0)
+//					msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"), gameSystem);
+//				updatePlayerHealthBar(tank->id);
+//			}
+//		}
+//	}
+//}
 
 //Position of tank firing: _originX, _originY
 //how many tiles the shot can go: length

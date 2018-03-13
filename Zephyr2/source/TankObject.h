@@ -14,6 +14,8 @@ public:
 	//returns the string representation of the objects data. Compatible with save file syntax
 	std::string toString();
 
+	void shoot(int targetX,int targetY);
+
 	//the remaining hitpoints
 	int health = 100;
 	int getHealth();

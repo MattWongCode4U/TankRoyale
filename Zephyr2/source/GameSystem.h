@@ -52,6 +52,8 @@ public:
 	void removeAllGameObjects();
 	void deleteGameObject(string id);
 	void deleteGameObject(GameObject* go);
+	std::vector<GameObject*>* getGameObjectsVector();
+	int getGridDistance(int aX, int aY, int bX, int bY);//gets the distance between 2 points on the hex grid
 
 	//post message on the bus
 	void postMessageToBus(Msg* message);
@@ -84,7 +86,6 @@ public:
 	TankObject* findTankObject(std::string objectID);
 	GridObject* findGridObject(std::string objectID);
 	FullscreenObj* findFullscreenObject(std::string objectID);
-	void testMethod(GameObject* go, MSG_TYPE type, std::string data);
 
 	//the reticle controlled by the arrow keys. used for aiming and queing up actions
 	GridObject* reticle;
