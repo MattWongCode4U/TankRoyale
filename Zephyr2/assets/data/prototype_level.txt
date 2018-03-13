@@ -453,13 +453,17 @@ length: 100,
 imageFrames: 1;
 
 gameObjectType: GameObject,
-id: testObject,
-renderable: triangle.png,
+id: childTest,
+renderable: triangle,
 xPos: 0,
-yPos: 40,
+yPos: 0,
 zPos: 10,
-zRotation: -90,
-width: 50,
-length: 50,
+width: 5,
+length: 5,
+renderType: billboard,
+model: quad,
 imageFrames: 1,
-parentId: player2;
+parentId: reticle;
+
+
+

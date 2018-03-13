@@ -2,9 +2,9 @@
 #include <windows.h>
 #include <map>
 #include <iostream>
-#include "ObjectData.h"
 #include "Vector2.h"
 #include "renderer\RenderableTypes.h"
+#include "GameSystemUtil.h"
 using namespace std;
 
 class GameObject {
@@ -35,17 +35,17 @@ public:
 	//use parentObject* instead of this, unless you know what you're doing
 	std::string parentId = "";
 
-	ObjectData* objData;
-
 	std::string renderable;
 	RenderableType renderType;
 	std::string model;
 	std::string normalMap;
 	float smoothness;
 
+	GameSystemUtil* gameSystemUtil;//pointer to the active gamesystem. only has access to utility functions not the rest
+
 	GameObject();
 	~GameObject();
-	GameObject(std::map <std::string, std::string> paramsMap, ObjectData* objData);
+	GameObject(std::map <std::string, std::string> paramsMap, GameSystemUtil* _gameSystemUtil);
 	virtual std::string getObjectType();
 	virtual std::string toString();
 	void earlyUpdate();

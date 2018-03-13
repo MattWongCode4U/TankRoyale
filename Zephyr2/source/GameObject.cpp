@@ -5,8 +5,8 @@ GameObject::GameObject() {
 
 GameObject::~GameObject() {
 }
-GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
-	objData = _objData;
+GameObject::GameObject(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) {
+	gameSystemUtil = _gameSystemUtil;
 	try {
 		id = paramsMap.find("id")->second;
 		renderable = paramsMap.find("renderable")->second;
@@ -181,12 +181,18 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, flo
 		<< getObjectType();
 
 	mm->data = oss.str();
-	objData->toPostVector.push_back(mm);
+	gameSystemUtil->testMethod(this, UPDATE_OBJECT_POSITION, mm->data);
+
+	if (gameSystemUtil == nullptr)
+		OutputDebugString("\nGameSystemUtil NOT SET\n");
+	gameSystemUtil->postMessageToBus(mm);
 }
 
 void GameObject::setParent(GameObject* newParent) {
 	parentObject = newParent;
 	parentObject->childObjects.push_back(this);
+
+	offsetPosition(parentObject->x, parentObject->y, parentObject->z, parentObject->zRotation);
 	//parentObject->offsetPosition(300, 300, 0);
 }
 
@@ -211,5 +217,5 @@ void GameObject::destroyWithChildren() {
 		g->destroyWithChildren();
 	}
 	parentObject->removeChild(this);
-	objData->toDestroyVector.push_back(this);
+	gameSystemUtil->deleteGameObject(this);
 }

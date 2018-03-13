@@ -5,7 +5,7 @@ const int TANK_MAX_HEALTH = 100;
 
 class TankObject : public GridObject {
 public:
-	TankObject(map<string, string> params, ObjectData* objData);
+	TankObject(map<string, string> params, GameSystemUtil* _gameSystemUtil);
 	~TankObject();
 
 	//returns the object type string e.g. "GridObject"

@@ -1,6 +1,6 @@
 #include "TankObject.h"
 
-TankObject::TankObject(map <string, string> paramsMap, ObjectData* objData) : GridObject(paramsMap, objData) {
+TankObject::TankObject(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : GridObject(paramsMap, _gameSystemUtil) {
 	health = stoi(paramsMap.find("health")->second);
 }
 

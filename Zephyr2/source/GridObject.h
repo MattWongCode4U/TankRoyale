@@ -4,9 +4,9 @@
 
 class GridObject : public GameObject {
 public:
-	GridObject(map<string, string> params, ObjectData* objData);
+	GridObject(map<string, string> params, GameSystemUtil* _gameSystemUtil);
 
-	GridObject(ObjectData* _objData, std::string id, std::string renderable, float xPos, float yPos, int zPos, int orientation, int width, int length, int imageFrames, int gridX, int gridY, std::string _parent);
+	//GridObject(ObjectData* _objData, std::string id, std::string renderable, float xPos, float yPos, int zPos, int orientation, int width, int length, int imageFrames, int gridX, int gridY, std::string _parent);
 	
 	~GridObject();
 
