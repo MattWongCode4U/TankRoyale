@@ -42,4 +42,5 @@ public:
 	float hpBarWidth;//the original width of the hp bar
 	float maxHealth;//the maximum hp pool
 	
+	void turn(int turnDir);
 };

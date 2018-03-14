@@ -114,3 +114,8 @@ int TankObject::checkShootValidity(int originX, int originY, int targetX, int ta
 	else
 		return -1;
 }
+
+//params int turn amount & direction (6 or -6 is full 360. 
+void TankObject::turn(int turnDir) {
+
+}
