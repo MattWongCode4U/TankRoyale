@@ -315,6 +315,15 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			{
 				gameSystem->currentAction += 2;
 			}
+			//Rotate ActionTypes
+			else if (ActionType == ROTATEPOS) 
+			{
+				gameSystem->currentAction++;
+			}
+			else if (ActionType == ROTATENEG) 
+			{
+				gameSystem->currentAction++;
+			}
 			
 
 			break;
@@ -369,6 +378,14 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString(to_string(gameSystem->reticle->gridY).c_str());
 			OutputDebugString("\n");
 			break;
+		//TESTING ROTATION
+		case KEY_Q_PRESSED:
+			setActionType(ROTATEPOS);
+			break;
+		case KEY_E_PRESSED:
+			setActionType(ROTATENEG);
+			break;
+		
 		case KEY_ESC_RELEASED:
 			// Pause the game (lock control, display 2 buttons)
 			loadPauseMenu();
@@ -453,32 +470,43 @@ void Scene_Gameplay::executeAction(int a) {
 		string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
 		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
-			//switch on the action type received from the network system, and execute the action
-			switch (receivedAction) {
-			case SHOOT: {
-				gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
+		//switch on the action type received from the network system, and execute the action
+		switch (receivedAction) {
+		case SHOOT: {
+			gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
 
-				break;
-			}
+			break;
+		}
 
 		case MOVE:
-			//display player MOVE actions for players whose id's are found
-			for (GameObject* g : gameSystem->gameObjects) {
-				if (g->id == currentObjectId) {
-					//OutputDebugString(playerAction[2].c_str());
-					TankObject* t = (TankObject*)g;
-					if (t->health > 0) {
-						t->gridX = stoi(playerAction[2]);
-						t->gridY = stoi(playerAction[3]);
-						t->updateWorldCoords();
-						gameSystem->sendUpdatePosMessage(t);
-					}
+		//display player MOVE actions for players whose id's are found
+		for (GameObject* g : gameSystem->gameObjects) {
+			if (g->id == currentObjectId) {
+				//OutputDebugString(playerAction[2].c_str());
+				TankObject* t = (TankObject*)g;
+				if (t->health > 0) {
+					t->gridX = stoi(playerAction[2]);
+					t->gridY = stoi(playerAction[3]);
+					t->updateWorldCoords();
+					gameSystem->sendUpdatePosMessage(t);
 				}
 			}
-			break;
+		}
+		break;
 		case PASS:
 		{
 			std::cout << "Turn passed";
+			break;
+		}
+		//ROTATION
+		case ROTATEPOS:
+		{
+			gameSystem->findTankObject(currentObjectId)->turn(60);
+			break;
+		}
+		case ROTATENEG:
+		{
+			gameSystem->findTankObject(currentObjectId)->turn(300);
 			break;
 		}
 		}
@@ -505,237 +533,6 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 		break;
 	}
 }
-
-/*
-//Position of tank firing: _originX, _originY
-//how many tiles the shot can go: length
-//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-void Scene_Gameplay::dealLineDamage(int _originX, int _originY, int length, int axis, int damage) {
-	vector<TankObject *> thingsHit; //list of things hit
-
-	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
-		if (go->getObjectType() == "TankObject") {
-			TankObject* tank = (TankObject*)go;
-			if (sameAxisShot(axis, _originX, _originY, tank->gridX, tank->gridY, length)) { //if on same axis and in range
-				thingsHit.push_back(tank); //add things that are in firing range along the axis to the list
-			}
-		}
-	}
-
-	//Find the first thing hit from the list
-	if (thingsHit.size() > 0) {
-		TankObject* currClosestTank = nullptr;
-		int dist = -1;
-		for (TankObject* t : thingsHit) {
-			OutputDebugString((t->id).c_str());
-			OutputDebugString(" hit\n");
-			if (dist < getGridDistance(_originX, _originY, t->gridX, t->gridY)) {
-				dist = getGridDistance(_originX, _originY, t->gridX, t->gridY);
-				currClosestTank = t;
-			}
-		}
-
-		//deal damage to closest tank;
-		if (currClosestTank != nullptr) {
-			currClosestTank->health -= damage;
-			if (currClosestTank->health <= 0)
-				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"), gameSystem);
-			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
-		}
-	}
-}
-
-bool Scene_Gameplay::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length) {
-	bool result = false;
-
-	int aXCube = x1 - (y1 - (y1 & 1)) / 2;
-	int aZCube = y1;
-	int aYCube = -aXCube - aZCube;
-
-	int bXCube = x2 - (y2 - (y2 & 1)) / 2;
-	int bZCube = y2;
-	int bYCube = -bXCube - bZCube;
-
-	int axisBase[3] = { 0, 0, 0 };
-
-	switch (axis) {
-	case 0: //r (+1, -1, 0)
-		axisBase[0] = 1;
-		axisBase[1] = -1;
-		axisBase[2] = 0;
-		break;
-
-	case 1: //l (-1, +1, 0)
-		axisBase[0] = -1;
-		axisBase[1] = 1;
-		axisBase[2] = 0;
-		break;
-
-	case 2: //ur (0, -1, 1)
-		axisBase[0] = 0;
-		axisBase[1] = -1;
-		axisBase[2] = 1;
-		break;
-
-	case 3: //dl (0, 1, -1)
-		axisBase[0] = 0;
-		axisBase[1] = 1;
-		axisBase[2] = -1;
-		break;
-
-	case 4: //ul (-1, 0, 1)
-		axisBase[0] = -1;
-		axisBase[1] = 0;
-		axisBase[2] = 1;
-		break;
-
-	case 5: //dr (1, 0, -1)
-		axisBase[0] = 1;
-		axisBase[1] = 0;
-		axisBase[2] = -1;
-		break;
-	}
-
-	//Test if the point line up on the specified axis
-	for (int i = 1; i < length; i++) {
-		int tempaXCube = aXCube + axisBase[0] * i;
-		int tempaYCube = aYCube + axisBase[1] * i;
-		int tempaZCube = aZCube + axisBase[2] * i;
-
-		if ((tempaXCube == bXCube) 
-			&& (tempaYCube == bYCube) 
-			&& (tempaZCube == bZCube)) {
-			result = true;
-			break;
-		}
-	}
-
-	return result;
-}
-
-//For selecting a direction to shoot along an axis
-//position of player's tank: (x1, y1)
-//position of click: (x2, y2)
-//returns 0=r 1=l 2=ur 3=dl 4=ul 5=dr -1=none
-int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
-	if (x1 == x2 && y1 == y2) { //same location
-		return -1;
-	}
-
-	int aXCube = x1 - (y1 - (y1 & 1)) / 2;
-	int aZCube = y1;
-	int aYCube = -aXCube - aZCube;
-
-	int bXCube = x2 - (y2 - (y2 & 1)) / 2;
-	int bZCube = y2;
-	int bYCube = -bXCube - bZCube;
-
-	//Check directions then return if it is in that direction
-
-	//r (+1, -1, 0)
-	int r[3] = { 1, -1, 0 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + r[0] * i;
-		int tempaYCube = aYCube + r[1] * i;
-		int tempaZCube = aZCube + r[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("right\n");
-			return 0;
-		}
-	}
-
-	//l (-1, +1, 0)
-	int l[3] = { -1, 1, 0 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + l[0] * i;
-		int tempaYCube = aYCube + l[1] * i;
-		int tempaZCube = aZCube + l[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("left\n");
-			return 1;
-		}
-	}
-
-	//ur (0, -1, 1)
-	int ur[3] = { 0, -1, 1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + ur[0] * i;
-		int tempaYCube = aYCube + ur[1] * i;
-		int tempaZCube = aZCube + ur[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("up right\n");
-			return 2;
-		}
-	}
-
-	//dl (0, 1, -1)
-	int dl[3] = { 0, 1, -1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + dl[0] * i;
-		int tempaYCube = aYCube + dl[1] * i;
-		int tempaZCube = aZCube + dl[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("down left\n");
-			return 3;
-		}
-	}
-
-	//ul (-1, 0, 1)
-	int ul[3] = { -1, 0, 1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + ul[0] * i;
-		int tempaYCube = aYCube + ul[1] * i;
-		int tempaZCube = aZCube + ul[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("up left\n");
-			return 4;
-		}
-	}
-
-	//dr (1, 0, -1)
-	int dr[3] = { 1, 0, -1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + dr[0] * i;
-		int tempaYCube = aYCube + dr[1] * i;
-		int tempaZCube = aZCube + dr[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("down right\n");
-			return 5;
-		}
-	}
-
-	return -1; //Not on any axis or in range
-}*/
-
-/*int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
-	int aXCube = aX - (aY - (aY & 1)) / 2;
-	int aZCube = aY;
-	int aYCube = -aXCube - aZCube;
-
-	int bXCube = bX - (bY - (bY & 1)) / 2;
-	int bZCube = bY;
-	int bYCube = -bXCube - bZCube;
-
-	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
-}*/
 
 void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();

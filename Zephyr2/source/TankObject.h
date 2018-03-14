@@ -43,4 +43,5 @@ public:
 	float maxHealth;//the maximum hp pool
 	
 	void turn(int turnDir);
+	int getAxisOrientation();
 };

@@ -78,7 +78,8 @@ string Tank_Scout::getObjectType() {
 //returns -1 if action invalid
 //returns the action cost if valid
 int Tank_Scout::checkShootValidity(int originX, int originY, int targetX, int targetY) {
-	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, 3);
+	int range = 3;
+	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, range);
 
 	if (axis != -1)
 		return 1;

@@ -22,12 +22,12 @@ public:
 
 	//returns true if the two points are on the same specified axis
 	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-	virtual bool sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length);
+	virtual bool sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length) = 0;
 
 	//returns the axis that is shared by the 2 points. 
 	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
 	//if not on any of the axis, return -1
-	virtual int onAxis(int x1, int y1, int x2, int y2, int range);
+	virtual int onAxis(int x1, int y1, int x2, int y2, int range) = 0;
 
 	//post message on the bus
 	virtual void postMessageToBus(Msg* message) = 0;

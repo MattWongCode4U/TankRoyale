@@ -57,9 +57,10 @@ int Tank_Artillery::checkMoveValidity(int originX, int originY, int targetX, int
 //returns -1 if action invalid
 //returns the action cost if valid
 int Tank_Artillery::checkShootValidity(int originX, int originY, int targetX, int targetY) {
+	int range = 6;
 	int distancetoTarget = gameSystemUtil->getGridDistance(originX, originY, targetX, targetY);
 
-	if (distancetoTarget < 6 && distancetoTarget > 0)
+	if (distancetoTarget < range && distancetoTarget > 0)
 		return 2;
 	else
 		return -1;
