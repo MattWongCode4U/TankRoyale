@@ -439,7 +439,7 @@ int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
 //Position of tank firing: _originX, _originY
 //how many tiles the shot can go: length
 //axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-void GameSystem::dealLineDamage(int _originX, int _originY, int length, int axis, int damage) {
+/*void GameSystem::dealLineDamage(int _originX, int _originY, int length, int axis, int damage) {
 	vector<TankObject *> thingsHit; //list of things hit
 
 	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
@@ -472,7 +472,7 @@ void GameSystem::dealLineDamage(int _originX, int _originY, int length, int axis
 			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
 		}
 	}
-}
+}*/
 
 bool GameSystem::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length) {
 	bool result = false;

@@ -18,7 +18,7 @@ public:
 	virtual int getGridDistance(int aX, int aY, int bX, int bY) = 0;//gets the distance between 2 points on the hex grid
 
 	//deal damage in a straight line from the origin position along an axis
-	virtual void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
+	//virtual void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
 
 	//returns true if the two points are on the same specified axis
 	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
