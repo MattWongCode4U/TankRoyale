@@ -14,18 +14,29 @@ public:
 	//returns the string representation of the objects data. Compatible with save file syntax
 	std::string toString();
 
-	void shoot(int targetX,int targetY);
+	//deals damage to affected objects. creates animations
+	virtual void shoot(int targetX,int targetY);
 
 
 	//the remaining hitpoints
 	int health = 100;
 	int getHealth();
 	void setHealth(int newHealth);
-	void takeDamage(int damage);//reduce health and update hpBar
+	virtual void takeDamage(int damage);//reduce health and update hpBar
 
 	GameObject* hpBar;//the id of this tank hp bar
 	void createhpBar();//creates an hp bar object for this tank
 	void updatehpBar();//updates the hpBar
+
+	//checks if the targeted move action is valid for this tankObject
+	//returns -1 if action invalid
+	//returns the action cost if valid
+	virtual int checkMoveValidity(int originX, int originY, int targetX, int targetY);
+
+	//checks if the targeted Shooting action is valid for this tankObject
+	//returns -1 if action invalid
+	//returns the action cost if valid
+	virtual int checkShootValidity(int originX, int originY, int targetX, int targetY);
 
 	//the width of a full hpBar
 	float hpBarWidth;//the original width of the hp bar

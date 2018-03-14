@@ -83,18 +83,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		std::ostringstream oss, oss2;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-		//for (GameObject* g : gameSystem->gameObjects) {
-		//	if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
-		//		gameSystem->reticle = (GridObject*)g;
-
-		//		//for testing of object parenting
-		//		/*GameObject* testObj = gameSystem->findGameObject("testObject");
-		//		if (testObj->parentObject == nullptr) {
-		//			testObj->setParent(g);
-		//		}*/
-		//		
-		//	}
-		//}
 		gameSystem->reticle = gameSystem->findGridObject("reticle");
 
 		vector<string> playersArray;
@@ -216,30 +204,15 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case SPACEBAR_PRESSED: {
-			if (gameSystem->currentAction >= gameSystem->maxActions || !validMove) break;
-			if (ActionType == SHOOT && gameSystem->currentAction >= gameSystem->maxActions - 1) break;
+			if (gameSystem->currentAction >= gameSystem->maxActions || moveCost <= 0) break;
+			if (gameSystem->currentAction > gameSystem->maxActions - moveCost) break;
 
-			//Send Message to network
-			//message format: playerID,actionName,actionNumber,targetX,targetY
-			oss << gameSystem->clientID << ","//playerID
-				<< to_string(ActionType) << ","//action type (e.g. MOVE or SHOOT)
-											   //<< currentAction << ","//the action number 0 to <number of actions/turn>
-				<< gameSystem->reticle->gridX << "," //target x pos
-				<< gameSystem->reticle->gridY; //target y pos
+			//send the action to the network system
+			sendNetworkActionMsg(ActionType);
 
-			mm->type = NETWORK_S_ACTION;
-			mm->data = oss.str();
-			msgBus->postMessage(mm, gameSystem);
-
-			if (ActionType == SHOOT)	// DUMMY PASSING DATA AFTER SHOOT
-			{
-				oss2 << gameSystem->clientID << ","//playerID
-					<< to_string(PASS) << ","//action type (e.g. MOVE or SHOOT)
-												   //<< currentAction << ","//the action number 0 to <number of actions/turn>
-					<< gameSystem->reticle->gridX << "," //target x pos
-					<< gameSystem->reticle->gridY; //target y pos
-
-				msgBus->postMessage(new Msg(NETWORK_S_ACTION, oss2.str()), gameSystem);
+			//pad with empty actions iff the move cost is > 1;
+			for (int i = 1; i < moveCost; i++) {
+				sendNetworkActionMsg(PASS);
 			}
 
 			GridObject *indicator = NULL;
@@ -446,33 +419,8 @@ void Scene_Gameplay::executeAction(int a) {
 			//switch on the action type received from the network system, and execute the action
 			switch (receivedAction) {
 			case SHOOT: {
-				GridObject* go = (GridObject*)gameSystem->makeGameObject("explostion.txt");
-
-				go->id = "explosion" + to_string(rand());
-				go->gridX = stoi(playerAction[2]);
-				go->gridY = stoi(playerAction[3]);
-				gameSystem->createGameObject(go);
-				go->updateWorldCoords();
-
-				int radius = 1;
-				int damage = 19;
-
 				gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
-				
-				
-				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-				
-				//for (GameObject* g : gameSystem->gameObjects) {
-				//	if (g->id == currentObjectId) {
-				//		TankObject* t = (TankObject*)g; //the player's TankObject
-				//		//if t->shootType == //dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-				//		//else 
-				//		int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range);
-				//		if(axis != -1){
-				//			dealLineDamage(t->gridX, t->gridY, range, axis, damage);
-				//		}
-				//	}
-				//}
+
 				break;
 			}
 
@@ -763,16 +711,22 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 
-	int dist = getGridDistance(gameSystem->reticle->gridX, gameSystem->reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
 
-	if (dist > range) {
-		gameSystem->reticle->renderable = "TileIndicatorRed.png";
-		validMove = false;
-	}
-	else {
+	if (ActionType == SHOOT)
+		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	else if(ActionType == MOVE)
+		moveCost = playerTank->checkMoveValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+
+	if (moveCost > 0 && gameSystem->reticle->renderable != "TileIndicator.png") {
 		gameSystem->reticle->renderable = "TileIndicator.png";
-		validMove = true;
+		gameSystem->reticle->postSpriteMsg();
+	}	
+	else if(moveCost <= 0 && gameSystem->reticle->renderable != "TileIndicatorRed") {
+		gameSystem->reticle->renderable = "TileIndicatorRed";
+		gameSystem->reticle->postSpriteMsg();
 	}
+		
+
 
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
@@ -786,13 +740,14 @@ void Scene_Gameplay::setPlayerTank(std::string playerID) {
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), gameSystem);
 	}
 	for (GameObject* g : gameSystem->gameObjects) {
-		if (g->id == playerID && g->getObjectType() == "TankObject") {
-			playerTank = (TankObject*)g;
-			actionOrigin = playerTank;
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
+		if (g->id == playerID)
+			if(playerTank = dynamic_cast<TankObject*>(g)) {
+			//playerTank = (TankObject*)g;
+				actionOrigin = playerTank;
+				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
 
-			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
-			OutputDebugString(debugS.c_str());
+				string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
+				OutputDebugString(debugS.c_str());
 		}
 	}
 }
@@ -804,4 +759,17 @@ void Scene_Gameplay::loadPauseMenu() {
 void Scene_Gameplay::unloadPauseMenuObjects() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem0"));
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem1"));
+}
+
+void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
+	ostringstream oss;
+	Msg* mm = new Msg(NETWORK_S_ACTION, "");
+	oss << gameSystem->clientID << ","//playerID
+		<< to_string(actionType) << ","//action type (e.g. MOVE or SHOOT)
+									   //<< currentAction << ","//the action number 0 to <number of actions/turn>
+		<< gameSystem->reticle->gridX << "," //target x pos
+		<< gameSystem->reticle->gridY; //target y pos
+
+	mm->data = oss.str();
+	msgBus->postMessage(mm, gameSystem);
 }

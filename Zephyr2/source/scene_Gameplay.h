@@ -63,8 +63,13 @@ public:
 	//updates the reticle spright, and postion.
 	void updateReticle();
 
-	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
-	bool validMove = false;
+	//sends a message to network system with the specified action
+	void sendNetworkActionMsg(ActionTypes actionType);
+
+	//the action point cost of the current action. -1 if action not allowed
+	//bool validMove = false;
+	int moveCost = -1;
+
 
 	//the local player tank object
 	TankObject* playerTank;

@@ -319,7 +319,7 @@ imageFrames: 1,
 gridX: 0,
 gridY: 0;
 
-gameObjectType: TankObject,
+gameObjectType: Tank_Artillery,
 id: player1,
 renderable: sciFiTank.png,
 xPos: -18.57,
@@ -338,7 +338,7 @@ gridX: -2,
 gridY: 3,
 health: 100;
 
-gameObjectType: TankObject,
+gameObjectType: Tank_Heavy,
 id: player2,
 renderable: sciFiTank1.png,
 xPos: -18.57,
@@ -355,7 +355,7 @@ gridX: -2,
 gridY: -3,
 health: 100;
 
-gameObjectType: TankObject,
+gameObjectType: Tank_Scout,
 id: player3,
 renderable: testTankTexture.png,
 xPos: 18.57,
@@ -374,7 +374,7 @@ gridX: 1,
 gridY: -3,
 health: 100;
 
-gameObjectType: TankObject,
+gameObjectType: Tank_Sniper,
 id: player4,
 renderable: sciFiTank2.png,
 xPos: 18.57,

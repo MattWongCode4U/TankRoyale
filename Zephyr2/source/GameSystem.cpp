@@ -35,7 +35,19 @@ GameObject* GameSystem::makeGameObject(string fileName) {
 		g = new FullscreenObj(gameObjDataMap, this);
 	}
 	else if (gameObjectType.compare("TankObject") == 0) {
-		g = new TankObject(gameObjDataMap, this);
+		g = new Tank_Artillery(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Artillery") == 0) {
+		g = new Tank_Artillery(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Heavy") == 0) {
+		g = new Tank_Heavy(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Scout") == 0) {
+		g = new Tank_Scout(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Sniper") == 0) {
+		g = new Tank_Sniper(gameObjDataMap, this);
 	}
 	return g;
 }
@@ -75,7 +87,19 @@ void GameSystem::addGameObjects(string fileName) {
 			g = new FullscreenObj(gameObjDataMap, this);
 		}
 		else if (gameObjectType.compare("TankObject") == 0) {
-			g = new TankObject(gameObjDataMap, this);
+			g = new Tank_Artillery(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Artillery") == 0) {
+			g = new Tank_Artillery(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Heavy") == 0) {
+			g = new Tank_Heavy(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Scout") == 0) {
+			g = new Tank_Scout(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Sniper") == 0) {
+			g = new Tank_Sniper(gameObjDataMap, this);
 		}
 
 		if (g != NULL) {
@@ -326,10 +350,14 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 TankObject* GameSystem::findTankObject(std::string objectID) {
 	TankObject* tank = nullptr;
 	for (GameObject *g : gameObjects) {
-		if(g->id == objectID)
-			if (TankObject* tank = dynamic_cast<TankObject*>(g)){
+		if (g->id == objectID) {
+			if (TankObject* tank = dynamic_cast<TankObject*>(g)) {
+				//OutputDebugString("\nFOund Tank\n");
+				//TankObject* tank = dynamic_cast<TankObject*>(g);
 				return tank;
 			}
+		}
+			
 	}
 	return nullptr;
 }
