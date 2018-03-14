@@ -173,7 +173,7 @@ void NetworkSystem::handleMessage(Msg *msg) {
 
 				//testing sending NETWORK_R_GAMESTART_OK message
 				//id1,class1|id2,class2|etc.
-				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,light|defaultClientID,heavy|id3,arty|id4,heavy|"), this);
+				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,artillery|defaultClientID,"+ msg->data +"|id3,sniper|id4,scout|"), this);
 			}
 			break;
 		case NETWORK_S_ANIMATIONS:

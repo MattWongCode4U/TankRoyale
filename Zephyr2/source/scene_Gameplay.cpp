@@ -98,7 +98,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
 			actionOrigin = playerTank;
 
-			if (playerTank->health <= 0) {
+			if (playerTank != nullptr && playerTank->health <= 0) {
 				string spoofData = gameSystem->clientID + ",3,0,0";
 				msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), gameSystem);
 				msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), gameSystem);
@@ -117,8 +117,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			gameActive = false;
 			OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
 			break;
-		case NETWORK_R_GAMESTART_OK: {//"id1,ClientID,id3,id4," only for server version
-			//id1,class1|id2,class2|etc.
+		case NETWORK_R_GAMESTART_OK: {//id1,class1|id2,class2|etc.
 			vector<string> clientIDVector = split(msg->data, '|');
 			vector<string> tankIdClassVector;
 			//OutputDebugString(to_string(clientIDVector.size()).c_str());
@@ -131,14 +130,52 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			for (int i = 0; i < clientIDVector.size(); i++) {
 				tankIdClassVector = split(clientIDVector[i], ',');
 
-				//create healthbar for each player
-				gameSystem->findTankObject("player" + to_string(i + 1))->createhpBar();
+				
 
+				//create Tank Object
+				TankObject* t = (TankObject*)gameSystem->makeGameObject("Tank_" + tankIdClassVector[1] + ".txt");
+				t->id = "player" + to_string(i+1);
+
+				//set starting pos
+				if (i == 0) {
+					t->gridX = -3;
+					t->gridY = 3;
+				} else if (i == 1) {
+					t->gridX = -3;
+					t->gridY = -3;
+				}
+				else if (i == 2) {
+					t->gridX = 3;
+					t->gridY = 3;
+				}
+				else if (i == 3) {
+					t->gridX = 3;
+					t->gridY = -3;
+				}
+			
+				gameSystem->createGameObject(t);
+				t->updateWorldCoords();
+				t->createhpBar();//create the hp bar
+				
 
 				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
-					setPlayerTank("player" + to_string(i + 1));
+					//setPlayerTank("player" + to_string(i + 1));
+					playerTank = t;
+					actionOrigin = playerTank;
+
+					//create the playerTank Indicator
+					GameObject* arrow = gameSystem->makeGameObject("arrow.txt");
+					arrow->id = "playerArrow";
+					arrow->parentId = t->id;
+					gameSystem->createGameObject(arrow);//add the arrow to gameobjects
+
+					OutputDebugString("\nActionORigin id : ");
+					OutputDebugString(actionOrigin->id.c_str());
 				}
+
+				//create healthbar for each player
+				//gameSystem->findTankObject("player" + to_string(i + 1))->createhpBar();
 			}
 
 
@@ -703,7 +740,7 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
-
+	if (!playerTank) return; //if the player tank is null return
 
 	if (ActionType == SHOOT)
 		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
