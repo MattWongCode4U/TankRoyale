@@ -95,7 +95,11 @@ string GameObject::getObjectType() {
 }
 
 void GameObject::earlyUpdate() {
-
+	if (offsetFrames > 0) {
+		offsetPosition(offsetX, offsetY, offsetZ, rotationOffsetZ);
+		offsetFrames--;
+	}
+		
 }
 
 void GameObject::midUpdate() {
@@ -198,6 +202,22 @@ void GameObject::destroyWithChildren() {
 	parentObject->removeChild(this);
 	gameSystemUtil->deleteGameObject(this);
 }
+
+/*move object towards the specified position in the number of frames
+params:
+float targetX, targetY, targetZ = the target position
+float turnZ = the number of degrees to turn around z direction
+int frames = number of frames to move in
+*/
+void GameObject::moveTowards(float targetX, float targetY, float targetZ, float turnZ, int frames) {
+	//if (offsetFrames <= 0) return; //if already moving towards, ignore
+	offsetFrames = frames;
+	offsetX = (targetX-x) / (float)frames;
+	offsetY = (targetY-y) / (float)frames;
+	offsetZ = (targetZ-z) / (float)frames;
+	rotationOffsetZ = (turnZ-zRotation) / (float)frames;
+}
+
 
 void GameObject::postPostionMsg() {
 	ostringstream oss;

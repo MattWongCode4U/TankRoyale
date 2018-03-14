@@ -470,8 +470,10 @@ void Scene_Gameplay::executeAction(int a) {
 					if (t->health > 0) {
 						t->gridX = stoi(playerAction[2]);
 						t->gridY = stoi(playerAction[3]);
-						t->updateWorldCoords();
-						gameSystem->sendUpdatePosMessage(t);
+						
+						//t->moveTowards(t->gridToworld().first, t->gridToworld().second, t->z, 0, 99);
+						t->updateWorldCoords(70);
+						//gameSystem->sendUpdatePosMessage(t);
 					}
 				}
 			}
@@ -745,7 +747,7 @@ int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
 }
 
 void Scene_Gameplay::updateReticle() {
-	gameSystem->reticle->updateWorldCoords();
+	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
 
