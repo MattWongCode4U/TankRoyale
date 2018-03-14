@@ -57,10 +57,10 @@ string Tank_Scout::getObjectType() {
 //returns -1 if action invalid
 //returns the action cost if valid
 int Tank_Scout::checkShootValidity(int originX, int originY, int targetX, int targetY) {
-	int distancetoTarget = gameSystemUtil->getGridDistance(originX, originY, targetX, targetY);
+	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, 3);
 
-	if (distancetoTarget < 6 && distancetoTarget > 0)
-		return 2;
+	if (axis != -1)
+		return 1;
 	else
 		return -1;
 }
