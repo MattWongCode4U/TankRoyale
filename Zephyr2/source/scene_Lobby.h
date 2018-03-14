@@ -6,7 +6,7 @@ public:
 	Scene_Lobby(MessageBus* _mbus, GameSystem* _gs);
 	~Scene_Lobby();
 
-	std::string playerSelectedClass;
+	bool gameActive = false;
 
 	//Runs once per gameloop frame
 	void sceneUpdate();
@@ -17,6 +17,6 @@ public:
 	//code that runs once when  scene is loaded goes here
 	void startScene();
 
-	std::string playerSelection(int option);
-	void Scene_Lobby::sendPlayerSelection();
+	void loadNoClassSelected();
+	void unloadNoClassSelected();
 };
