@@ -41,7 +41,6 @@ void TankObject::shoot(int targetX, int targetY) {
 	int aYCube = -aXCube - aZCube;
 	vector<GameObject*>* gameObjects = gameSystemUtil->getGameObjectsVector();
 
-
 	//create explosion Object
 	GridObject* go = (GridObject*)gameSystemUtil->makeGameObject("explostion.txt");
 	go->id = "explosion" + to_string(rand());

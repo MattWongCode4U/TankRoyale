@@ -46,21 +46,25 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 					if (g->id.compare("Option0") == 0) {
 						// tank 1
 						gameSystem->tankClass = "scout";
+						OutputDebugString("scout SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option1") == 0) {
 						// tank 2
 						gameSystem->tankClass = "sniper";
+						OutputDebugString("sniper SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option2") == 0) {
 						// tank 3
 						gameSystem->tankClass = "heavy";
+						OutputDebugString("heavy SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option3") == 0) {
 						// tank 4
-						gameSystem->tankClass = "battle"; // regular tank?
+						gameSystem->tankClass = "artillery"; // regular tank?
+						OutputDebugString("artillery SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("SelectButton") == 0) {
