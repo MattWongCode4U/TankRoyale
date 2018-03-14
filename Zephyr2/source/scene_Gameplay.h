@@ -45,6 +45,7 @@ public:
 	//MOVED TO THE TankObject class
 	//void dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
 
+	/*
 	//deal damage in a straight line from the origin position along an axis
 	void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
 
@@ -59,6 +60,7 @@ public:
 
 	//returns the tile distance in between two tiles on the grid;
 	int getGridDistance(int aX, int aY, int bx, int bY);
+	*/
 
 	//updates the reticle spright, and postion.
 	void updateReticle();

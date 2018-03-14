@@ -469,6 +469,7 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 	}
 }
 
+/*
 //Position of tank firing: _originX, _originY
 //how many tiles the shot can go: length
 //axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
@@ -563,14 +564,6 @@ bool Scene_Gameplay::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int 
 		int tempaXCube = aXCube + axisBase[0] * i;
 		int tempaYCube = aYCube + axisBase[1] * i;
 		int tempaZCube = aZCube + axisBase[2] * i;
-		
-		/*OutputDebugString("Hitting: ");
-		OutputDebugString(to_string(tempaXCube).c_str());
-		OutputDebugString(", ");
-		OutputDebugString(to_string(tempaYCube).c_str());
-		OutputDebugString(", ");
-		OutputDebugString(to_string(tempaZCube).c_str());
-		OutputDebugString("\n");*/
 
 		if ((tempaXCube == bXCube) 
 			&& (tempaYCube == bYCube) 
@@ -693,9 +686,9 @@ int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
 	}
 
 	return -1; //Not on any axis or in range
-}
+}*/
 
-int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
+/*int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
 	int aXCube = aX - (aY - (aY & 1)) / 2;
 	int aZCube = aY;
 	int aYCube = -aXCube - aZCube;
@@ -705,7 +698,7 @@ int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
 	int bYCube = -bXCube - bZCube;
 
 	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
-}
+}*/
 
 void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords();
