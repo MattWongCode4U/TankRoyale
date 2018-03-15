@@ -52,7 +52,7 @@ void GridObject::updateWorldCoords(int frameDelay) {
 	if(frameDelay == 0)
 		setPosition(newX, vertDist * gridY, z);
 	else
-		moveTowards(newX, newY, z, 0, frameDelay);
+		moveTowards(newX, newY, z, zRotation, frameDelay);
 	//x = newX;
 	//y = vertDist * gridY;
 	//z = z;
