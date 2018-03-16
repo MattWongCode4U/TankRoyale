@@ -543,13 +543,14 @@ void Scene_Gameplay::updateReticle() {
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
 
-	if (ActionType == SHOOT)
+	if (ActionType == SHOOT) {
+		checkAOEReticle();
 		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	}
 	else if(ActionType == MOVE)
 		moveCost = playerTank->checkMoveValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	else if(ActionType == ROTATENEG || ActionType == ROTATEPOS)
 		moveCost = playerTank->checkTurnValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
-
 	if (moveCost > 0 && gameSystem->reticle->renderable != "TileIndicator.png") {
 		gameSystem->reticle->renderable = "TileIndicator.png";
 		gameSystem->reticle->postSpriteMsg();
@@ -567,6 +568,19 @@ void Scene_Gameplay::updateReticle() {
 	////UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
 	//msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
 }
+
+void Scene_Gameplay::checkAOEReticle() {
+	if (playerTank->getObjectType() == "Tank_Artillery") {
+		gameSystem->reticle->length = gameSystem->reticle->originalLength * 4.0f;
+		gameSystem->reticle->width = gameSystem->reticle->originalWidth * 4.0f;
+		gameSystem->reticle->postSpriteMsg();
+	}
+	else {
+		gameSystem->reticle->length = gameSystem->reticle->originalLength;
+		gameSystem->reticle->width = gameSystem->reticle->originalWidth;
+		gameSystem->reticle->postSpriteMsg();
+	}
+};
 
 void Scene_Gameplay::setPlayerTank(std::string playerID) {
 	if (playerTank != nullptr) {

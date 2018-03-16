@@ -47,6 +47,8 @@ public:
 	//updates the reticle spright, and postion.
 	void updateReticle();
 
+	void checkAOEReticle();
+
 	//sends a message to network system with the specified action
 	void sendNetworkActionMsg(ActionTypes actionType);
 
