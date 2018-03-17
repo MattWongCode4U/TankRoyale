@@ -6,7 +6,6 @@
 
 class NetworkSystem : public System {
 public:
-
 	// use config file to set this later
 	// for testing we'll leave both echo mode to true and serverIP to empty (which should also be set via confgig file)
 	bool echoMode = true;

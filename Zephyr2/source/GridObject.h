@@ -22,11 +22,11 @@ public:
 	void GridObject::lateUpdate();
 
 	//updates the world coordinates to match the grid coordinates
-	void updateWorldCoords();
+	//optionaly do it over a number of frames
+	void updateWorldCoords(int frameDelay = 0);
 
 	//set objects coordinates in grid space. Automatically updates the world space as well
 	void setGridCoords(int _gridX, int _gridY);
-	
 
 	//object's position in in grid coordinates
 	int gridX;

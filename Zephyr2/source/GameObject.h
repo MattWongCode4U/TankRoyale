@@ -68,8 +68,23 @@ public:
 
 	void destroyWithChildren();
 
+	float offsetX, offsetY, offsetZ, rotationOffsetZ;//how much to offset the object by, each turn;
+	int offsetFrames = 0; //number of frames left in current movement
+
+	/*move object towards the specified position in the number of frames
+	params:
+	float targetX, targetY, targetZ = the target position
+	float turnZ = the number of degrees to turn around z direction
+	int frames = number of frames to move in
+	*/
+	void moveTowards(float targetX, float targetY, float targetZ, float turnZ, int frames);
+
+
 	//sends an UPDATE_POSIION message to the bus. includes sprite info
 	void postPostionMsg();
+
+	//sends an UPDATE_SPRITE message to the bus. includes sprite info
+	void postSpriteMsg();
 
 	GameObject* parentObject = nullptr;
 	std::vector<GameObject*> childObjects;

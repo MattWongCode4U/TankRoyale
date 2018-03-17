@@ -14,6 +14,10 @@
 #include "FullscreenObj.h"
 #include "GridObject.h"
 #include "TankObject.h"
+#include "Tank_Artillery.h"
+#include "Tank_Heavy.h"
+#include "Tank_Scout.h"
+#include "Tank_Sniper.h"
 #include "Scene_MainMenu.h"
 #include "Scene_Lobby.h"
 #include "Scene_Gameplay.h"
@@ -54,6 +58,18 @@ public:
 	void deleteGameObject(GameObject* go);
 	std::vector<GameObject*>* getGameObjectsVector();
 	int getGridDistance(int aX, int aY, int bX, int bY);//gets the distance between 2 points on the hex grid
+
+	//deal damage in a straight line from the origin position along an axis
+	//void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
+
+	//returns true if the two points are on the same specified axis
+	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
+	bool sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length);
+
+	//returns the axis that is shared by the 2 points. 
+	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
+	//if not on any of the axis, return -1
+	int onAxis(int x1, int y1, int x2, int y2, int range);
 
 	//post message on the bus
 	void postMessageToBus(Msg* message);

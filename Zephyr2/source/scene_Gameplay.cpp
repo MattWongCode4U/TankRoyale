@@ -19,6 +19,16 @@ void Scene_Gameplay::startScene() {
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
 
+	//gameSystem->reticle = gameSystem->findGridObject("reticle");
+	if (gameSystem->reticle = gameSystem->findGridObject("reticle")) {
+		GameObject* g = gameSystem->makeGameObject("reticleActionIndicator.txt");
+		g->parentId = gameSystem->reticle->id;
+		gameSystem->createGameObject(g);
+		actionIndicator = g;
+		}
+	setActionType(ROTATEPOS);
+		
+
 	//add healthBars to tanks
 }
 
@@ -83,19 +93,10 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		std::ostringstream oss, oss2;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 
-		//for (GameObject* g : gameSystem->gameObjects) {
-		//	if (g->id == "reticle"&& g->getObjectType() == "GridObject") {
-		//		gameSystem->reticle = (GridObject*)g;
-
-		//		//for testing of object parenting
-		//		/*GameObject* testObj = gameSystem->findGameObject("testObject");
-		//		if (testObj->parentObject == nullptr) {
-		//			testObj->setParent(g);
-		//		}*/
-		//		
-		//	}
-		//}
-		gameSystem->reticle = gameSystem->findGridObject("reticle");
+		/*if (!gameSystem->reticle) {
+			gameSystem->reticle = gameSystem->findGridObject("reticle");
+		}*/
+			
 
 		vector<string> playersArray;
 		vector<string> playerAction;
@@ -110,7 +111,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
 			actionOrigin = playerTank;
 
-			if (playerTank->health <= 0) {
+			if (playerTank != nullptr && playerTank->health <= 0) {
 				string spoofData = gameSystem->clientID + ",3,0,0";
 				msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), gameSystem);
 				msgBus->postMessage(new Msg(NETWORK_S_ACTION, spoofData), gameSystem);
@@ -129,8 +130,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			gameActive = false;
 			OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
 			break;
-		case NETWORK_R_GAMESTART_OK: {//"id1,ClientID,id3,id4," only for server version
-			//id1,class1|id2,class2|etc.
+		case NETWORK_R_GAMESTART_OK: {//id1,class1|id2,class2|etc.
 			vector<string> clientIDVector = split(msg->data, '|');
 			vector<string> tankIdClassVector;
 			//OutputDebugString(to_string(clientIDVector.size()).c_str());
@@ -143,14 +143,52 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			for (int i = 0; i < clientIDVector.size(); i++) {
 				tankIdClassVector = split(clientIDVector[i], ',');
 
-				//create healthbar for each player
-				gameSystem->findTankObject("player" + to_string(i + 1))->createhpBar();
+				
 
+				//create Tank Object
+				TankObject* t = (TankObject*)gameSystem->makeGameObject("Tank_" + tankIdClassVector[1] + ".txt");
+				t->id = "player" + to_string(i+1);
+
+				//set starting pos
+				if (i == 0) {
+					t->gridX = -3;
+					t->gridY = 3;
+				} else if (i == 1) {
+					t->gridX = -3;
+					t->gridY = -3;
+				}
+				else if (i == 2) {
+					t->gridX = 3;
+					t->gridY = 3;
+				}
+				else if (i == 3) {
+					t->gridX = 3;
+					t->gridY = -3;
+				}
+			
+				gameSystem->createGameObject(t);
+				t->updateWorldCoords();
+				t->createhpBar();//create the hp bar
+				
 
 				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
-					setPlayerTank("player" + to_string(i + 1));
+					//setPlayerTank("player" + to_string(i + 1));
+					playerTank = t;
+					actionOrigin = playerTank;
+
+					//create the playerTank Indicator
+					GameObject* arrow = gameSystem->makeGameObject("arrow.txt");
+					arrow->id = "playerArrow";
+					arrow->parentId = t->id;
+					gameSystem->createGameObject(arrow);//add the arrow to gameobjects
+
+					OutputDebugString("\nActionORigin id : ");
+					OutputDebugString(actionOrigin->id.c_str());
 				}
+
+				//create healthbar for each player
+				//gameSystem->findTankObject("player" + to_string(i + 1))->createhpBar();
 			}
 
 
@@ -241,30 +279,15 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case SPACEBAR_PRESSED: {
-			if (gameSystem->currentAction >= gameSystem->maxActions || !validMove) break;
-			if (ActionType == SHOOT && gameSystem->currentAction >= gameSystem->maxActions - 1) break;
+			if (gameSystem->currentAction >= gameSystem->maxActions || moveCost <= 0) break;
+			if (gameSystem->currentAction > gameSystem->maxActions - moveCost) break;
 
-			//Send Message to network
-			//message format: playerID,actionName,actionNumber,targetX,targetY
-			oss << gameSystem->clientID << ","//playerID
-				<< to_string(ActionType) << ","//action type (e.g. MOVE or SHOOT)
-											   //<< currentAction << ","//the action number 0 to <number of actions/turn>
-				<< gameSystem->reticle->gridX << "," //target x pos
-				<< gameSystem->reticle->gridY; //target y pos
+			//send the action to the network system
+			sendNetworkActionMsg(ActionType);
 
-			mm->type = NETWORK_S_ACTION;
-			mm->data = oss.str();
-			msgBus->postMessage(mm, gameSystem);
-
-			if (ActionType == SHOOT)	// DUMMY PASSING DATA AFTER SHOOT
-			{
-				oss2 << gameSystem->clientID << ","//playerID
-					<< to_string(PASS) << ","//action type (e.g. MOVE or SHOOT)
-												   //<< currentAction << ","//the action number 0 to <number of actions/turn>
-					<< gameSystem->reticle->gridX << "," //target x pos
-					<< gameSystem->reticle->gridY; //target y pos
-
-				msgBus->postMessage(new Msg(NETWORK_S_ACTION, oss2.str()), gameSystem);
+			//pad with empty actions iff the move cost is > 1;
+			for (int i = 1; i < moveCost; i++) {
+				sendNetworkActionMsg(PASS);
 			}
 
 			GridObject *indicator = NULL;
@@ -273,7 +296,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			string indicatorId = "TileIndicator" + to_string(gameSystem->currentAction);
 			string actionBarId = "actionBar" + to_string(gameSystem->currentAction + 1);
 			string actionBarId2;
-			if (gameSystem->currentAction <= gameSystem->maxActions - 1 && ActionType == SHOOT)
+			if (gameSystem->currentAction <= gameSystem->maxActions - 1 && moveCost > 1)
 			{
 				actionBarId2 = "actionBar" + to_string(gameSystem->currentAction + 2);
 			}
@@ -311,7 +334,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			indicator->gridX = gameSystem->reticle->gridX;
 			indicator->gridY = gameSystem->reticle->gridY;
 			indicator->updateWorldCoords();
-			//indicator->renderable = "TileIndicatorNum" + to_string(currentAction) + ".png";
 			gameSystem->sendUpdatePosMessage(indicator);//send indicator position message
 
 			//send update sprite message. maybe this sould be included in update position?
@@ -322,35 +344,26 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
 			}
 
-			if (ActionType == MOVE) 
-			{
-				gameSystem->currentAction++;
-			}
-			else if (ActionType == SHOOT)
-			{
-				gameSystem->currentAction += 2;
-			}
-			
-
+			gameSystem->currentAction += moveCost;
 			break;
 		}
 		case KEY_A_PRESSED:
 			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
-			updateReticle();
+			
 			break;
 
 		case KEY_D_PRESSED: {
-			gameSystem->findGameObject("testObject")->offsetPosition(0, 0, 0, 30);
+
+			break;
+		}
+		case KEY_W_PRESSED: {
+			setActionType(MOVE);
 			
-			//return the position of the reticle for debugging purposes
-			string s = "RETICLE AT GRID("
-				+ to_string(gameSystem->reticle->gridX)
-				+ "," + to_string(gameSystem->reticle->gridY)
-				+ ")  WORLD("
-				+ to_string(gameSystem->reticle->x)
-				+ "," + to_string(gameSystem->reticle->y)
-				+ ")\n";
-			//OutputDebugString(s.c_str());
+			break;
+		}
+		case KEY_S_PRESSED: {
+			setActionType(SHOOT);
+			
 			break;
 		}
 		case TEST_KEY_PRESSED:
@@ -384,6 +397,14 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString(to_string(gameSystem->reticle->gridY).c_str());
 			OutputDebugString("\n");
 			break;
+		//TESTING ROTATION
+		case KEY_Q_PRESSED:
+			setActionType(ROTATENEG);
+			break;
+		case KEY_E_PRESSED:
+			setActionType(ROTATEPOS);
+			break;
+		
 		case KEY_ESC_RELEASED:
 			// Pause the game (lock control, display 2 buttons)
 			loadPauseMenu();
@@ -468,38 +489,13 @@ void Scene_Gameplay::executeAction(int a) {
 		string currentObjectId = "player" + to_string(playerNum + 1);//get id from the order of incoming actions
 		ActionTypes receivedAction = static_cast<ActionTypes>(stoi(playerAction[1]));//parse action type
 
-			//switch on the action type received from the network system, and execute the action
-			switch (receivedAction) {
-			case SHOOT: {
-				GridObject* go = (GridObject*)gameSystem->makeGameObject("explostion.txt");
+		//switch on the action type received from the network system, and execute the action
+		switch (receivedAction) {
+		case SHOOT: {
+			gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
 
-				go->id = "explosion" + to_string(rand());
-				go->gridX = stoi(playerAction[2]);
-				go->gridY = stoi(playerAction[3]);
-				gameSystem->createGameObject(go);
-				go->updateWorldCoords();
-
-				int radius = 1;
-				int damage = 19;
-
-				gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
-				
-				
-				//dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-				
-				//for (GameObject* g : gameSystem->gameObjects) {
-				//	if (g->id == currentObjectId) {
-				//		TankObject* t = (TankObject*)g; //the player's TankObject
-				//		//if t->shootType == //dealAOEDamage(stoi(playerAction[2]), stoi(playerAction[3]), radius, damage);
-				//		//else 
-				//		int axis = onAxis(t->gridX, t->gridY, stoi(playerAction[2]), stoi(playerAction[3]), range);
-				//		if(axis != -1){
-				//			dealLineDamage(t->gridX, t->gridY, range, axis, damage);
-				//		}
-				//	}
-				//}
-				break;
-			}
+			break;
+		}
 
 		case MOVE:
 			//display player MOVE actions for players whose id's are found
@@ -510,15 +506,25 @@ void Scene_Gameplay::executeAction(int a) {
 					if (t->health > 0) {
 						t->gridX = stoi(playerAction[2]);
 						t->gridY = stoi(playerAction[3]);
-						t->updateWorldCoords();
-						gameSystem->sendUpdatePosMessage(t);
+						t->updateWorldCoords(60);
 					}
 				}
 			}
-			break;
+		break;
 		case PASS:
 		{
 			std::cout << "Turn passed";
+			break;
+		}
+		//ROTATION
+		case ROTATEPOS:
+		{
+			gameSystem->findTankObject(currentObjectId)->turn(-60);
+			break;
+		}
+		case ROTATENEG:
+		{
+			gameSystem->findTankObject(currentObjectId)->turn(60);
 			break;
 		}
 		}
@@ -534,290 +540,86 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 
 	switch (a) {
 	case SHOOT:
+		actionIndicator->renderable = "Reticle.png";
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
-		range = 5;
 		break;
 	case MOVE:
+		actionIndicator->renderable = "moveIcon2.png";
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);
-		range = 1;
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);	
+		break;
+	case ROTATENEG:
+		actionIndicator->renderable = "rotateIconCW.png";
+		break;
+	case ROTATEPOS:
+		actionIndicator->renderable = "rotateIconCCW.png";
 		break;
 	}
-}
+	if (playerTank)
+		actionIndicator->zRotation = playerTank->zRotation;
 
-//Position of tank firing: _originX, _originY
-//how many tiles the shot can go: length
-//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-void Scene_Gameplay::dealLineDamage(int _originX, int _originY, int length, int axis, int damage) {
-	vector<TankObject *> thingsHit; //list of things hit
-
-	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
-		if (go->getObjectType() == "TankObject") {
-			TankObject* tank = (TankObject*)go;
-			if (sameAxisShot(axis, _originX, _originY, tank->gridX, tank->gridY, length)) { //if on same axis and in range
-				thingsHit.push_back(tank); //add things that are in firing range along the axis to the list
-			}
-		}
-	}
-
-	//Find the first thing hit from the list
-	if (thingsHit.size() > 0) {
-		TankObject* currClosestTank = nullptr;
-		int dist = -1;
-		for (TankObject* t : thingsHit) {
-			OutputDebugString((t->id).c_str());
-			OutputDebugString(" hit\n");
-			if (dist < getGridDistance(_originX, _originY, t->gridX, t->gridY)) {
-				dist = getGridDistance(_originX, _originY, t->gridX, t->gridY);
-				currClosestTank = t;
-			}
-		}
-
-		//deal damage to closest tank;
-		if (currClosestTank != nullptr) {
-			currClosestTank->health -= damage;
-			if (currClosestTank->health <= 0)
-				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"), gameSystem);
-			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
-		}
-	}
-}
-
-bool Scene_Gameplay::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length) {
-	bool result = false;
-
-	int aXCube = x1 - (y1 - (y1 & 1)) / 2;
-	int aZCube = y1;
-	int aYCube = -aXCube - aZCube;
-
-	int bXCube = x2 - (y2 - (y2 & 1)) / 2;
-	int bZCube = y2;
-	int bYCube = -bXCube - bZCube;
-
-	int axisBase[3] = { 0, 0, 0 };
-
-	switch (axis) {
-	case 0: //r (+1, -1, 0)
-		axisBase[0] = 1;
-		axisBase[1] = -1;
-		axisBase[2] = 0;
-		break;
-
-	case 1: //l (-1, +1, 0)
-		axisBase[0] = -1;
-		axisBase[1] = 1;
-		axisBase[2] = 0;
-		break;
-
-	case 2: //ur (0, -1, 1)
-		axisBase[0] = 0;
-		axisBase[1] = -1;
-		axisBase[2] = 1;
-		break;
-
-	case 3: //dl (0, 1, -1)
-		axisBase[0] = 0;
-		axisBase[1] = 1;
-		axisBase[2] = -1;
-		break;
-
-	case 4: //ul (-1, 0, 1)
-		axisBase[0] = -1;
-		axisBase[1] = 0;
-		axisBase[2] = 1;
-		break;
-
-	case 5: //dr (1, 0, -1)
-		axisBase[0] = 1;
-		axisBase[1] = 0;
-		axisBase[2] = -1;
-		break;
-	}
-
-	//Test if the point line up on the specified axis
-	for (int i = 1; i < length; i++) {
-		int tempaXCube = aXCube + axisBase[0] * i;
-		int tempaYCube = aYCube + axisBase[1] * i;
-		int tempaZCube = aZCube + axisBase[2] * i;
-		
-		/*OutputDebugString("Hitting: ");
-		OutputDebugString(to_string(tempaXCube).c_str());
-		OutputDebugString(", ");
-		OutputDebugString(to_string(tempaYCube).c_str());
-		OutputDebugString(", ");
-		OutputDebugString(to_string(tempaZCube).c_str());
-		OutputDebugString("\n");*/
-
-		if ((tempaXCube == bXCube) 
-			&& (tempaYCube == bYCube) 
-			&& (tempaZCube == bZCube)) {
-			result = true;
-			break;
-		}
-	}
-
-	return result;
-}
-
-//For selecting a direction to shoot along an axis
-//position of player's tank: (x1, y1)
-//position of click: (x2, y2)
-//returns 0=r 1=l 2=ur 3=dl 4=ul 5=dr -1=none
-int Scene_Gameplay::onAxis(int x1, int y1, int x2, int y2, int range) {
-	if (x1 == x2 && y1 == y2) { //same location
-		return -1;
-	}
-
-	int aXCube = x1 - (y1 - (y1 & 1)) / 2;
-	int aZCube = y1;
-	int aYCube = -aXCube - aZCube;
-
-	int bXCube = x2 - (y2 - (y2 & 1)) / 2;
-	int bZCube = y2;
-	int bYCube = -bXCube - bZCube;
-
-	//Check directions then return if it is in that direction
-
-	//r (+1, -1, 0)
-	int r[3] = { 1, -1, 0 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + r[0] * i;
-		int tempaYCube = aYCube + r[1] * i;
-		int tempaZCube = aZCube + r[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("right\n");
-			return 0;
-		}
-	}
-
-	//l (-1, +1, 0)
-	int l[3] = { -1, 1, 0 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + l[0] * i;
-		int tempaYCube = aYCube + l[1] * i;
-		int tempaZCube = aZCube + l[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("left\n");
-			return 1;
-		}
-	}
-
-	//ur (0, -1, 1)
-	int ur[3] = { 0, -1, 1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + ur[0] * i;
-		int tempaYCube = aYCube + ur[1] * i;
-		int tempaZCube = aZCube + ur[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("up right\n");
-			return 2;
-		}
-	}
-
-	//dl (0, 1, -1)
-	int dl[3] = { 0, 1, -1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + dl[0] * i;
-		int tempaYCube = aYCube + dl[1] * i;
-		int tempaZCube = aZCube + dl[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("down left\n");
-			return 3;
-		}
-	}
-
-	//ul (-1, 0, 1)
-	int ul[3] = { -1, 0, 1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + ul[0] * i;
-		int tempaYCube = aYCube + ul[1] * i;
-		int tempaZCube = aZCube + ul[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("up left\n");
-			return 4;
-		}
-	}
-
-	//dr (1, 0, -1)
-	int dr[3] = { 1, 0, -1 };
-	for (int i = 1; i < range; i++) {
-		int tempaXCube = aXCube + dr[0] * i;
-		int tempaYCube = aYCube + dr[1] * i;
-		int tempaZCube = aZCube + dr[2] * i;
-
-		if ((tempaXCube == bXCube)
-			&& (tempaYCube == bYCube)
-			&& (tempaZCube == bZCube)) {
-			OutputDebugString("down right\n");
-			return 5;
-		}
-	}
-
-	return -1; //Not on any axis or in range
-}
-
-int Scene_Gameplay::getGridDistance(int aX, int aY, int bX, int bY) {
-	int aXCube = aX - (aY - (aY & 1)) / 2;
-	int aZCube = aY;
-	int aYCube = -aXCube - aZCube;
-
-	int bXCube = bX - (bY - (bY & 1)) / 2;
-	int bZCube = bY;
-	int bYCube = -bXCube - bZCube;
-
-	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
+	actionIndicator->postPostionMsg();
+	updateReticle();
 }
 
 void Scene_Gameplay::updateReticle() {
-	gameSystem->reticle->updateWorldCoords();
+	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
+	if (!playerTank) return; //if the player tank is null return
 
-	int dist = getGridDistance(gameSystem->reticle->gridX, gameSystem->reticle->gridY, actionOrigin->gridX, actionOrigin->gridY);
+	if (ActionType == SHOOT) {
+		checkAOEReticle();
+		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	}
+	else if(ActionType == MOVE)
+		moveCost = playerTank->checkMoveValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	else if(ActionType == ROTATENEG || ActionType == ROTATEPOS)
+		moveCost = playerTank->checkTurnValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	if (moveCost > 0 && gameSystem->reticle->renderable != "TileIndicator.png") {
+		gameSystem->reticle->renderable = "TileIndicator.png";
+		gameSystem->reticle->postSpriteMsg();
+	}	
+	else if(moveCost <= 0 && gameSystem->reticle->renderable != "TileIndicatorRed") {
+		gameSystem->reticle->renderable = "TileIndicatorRed";
+		gameSystem->reticle->postSpriteMsg();
+	}
+		
 
-	if (dist > range) {
-		gameSystem->reticle->renderable = "TileIndicatorRed.png";
-		validMove = false;
+
+	//std::ostringstream oss;
+	//Msg* mm = new Msg(EMPTY_MESSAGE, "");
+
+	////UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
+	//msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
+}
+
+void Scene_Gameplay::checkAOEReticle() {
+	if (playerTank->getObjectType() == "Tank_Artillery") {
+		gameSystem->reticle->length = gameSystem->reticle->originalLength * 4.0f;
+		gameSystem->reticle->width = gameSystem->reticle->originalWidth * 4.0f;
+		gameSystem->reticle->postSpriteMsg();
 	}
 	else {
-		gameSystem->reticle->renderable = "TileIndicator.png";
-		validMove = true;
+		gameSystem->reticle->length = gameSystem->reticle->originalLength;
+		gameSystem->reticle->width = gameSystem->reticle->originalWidth;
+		gameSystem->reticle->postSpriteMsg();
 	}
-
-	std::ostringstream oss;
-	Msg* mm = new Msg(EMPTY_MESSAGE, "");
-
-	//UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
-	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
-}
+};
 
 void Scene_Gameplay::setPlayerTank(std::string playerID) {
 	if (playerTank != nullptr) {
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), gameSystem);
 	}
 	for (GameObject* g : gameSystem->gameObjects) {
-		if (g->id == playerID && g->getObjectType() == "TankObject") {
-			playerTank = (TankObject*)g;
-			actionOrigin = playerTank;
-			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
+		if (g->id == playerID)
+			if(playerTank = dynamic_cast<TankObject*>(g)) {
+			//playerTank = (TankObject*)g;
+				actionOrigin = playerTank;
+				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
 
-			string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
-			OutputDebugString(debugS.c_str());
+				string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
+				OutputDebugString(debugS.c_str());
 		}
 	}
 }
@@ -831,25 +633,15 @@ void Scene_Gameplay::unloadPauseMenuObjects() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem1"));
 }
 
-void Scene_Gameplay::UnProject(GLfloat x, GLfloat y, GLfloat z, const glm::mat4 & view, const glm::mat4 & project, const Uint32 width, const Uint32 length, glm::vec3 & coords)
-{
-	glm::mat4 projectViewMatrix = project * view;
-	glm::mat4 InvProjectViewMatrix = glm::inverse(projectViewMatrix);
+void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
+	ostringstream oss;
+	Msg* mm = new Msg(NETWORK_S_ACTION, "");
+	oss << gameSystem->clientID << ","//playerID
+		<< to_string(actionType) << ","//action type (e.g. MOVE or SHOOT)
+									   //<< currentAction << ","//the action number 0 to <number of actions/turn>
+		<< gameSystem->reticle->gridX << "," //target x pos
+		<< gameSystem->reticle->gridY; //target y pos
 
-	glm::vec4 in;
-	in.x = (x - 0.0f) / (float)width * 2.0f - 1.0f;
-	in.y = (y - 0.0f) / (float)length * 2.0f - 1.0f;
-	in.z = 2.0f * z - 1.0f;
-	in.w = 1.0f;
-
-	glm::vec4 coordNear = InvProjectViewMatrix * in;
-	if (coordNear.w == 0.0f)
-	{
-		return;
-	}
-	coordNear.w = 1.0f / coordNear.w;
-	coords.x = coordNear.x * coordNear.w;
-	coords.y = coordNear.y * coordNear.w;
-	coords.z = coordNear.z * coordNear.w;
-
+	mm->data = oss.str();
+	msgBus->postMessage(mm, gameSystem);
 }

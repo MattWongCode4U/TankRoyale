@@ -197,6 +197,10 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\scene_Lobby.cpp" />
     <ClCompile Include="source\scene_SettingsMenu.cpp" />
     <ClCompile Include="source\System.cpp" />
+    <ClCompile Include="source\Tank_Artillery.cpp" />
+    <ClCompile Include="source\Tank_Heavy.cpp" />
+    <ClCompile Include="source\Tank_Scout.cpp" />
+    <ClCompile Include="source\Tank_Sniper.cpp" />
     <ClCompile Include="source\Vector2.cpp" />
     <ClCompile Include="source\TankObject.cpp" />
   </ItemGroup>
@@ -233,6 +237,10 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\scene_Lobby.h" />
     <ClInclude Include="source\scene_SettingsMenu.h" />
     <ClInclude Include="source\System.h" />
+    <ClInclude Include="source\Tank_Artillery.h" />
+    <ClInclude Include="source\Tank_Heavy.h" />
+    <ClInclude Include="source\Tank_Scout.h" />
+    <ClInclude Include="source\Tank_Sniper.h" />
     <ClInclude Include="source\Util.h" />
     <ClInclude Include="source\Vector2.h" />
     <ClInclude Include="source\TankObject.h" />
