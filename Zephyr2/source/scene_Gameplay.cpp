@@ -205,32 +205,57 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		if (gameActive) switch (msg->type) {
 		case MOUSE_MOVE:
 		{
+
 			vector<string> objectData = split(msg->data, ',');
 			INT32 x = atoi(objectData[0].c_str());
 			INT32 y = atoi(objectData[1].c_str());
 			INT32 width = atoi(objectData[2].c_str());
 			INT32 length = atoi(objectData[3].c_str());
-			x -= width / 2; y -= length / 2;
-			y = -y;
+			y = length - y;
 
-			int offsetX = x;
-			int offsetY = y;
+			//SDL_Log("X %d, Y %d", x, y);
+			glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width / (float)length, 1.0f, 1000.0f);
+			glm::mat4 look = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 
-			if (y < -44) offsetY -= 45;
-			else if (y > 44) offsetY += 45;
+			glm::mat4 translation = glm::translate(look, position * -1.0f);
 
-			int gridLocationY = (offsetY * 2 / 3) / gameSystem->hexSize;
+			rotation2 = glm::mat4();
 
-			if (x < -44 && gridLocationY % 2 == 0) offsetX -= 45;
-			else if (x > 44 && gridLocationY % 2 == 0) offsetX += 45;
-			else if (x <= 0 && gridLocationY % 2 != 0) offsetX -= 90;
+			rotation2 = glm::rotate(rotation2, rotation.z, glm::vec3(0, 0, 1));
+			rotation2 = glm::rotate(rotation2, rotation.x, glm::vec3(1, 0, 0));
+			rotation2 = glm::rotate(rotation2, rotation.y, glm::vec3(0, 1, 0));
 
-			int gridLocationX = (offsetX * sqrt(3) / 3) / gameSystem->hexSize;
+			glm::mat4 view = rotation2 * translation;
+			
+			glm::vec3 rayOrigin = glm::unProject(glm::vec3(x, y, 0.0f), view, projection, glm::vec4(0, 0, width, length));
+			glm::vec3 rayEnd = glm::unProject(glm::vec3(x, y, 1.0f), view, projection, glm::vec4(0, 0, width, length));
+			glm::vec3 ray = rayEnd - rayOrigin;
+
+			glm::vec3 normal = glm::vec3(0, 0, 1);
+			float d = glm::dot(normal, glm::vec3(0, 0, -80));
+
+			float t = (d - glm::dot(normal, rayOrigin)) / glm::dot(normal, ray);
+			glm::vec3 contact = rayOrigin + ray * t;
+
+			float distance = glm::length(contact - position);
+
+			float offsetX = contact.x;
+			float offsetY = contact.y;
+
+			if (offsetY < -5) offsetY -= 5;
+			else if (offsetY > 5) offsetY += 5;
+
+			int gridLocationY = (offsetY * 2 / 3.0f) / gameSystem->hexSize;
+
+			if (offsetX < -5 && gridLocationY % 2 == 0) offsetX -= 5;
+			else if (offsetX > 5 && gridLocationY % 2 == 0) offsetX += 5;
+			else if (offsetX <= 0 && gridLocationY % 2 != 0) offsetX -= 10;
+
+			int gridLocationX = (offsetX * sqrt(3) / 3.0f) / gameSystem->hexSize;
 
 			gameSystem->reticle->gridX = gridLocationX;
 			gameSystem->reticle->gridY = gridLocationY;
 			updateReticle();
-
 			break;
 		}
 		case DOWN_ARROW_PRESSED: {
