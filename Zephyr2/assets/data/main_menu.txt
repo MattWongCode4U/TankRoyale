@@ -1,6 +1,6 @@
 gameObjectType: FullscreenObj,
-id: BackgroundObj,
-renderable: Z0.png,
+id: backgroundObj,
+renderable: Background.png,
 xPos: 0,
 yPos: 0,
 zPos: 10,
@@ -10,22 +10,8 @@ length: 720,
 physicsEnabled: 0,
 windScale: 0,
 renderType: overlay,
-imageFrames: 1;
-
-gameObjectType: FullscreenObj,
-id: trabg,
-renderable: TRABG3.png,
-xPos: 0,
-yPos: 0,
-zPos: 10,
-zRotation: 0,
-width: 1280,
-length: 720,
-physicsEnabled: 0,
-windScale: 0,
-renderType: overlay,
-animationDelay: 5,
-imageFrames: 33;
+animationDelay: 1,
+imageFrames: 120;
 
 gameObjectType: FullscreenObj,
 id: ScrollObj,
