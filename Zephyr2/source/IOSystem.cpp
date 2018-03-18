@@ -161,6 +161,46 @@ void IOSystem::checkKeyPresses() {
 				msgBus->postMessage(m, this);
 			}
 		}
+
+		if (GetKeyState(0x31) && 0x8000) { // 1 key
+			m->type = NUM_1_PRESSED;
+			if ((clock() - keyspressed["1"]) >= timebetweenPresses) {
+				keyspressed["1"] = clock();
+				msgBus->postMessage(m, this);
+			}
+		}
+
+		if (GetKeyState(0x32) && 0x8000) { // 2 key
+			m->type = NUM_2_PRESSED;
+			if ((clock() - keyspressed["2"]) >= timebetweenPresses) {
+				keyspressed["2"] = clock();
+				msgBus->postMessage(m, this);
+			}
+		}
+
+		if (GetKeyState(0x33) && 0x8000) { // 3 key
+			m->type = NUM_3_PRESSED;
+			if ((clock() - keyspressed["3"]) >= timebetweenPresses) {
+				keyspressed["3"] = clock();
+				msgBus->postMessage(m, this);
+			}
+		}
+
+		if (GetKeyState(0x34) && 0x8000) { // 4 key
+			m->type = NUM_4_PRESSED;
+			if ((clock() - keyspressed["4"]) >= timebetweenPresses) {
+				keyspressed["4"] = clock();
+				msgBus->postMessage(m, this);
+			}
+		}
+
+		if (GetKeyState(0x35) && 0x8000) { // 5 key
+			m->type = NUM_5_PRESSED;
+			if ((clock() - keyspressed["5"]) >= timebetweenPresses) {
+				keyspressed["5"] = clock();
+				msgBus->postMessage(m, this);
+			}
+		}
 	}
 }
 

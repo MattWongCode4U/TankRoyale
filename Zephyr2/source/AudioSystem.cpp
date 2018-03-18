@@ -49,13 +49,19 @@ void AudioSystem::handleMessage(Msg *msg)
 	case BUTTON_SELECT_SOUND:
 		PlaySfx(BUTTON_SELECT_SFX, gameplayVolume);
 		break;
+	case AUDIO_SET:
+		gameplayVolume = stoi(msg->data);
+		Audio.SetSoundVolume(gameplayVolume);
+		break;
 	case AUDIO_DOWN:
 		if (gameplayVolume > 0) gameplayVolume--;
 		else if (gameplayVolume < 0) gameplayVolume = 0;
+		Audio.SetSoundVolume(gameplayVolume);
 		break;
 	case AUDIO_UP:
 		if (gameplayVolume < 0) gameplayVolume++;
 		else if (gameplayVolume > GAMEPLAY_VOLUME) gameplayVolume = GAMEPLAY_VOLUME;
+		Audio.SetSoundVolume(gameplayVolume);
 		break;
 	case AUDIO_MUTE:
 		audioMute = atoi(msg->data.c_str());
