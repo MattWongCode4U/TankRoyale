@@ -570,9 +570,8 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
-
+	checkAOEReticle();
 	if (ActionType == SHOOT) {
-		checkAOEReticle();
 		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
@@ -598,7 +597,7 @@ void Scene_Gameplay::updateReticle() {
 }
 
 void Scene_Gameplay::checkAOEReticle() {
-	if (playerTank->getObjectType() == "Tank_Artillery") {
+	if (playerTank->getObjectType() == "Tank_Artillery" && ActionType == SHOOT) {
 		gameSystem->reticle->length = gameSystem->reticle->originalLength * 4.0f;
 		gameSystem->reticle->width = gameSystem->reticle->originalWidth * 4.0f;
 		gameSystem->reticle->postSpriteMsg();
