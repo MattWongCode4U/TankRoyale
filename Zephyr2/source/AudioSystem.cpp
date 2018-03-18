@@ -31,84 +31,31 @@ void AudioSystem::handleMessage(Msg *msg)
 	vector<std::string> data;
 
 	switch (msg->type) {
-	case CAMERA_OFFSET:
-		data = split(msg->data, ',');
-		listenerX = stof(data[0]) * -1;
-		listenerY = stof(data[1]);
-		UpdateListener(listenerX, listenerY);
-		/*
-		OutputDebugString("CAMERA OFFSET ");
-		OutputDebugString(to_string(listenerX).c_str());
-		OutputDebugString("  ");
-		OutputDebugString(to_string(listenerY).c_str());
-		OutputDebugString("\n");
-		*/
+	// Tank shots
+	case REGULAR_SHOT_SOUND:
+		PlaySfx(REGULAR_SHOT_SFX, gameplayVolume);
 		break;
-	case GO_ADDED:
-	{
-		data = split(msg->data, ',');
-		xPos = stof(data[2]);
-		yPos = stof(data[3]);
-		if (data[9] == "Cannonball")
-		{
-			if (yPos == listenerY)
-				sfxVolume = 5;
-			else
-				sfxVolume = 40;
-			PlaySfx(CANNONBALL_SFX, true, xPos, yPos, sfxVolume);
-			/*
-			OutputDebugString("cannonball sfx\n");
-			OutputDebugString(to_string(xPos).c_str());
-			OutputDebugString("  ");
-			OutputDebugString(to_string(yPos).c_str());
-			OutputDebugString("\n");
-			*/
-		}
+	case SNIPER_SHOT_SOUND:
+		PlaySfx(SNIPER_SHOT_SFX, gameplayVolume);
 		break;
-	}
-	case CHANGE_MAST:
-		data = split(msg->data, ',');
-		if (data[0] == "playerShip")
-		{
-			PlaySfx(SAIL_SFX, false, 0, 0, 10);
-		}
+	case ARTILLERY_SHOT_SOUND:
+		PlaySfx(ARTILLERY_SHOT_SFX, gameplayVolume);
 		break;
-	case CHANGE_RUDDER:
-		data = split(msg->data, ',');
-		if (data[0] == "playerShip")
-		{
-			PlaySfx(RUDDER_SFX, false, 0, 0, 10);
-		}
+	// Tank Move
+	case MOVEMENT_SOUND:
+		PlaySfx(MOVEMENT_SFX, gameplayVolume);
 		break;
-	case SHIP_SANK:
-		data = split(msg->data, ',');
-		xPos = stof(data[1]);
-		yPos = stof(data[2]);
-		if (yPos == listenerY)
-			sfxVolume = 5;
-		else
-			sfxVolume = 40;
-		PlaySfx(DESTROYED_SFX, true, xPos, yPos, sfxVolume);
+	// Button Selection
+	case BUTTON_SELECT_SOUND:
+		PlaySfx(BUTTON_SELECT_SFX, gameplayVolume);
 		break;
-	case LEVEL_LOADED:
-		loadedLevel = atoi(msg->data.c_str());
-		if (loadedLevel == 2)
-		{
-			if (loadedLevel != lastLevel)
-			{
-				PlayMusic(SOUNDTRACK_GAMEPLAY, GAMEPLAY_VOLUME);
-				StopMusic(SOUNDTRACK_MENU);
-			}
-		}
-		else
-		{
-			if (lastLevel == 2)
-			{
-				PlayMusic(SOUNDTRACK_MENU, DEFAULT_VOLUME);
-				StopMusic(SOUNDTRACK_GAMEPLAY);
-			}
-		}
-
+	case AUDIO_DOWN:
+		if (gameplayVolume > 0) gameplayVolume--;
+		else if (gameplayVolume < 0) gameplayVolume = 0;
+		break;
+	case AUDIO_UP:
+		if (gameplayVolume < 0) gameplayVolume++;
+		else if (gameplayVolume > GAMEPLAY_VOLUME) gameplayVolume = GAMEPLAY_VOLUME;
 		break;
 	case AUDIO_MUTE:
 		audioMute = atoi(msg->data.c_str());
@@ -116,6 +63,30 @@ void AudioSystem::handleMessage(Msg *msg)
 			MuteAudio(true);
 		else
 			MuteAudio(false);
+		break;
+	// Level Sounds
+	case LEVEL_LOADED:
+		loadedLevel = atoi(msg->data.c_str());
+		if (loadedLevel == 2)
+		{
+			if (loadedLevel != lastLevel)
+			{
+				PlayMusic(GAMEPLAY_SND, gameplayVolume);
+				StopMusic(MENU_SND);
+			}
+		}
+		else
+		{
+			if (lastLevel == 2)
+			{
+				PlayMusic(MENU_SND, gameplayVolume);
+				StopMusic(GAMEPLAY_SND);
+			}
+		}
+		break;
+	case MAIN_MENU_SOUND:
+		break;
+	case GAME_MENU_SOUND:
 		break;
 	default:
 		break;
@@ -132,6 +103,12 @@ void AudioSystem::PlayMusic(string songName, float volume)
 void AudioSystem::StopMusic(string songName)
 {
 	Audio.UnLoadSound(songName);
+}
+
+void AudioSystem::PlaySfx(string soundName, float volume)
+{
+	Audio.LoadSound(soundName, false, false, false);
+	Audio.PlayAudio(soundName, Vector3{ 0,0,0 }, volume);
 }
 
 void AudioSystem::PlaySfx(string soundName, bool directional, float x, float y, float volume)

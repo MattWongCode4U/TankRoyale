@@ -493,7 +493,7 @@ void Scene_Gameplay::executeAction(int a) {
 		switch (receivedAction) {
 		case SHOOT: {
 			gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
-
+			playShotSfx(gameSystem->findTankObject(currentObjectId)->getObjectType());
 			break;
 		}
 
@@ -510,6 +510,7 @@ void Scene_Gameplay::executeAction(int a) {
 					}
 				}
 			}
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 		break;
 		case PASS:
 		{
@@ -520,11 +521,13 @@ void Scene_Gameplay::executeAction(int a) {
 		case ROTATEPOS:
 		{
 			gameSystem->findTankObject(currentObjectId)->turn(-60);
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		case ROTATENEG:
 		{
 			gameSystem->findTankObject(currentObjectId)->turn(60);
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		}
@@ -644,4 +647,19 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 
 	mm->data = oss.str();
 	msgBus->postMessage(mm, gameSystem);
+}
+
+void Scene_Gameplay::playShotSfx(std::string objectType) {
+	if (objectType == "Tank_Scout") {
+		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Sniper") {
+		msgBus->postMessage(new Msg(SNIPER_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Heavy") {
+		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Artillery") {
+		msgBus->postMessage(new Msg(ARTILLERY_SHOT_SOUND), gameSystem);
+	}
 }
