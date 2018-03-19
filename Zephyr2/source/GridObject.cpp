@@ -57,3 +57,33 @@ void GridObject::updateWorldCoords(int frameDelay) {
 	//y = vertDist * gridY;
 	//z = z;
 }
+
+
+
+int GridObject::getAxisOrientation(GridObject* g) {
+	//if no grid object specified, find orientation for this object
+	if (g == 0)
+		g = this;
+
+	int degrees = ((int)g->zRotation) % 360;
+	switch (degrees) {
+	case 0: //r
+		return 0;
+		break;
+	case 180: //l
+		return 1;
+		break;
+	case 60: //ur
+		return 2;
+		break;
+	case 240: //dl
+		return 3;
+		break;
+	case 120: //ul
+		return 4;
+		break;
+	case 300: //dr
+		return 5;
+		break;
+	}
+}
