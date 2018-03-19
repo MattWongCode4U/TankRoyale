@@ -17,7 +17,7 @@ void Scene_SettingsMenu::startScene() {
 	gameSystem->levelLoaded = 1;
 	Msg* m = new Msg(LEVEL_LOADED, "1");
 	msgBus->postMessage(m, gameSystem);
-	updateSliderPosition(0);
+	updateSliderPosition(3); // Default 0.6f
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
 }
@@ -116,23 +116,23 @@ void Scene_SettingsMenu::sceneHandleMessage(Msg * msg) {
 		case NUM_1_PRESSED:
 			// move slider
 			updateSliderPosition(1);
-			msgBus->postMessage(new Msg(AUDIO_SET, "1"), gameSystem);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.2"), gameSystem);
 			break;
 		case NUM_2_PRESSED:
 			updateSliderPosition(2);
-			msgBus->postMessage(new Msg(AUDIO_SET, "2"), gameSystem);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.4"), gameSystem);
 			break;
 		case NUM_3_PRESSED:
 			updateSliderPosition(3);
-			msgBus->postMessage(new Msg(AUDIO_SET, "3"), gameSystem);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.6"), gameSystem);
 			break;
 		case NUM_4_PRESSED:
 			updateSliderPosition(4);
-			msgBus->postMessage(new Msg(AUDIO_SET, "4"), gameSystem);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.8"), gameSystem);
 			break;
 		case NUM_5_PRESSED:
 			updateSliderPosition(5);
-			msgBus->postMessage(new Msg(AUDIO_SET, "5"), gameSystem);
+			msgBus->postMessage(new Msg(AUDIO_SET, "1.0"), gameSystem);
 			break;
 		default:
 			break;

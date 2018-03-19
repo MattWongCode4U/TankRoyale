@@ -50,7 +50,7 @@ void AudioSystem::handleMessage(Msg *msg)
 		PlaySfx(BUTTON_SELECT_SFX, gameplayVolume);
 		break;
 	case AUDIO_SET:
-		gameplayVolume = stoi(msg->data);
+		gameplayVolume = stof(msg->data);
 		Audio.SetSoundVolume(gameplayVolume);
 		break;
 	case AUDIO_DOWN:

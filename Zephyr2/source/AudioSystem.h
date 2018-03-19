@@ -2,8 +2,8 @@
 #include "AudioEngine.h"
 #include "System.h"
 
-#define DEFAULT_VOLUME 5
-#define GAMEPLAY_VOLUME 5
+#define DEFAULT_VOLUME 0.6
+#define GAMEPLAY_VOLUME 0.6
 #define SOUNDTRACK_MENU "Assets/Music/MenuSong.mp3"
 #define SOUNDTRACK_GAMEPLAY "Assets/Music/QuarrellingSeas.mp3"
 #define CANNONBALL_SFX "Assets/Sfx/CannonballSfx.mp3"
@@ -26,7 +26,7 @@ public:
 	int loadedLevel;
 	int lastLevel = 2;
 	int audioMute;
-	int gameplayVolume = GAMEPLAY_VOLUME;
+	float gameplayVolume = GAMEPLAY_VOLUME;
 	float listenerX = 0;
 	float listenerY = 0;
 	float xPos;

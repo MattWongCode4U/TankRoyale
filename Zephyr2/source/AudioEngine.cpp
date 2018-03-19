@@ -162,10 +162,10 @@ int AudioEngine::PlayAudio(const string &strSoundName, const Vector3 &vPosition,
 	return nChannelId;
 }
 
-void AudioEngine::SetSoundVolume(int volume) { // DEBUG: This step isn't working
+void AudioEngine::SetSoundVolume(float volume) { // DEBUG: This step isn't working
 	FMOD::ChannelGroup *masterChannelGroup;
 	AudioEngine::FmodError(audioManager->mpSystem->getMasterChannelGroup(&masterChannelGroup));
-	masterChannelGroup->setVolume(dbToVolume(volume)); // This is not being run
+	masterChannelGroup->setVolume(volume); // This is not being run
 }
 
 void AudioEngine::SetChannel3dPosition(int nChannelId, const Vector3 &vPosition)
