@@ -27,19 +27,22 @@ void Scene_Lobby::sceneUpdate() {
 void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
+	INT32 x, y, width, length;
+	bool change;
+	vector<string> objectData;
 	//GameObject* g;
-	if(gameActive) {
+	if (gameActive) {
 		switch (msg->type) {
 		case LEFT_MOUSE_BUTTON:
 		{
-			vector<string> objectData = split(msg->data, ',');
-			INT32 x = atoi(objectData[0].c_str());
-			INT32 y = atoi(objectData[1].c_str());
-			INT32 width = atoi(objectData[2].c_str());
-			INT32 length = atoi(objectData[3].c_str());
+			objectData = split(msg->data, ',');
+			x = atoi(objectData[0].c_str());
+			y = atoi(objectData[1].c_str());
+			width = atoi(objectData[2].c_str());
+			length = atoi(objectData[3].c_str());
 			x -= width / 2; y -= length / 2;
 			y = -y;
-			bool change = false;
+			change = false;
 			for (GameObject *g : gameSystem->gameObjects) {
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2))) {
@@ -70,7 +73,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 					else if (g->id.compare("Option3") == 0 && gameSystem->markerPositionPrime != 3) {
 						// tank 4
 						gameSystem->markerPositionPrime = 3; change = true;
-						gameSystem->tankClass = "artillery"; 
+						gameSystem->tankClass = "artillery";
 						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("artillery SELECTED\n");
 						break;
@@ -90,7 +93,8 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 							gameSystem->loadScene(GAMEPLAY);
 							return;
 							//change = true;
-						} else {
+						}
+						else {
 							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							gameActive = false;
 							loadNoClassSelected();
@@ -104,20 +108,20 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						change = true;
 						break;
 					}
+				}
+				break;
 			}
-			break;
-		}
 
 		case MOUSE_MOVE:
 		{
-			vector<string> objectData = split(msg->data, ',');
-			INT32 x = atoi(objectData[0].c_str());
-			INT32 y = atoi(objectData[1].c_str());
-			INT32 width = atoi(objectData[2].c_str());
-			INT32 length = atoi(objectData[3].c_str());
+			objectData = split(msg->data, ',');
+			x = atoi(objectData[0].c_str());
+			y = atoi(objectData[1].c_str());
+			width = atoi(objectData[2].c_str());
+			length = atoi(objectData[3].c_str());
 			x -= width / 2; y -= length / 2;
 			y = -y;
-			bool change = false;
+			change = false;
 
 			for (GameObject *g : gameSystem->gameObjects)
 			{
@@ -151,17 +155,19 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 		default:
 			break;
 		}
-	} else {
+		}
+	}
+	else {
 		switch (msg->type) {
 			case LEFT_MOUSE_BUTTON:
-			vector<string> objectData = split(msg->data, ',');
-			INT32 x = atoi(objectData[0].c_str());
-			INT32 y = atoi(objectData[1].c_str());
-			INT32 width = atoi(objectData[2].c_str());
-			INT32 length = atoi(objectData[3].c_str());
+			objectData = split(msg->data, ',');
+			x = atoi(objectData[0].c_str());
+			y = atoi(objectData[1].c_str());
+			width = atoi(objectData[2].c_str());
+			length = atoi(objectData[3].c_str());
 			x -= width / 2; y -= length / 2;
 			y = -y;
-			bool change = false;
+			change = false;
 			for (GameObject *g : gameSystem->gameObjects) {
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2))) {
