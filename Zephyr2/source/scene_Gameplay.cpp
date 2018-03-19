@@ -600,7 +600,7 @@ void Scene_Gameplay::updateReticle() {
 	if (!playerTank) return; //if the player tank is null return
 	checkAOEReticle();
 	if (ActionType == SHOOT) {
-		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkShootValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
 		moveCost = playerTank->checkMoveValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
