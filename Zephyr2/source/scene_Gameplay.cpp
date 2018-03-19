@@ -19,6 +19,8 @@ void Scene_Gameplay::startScene() {
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
 
+	validActionsOverlay = gameSystem->findGridObject("validActionsOverlay");
+
 	//gameSystem->reticle = gameSystem->findGridObject("reticle");
 	if (gameSystem->reticle = gameSystem->findGridObject("reticle")) {
 		GameObject* g = gameSystem->makeGameObject("reticleActionIndicator.txt");
@@ -28,8 +30,7 @@ void Scene_Gameplay::startScene() {
 		}
 	setActionType(ROTATEPOS);
 		
-
-	//add healthBars to tanks
+	
 }
 
 //called every frame of the gameloop
@@ -176,6 +177,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					//setPlayerTank("player" + to_string(i + 1));
 					playerTank = t;
 					actionOrigin = playerTank;
+					updateActionOrigin(playerTank);
 
 					//initialize the player's orientation
 					queuedOrientation = playerTank->zRotation;
@@ -684,4 +686,11 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 
 	mm->data = oss.str();
 	msgBus->postMessage(mm, gameSystem);
+}
+
+void Scene_Gameplay::updateActionOrigin(GridObject* newOrigin) {
+	actionOrigin = newOrigin;
+	validActionsOverlay->gridX = newOrigin->gridX;
+	validActionsOverlay->gridY = newOrigin->gridY;
+	validActionsOverlay->updateWorldCoords();
 }

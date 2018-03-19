@@ -218,6 +218,20 @@ width: 100,
 length: 100,
 imageFrames: 1;
 
+gameObjectType: GridObject,
+id: validActionsOverlay,
+renderable: rotateIconCCW.png,
+xPos: 0,
+yPos: 0,
+zPos: -79,
+zRotation: 0,
+width: 20,
+length: 20,
+model: quad,
+renderType: forward3d,
+imageFrames: 1,
+gridX: 0,
+gridY: 0;
 
 
 
