@@ -91,6 +91,7 @@ public:
 
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
+	int markerPositionPrime = 0;
 
 	int score = 0;
 

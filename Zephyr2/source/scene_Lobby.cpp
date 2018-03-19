@@ -43,36 +43,48 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 			for (GameObject *g : gameSystem->gameObjects) {
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2))) {
-					if (g->id.compare("Option0") == 0) {
+					if (g->id.compare("Option0") == 0 && gameSystem->markerPositionPrime != -1) {
 						// tank 1
+						gameSystem->markerPositionPrime = 0; change = true;
 						gameSystem->tankClass = "scout";
 						OutputDebugString("scout SELECTED\n");
 						break;
 					}
-					else if (g->id.compare("Option1") == 0) {
+					else if (g->id.compare("Option1") == 0 && gameSystem->markerPositionPrime != 1) {
 						// tank 2
+						gameSystem->markerPositionPrime = 1; change = true;
 						gameSystem->tankClass = "sniper";
 						OutputDebugString("sniper SELECTED\n");
 						break;
 					}
-					else if (g->id.compare("Option2") == 0) {
+					else if (g->id.compare("Option2") == 0 && gameSystem->markerPositionPrime != 2) {
 						// tank 3
+						gameSystem->markerPositionPrime = 2; change = true;
 						gameSystem->tankClass = "heavy";
 						OutputDebugString("heavy SELECTED\n");
 						break;
 					}
-					else if (g->id.compare("Option3") == 0) {
+					else if (g->id.compare("Option3") == 0 && gameSystem->markerPositionPrime != 3) {
 						// tank 4
+						gameSystem->markerPositionPrime = 3; change = true;
 						gameSystem->tankClass = "artillery"; // regular tank?
 						OutputDebugString("artillery SELECTED\n");
 						break;
 					}
-					else if (g->id.compare("SelectButton") == 0) {
+					else if (g->id.compare("Option4") == 0) {
+						// Back to menu
+						gameSystem->loadScene(MAIN_MENU);
+						return;
+						//change = true;
+						//break;
+					}
+					else if (g->id.compare("Option5") == 0) {
 						// Select
 						// Load main menu
 						if (gameSystem->tankClass != "") {
 							gameSystem->loadScene(GAMEPLAY);
-							change = true;
+							return;
+							//change = true;
 						} else {
 							// TODO: No tank selected
 							gameActive = false;
@@ -80,15 +92,62 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						}
 						break;
 					}
-					else if (g->id.compare("BackButton") == 0) {
-						// Back to menu
-						gameSystem->loadScene(MAIN_MENU);
-						change = true;
-						break;
+				}
+			}
+			if (change)
+			{
+				msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
+
+					for (int i = 0; i < 4; i++) {
+						if (i == gameSystem->markerPositionPrime) {
+							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankSelected.png"), gameSystem);
+						}
+						else {
+							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankFrame.png"), gameSystem);
+						}
+					}
+			}
+			break;
+		}
+
+		case MOUSE_MOVE:
+		{
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
+			INT32 width = atoi(objectData[2].c_str());
+			INT32 length = atoi(objectData[3].c_str());
+			x -= width / 2; y -= length / 2;
+			y = -y;
+			bool change = false;
+
+			for (GameObject *g : gameSystem->gameObjects)
+			{
+				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+				{
+					if (g->id.compare("Option4") == 0 && gameSystem->markerPosition != 3)
+					{
+						gameSystem->markerPosition = 4; change = true;
+					}
+					else if (g->id.compare("Option5") == 0 && gameSystem->markerPosition != 5)
+					{
+						gameSystem->markerPosition = 5; change = true;
 					}
 				}
 			}
-			if (change) msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
+
+			if (change) {
+				for (int i = 4; i < 6; i++) {
+					if (i == gameSystem->markerPosition) {
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+					}
+					else {
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+					}
+				}
+			}
+
 			break;
 		}
 		default:

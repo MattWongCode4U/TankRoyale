@@ -85,7 +85,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: OptionLabel0,
-renderable: ArtilleryTankLabel.png,
+renderable: ScoutTankLabel.png,
 xPos: -150,
 yPos: 50,
 zPos: 20,
@@ -99,7 +99,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: OptionLabel1,
-renderable: HeavyTankLabel.png,
+renderable: SniperTankLabel.png,
 xPos: 150,
 yPos: 50,
 zPos: 20,
@@ -113,7 +113,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: OptionLabel2,
-renderable: ScoutTankLabel.png,
+renderable: HeavyTankLabel.png,
 xPos: -150,
 yPos: -200,
 zPos: 20,
@@ -127,7 +127,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: OptionLabel3,
-renderable: SniperTankLabel.png,
+renderable: ArtilleryTankLabel.png,
 xPos: 150,
 yPos: -200,
 zPos: 20,
@@ -140,7 +140,7 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
-id: lobbyItem4,
+id: Option4,
 renderable: MenuItem4.png,
 xPos: -250,
 yPos: -300,
@@ -154,7 +154,7 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
-id: lobbyItem5,
+id: Option5,
 renderable: MenuItem5.png,
 xPos: 250,
 yPos: -300,

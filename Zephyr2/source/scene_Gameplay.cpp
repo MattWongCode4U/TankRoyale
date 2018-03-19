@@ -84,7 +84,9 @@ void Scene_Gameplay::updateActionBar(int a)
 			break;
 		}
 	}
-	bar->renderable = "bar" + to_string(a) + "_Yellow.png";
+	if (ActionType == MOVE) bar->renderable = "MoveAction.png";
+	else if (ActionType == SHOOT) bar->renderable = "MoveAction.png";
+	else if (ActionType == PASS) bar->renderable = "MoveAction.png";
 	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
 }
 
