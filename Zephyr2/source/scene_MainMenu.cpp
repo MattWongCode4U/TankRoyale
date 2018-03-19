@@ -50,19 +50,21 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 				if (g->id.compare("Menu_Item0") == 0)
 				{
 					// Loadinstructions page
+					msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 					gameSystem->loadScene(INSTRUCTION_MENU);
 					change = true;
 					break;
 				}
 				else if (g->id.compare("Menu_Item1") == 0)
 				{
-
+					msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 					gameSystem->loadScene(LOBBY_MENU);
 					change = true;
 					break;
 				}
 				else if (g->id.compare("Menu_Item2") == 0)
 				{
+					msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 					gameSystem->loadScene(SETTINGS_MENU);
 					gameSystem->markerPosition = 0;
 					change = true;
@@ -70,6 +72,7 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 				}
 				else if (g->id.compare("Menu_Item3") == 0)
 				{
+					msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 					malive = false;
 					break;
 				}
@@ -87,7 +90,6 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 		if (change)
 		{
 			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
-			
 		}
 
 		break;

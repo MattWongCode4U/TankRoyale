@@ -179,6 +179,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					playerTank = t;
 					actionOrigin = playerTank;
 
+					//initialize the player's orientation
+					queuedOrientation = playerTank->zRotation;
+
 					//create the playerTank Indicator
 					GameObject* arrow = gameSystem->makeGameObject("arrow.txt");
 					arrow->id = "playerArrow";
@@ -198,6 +201,11 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		}
 		case NETWORK_R_PING:
 			gameSystem->displayTimeLeft(stoi(msg->data));
+			if(stoi(msg->data) == 1 )
+				for (int i = gameSystem->maxActions - gameSystem->currentAction; i > 0; i--) {
+					sendNetworkActionMsg(PASS);
+				}
+				
 			break;
 		default:
 			break;
@@ -207,32 +215,57 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		if (gameActive) switch (msg->type) {
 		case MOUSE_MOVE:
 		{
+
 			vector<string> objectData = split(msg->data, ',');
 			INT32 x = atoi(objectData[0].c_str());
 			INT32 y = atoi(objectData[1].c_str());
 			INT32 width = atoi(objectData[2].c_str());
 			INT32 length = atoi(objectData[3].c_str());
-			x -= width / 2; y -= length / 2;
-			y = -y;
+			y = length - y;
 
-			int offsetX = x;
-			int offsetY = y;
+			//SDL_Log("X %d, Y %d", x, y);
+			glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width / (float)length, 1.0f, 1000.0f);
+			glm::mat4 look = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 
-			if (y < -44) offsetY -= 45;
-			else if (y > 44) offsetY += 45;
+			glm::mat4 translation = glm::translate(look, position * -1.0f);
 
-			int gridLocationY = (offsetY * 2 / 3) / gameSystem->hexSize;
+			rotation2 = glm::mat4();
 
-			if (x < -44 && gridLocationY % 2 == 0) offsetX -= 45;
-			else if (x > 44 && gridLocationY % 2 == 0) offsetX += 45;
-			else if (x <= 0 && gridLocationY % 2 != 0) offsetX -= 90;
+			rotation2 = glm::rotate(rotation2, rotation.z, glm::vec3(0, 0, 1));
+			rotation2 = glm::rotate(rotation2, rotation.x, glm::vec3(1, 0, 0));
+			rotation2 = glm::rotate(rotation2, rotation.y, glm::vec3(0, 1, 0));
 
-			int gridLocationX = (offsetX * sqrt(3) / 3) / gameSystem->hexSize;
+			glm::mat4 view = rotation2 * translation;
+			
+			glm::vec3 rayOrigin = glm::unProject(glm::vec3(x, y, 0.0f), view, projection, glm::vec4(0, 0, width, length));
+			glm::vec3 rayEnd = glm::unProject(glm::vec3(x, y, 1.0f), view, projection, glm::vec4(0, 0, width, length));
+			glm::vec3 ray = rayEnd - rayOrigin;
+
+			glm::vec3 normal = glm::vec3(0, 0, 1);
+			float d = glm::dot(normal, glm::vec3(0, 0, -80));
+
+			float t = (d - glm::dot(normal, rayOrigin)) / glm::dot(normal, ray);
+			glm::vec3 contact = rayOrigin + ray * t;
+
+			float distance = glm::length(contact - position);
+
+			float offsetX = contact.x;
+			float offsetY = contact.y;
+
+			if (offsetY < -5) offsetY -= 5;
+			else if (offsetY > 5) offsetY += 5;
+
+			int gridLocationY = (offsetY * 2 / 3.0f) / gameSystem->hexSize;
+
+			if (offsetX < -5 && gridLocationY % 2 == 0) offsetX -= 5;
+			else if (offsetX > 5 && gridLocationY % 2 == 0) offsetX += 5;
+			else if (offsetX <= 0 && gridLocationY % 2 != 0) offsetX -= 10;
+
+			int gridLocationX = (offsetX * sqrt(3) / 3.0f) / gameSystem->hexSize;
 
 			gameSystem->reticle->gridX = gridLocationX;
 			gameSystem->reticle->gridY = gridLocationY;
 			updateReticle();
-
 			break;
 		}
 		case DOWN_ARROW_PRESSED: {
@@ -256,11 +289,28 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case SPACEBAR_PRESSED: {
+
+			OutputDebugString("\n");
+			OutputDebugString(to_string(queuedOrientation).c_str());
+
+			queuedOrientation = (queuedOrientation + 360) % 360;
+			actionOrigin->zRotation = queuedOrientation;
+
 			if (gameSystem->currentAction >= gameSystem->maxActions || moveCost <= 0) break;
 			if (gameSystem->currentAction > gameSystem->maxActions - moveCost) break;
 
+			
+
 			//send the action to the network system
 			sendNetworkActionMsg(ActionType);
+
+			//update the quedRotation
+			if (ActionType == ROTATENEG)
+				queuedOrientation += 60;
+			else if (ActionType == ROTATEPOS)
+				queuedOrientation -= 60;
+			queuedOrientation = (queuedOrientation + 360) % 360;
+			actionOrigin->zRotation = queuedOrientation;
 
 			//pad with empty actions iff the move cost is > 1;
 			for (int i = 1; i < moveCost; i++) {
@@ -297,6 +347,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			if (ActionType == MOVE) 
 			{
 				actionOrigin = indicator;
+
+				queuedOrientation = (queuedOrientation + 360) % 360;
+				actionOrigin->zRotation = queuedOrientation;
 				indicator->renderable = "MoveIndicator.png";
 			}
 			else if (ActionType == SHOOT)
@@ -470,7 +523,7 @@ void Scene_Gameplay::executeAction(int a) {
 		switch (receivedAction) {
 		case SHOOT: {
 			gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
-
+			playShotSfx(gameSystem->findTankObject(currentObjectId)->getObjectType());
 			break;
 		}
 
@@ -487,6 +540,7 @@ void Scene_Gameplay::executeAction(int a) {
 					}
 				}
 			}
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 		break;
 		case PASS:
 		{
@@ -496,12 +550,14 @@ void Scene_Gameplay::executeAction(int a) {
 		//ROTATION
 		case ROTATEPOS:
 		{
-			gameSystem->findTankObject(currentObjectId)->turn(-60);
+			gameSystem->findTankObject(currentObjectId)->turn(-60,60);
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		case ROTATENEG:
 		{
-			gameSystem->findTankObject(currentObjectId)->turn(60);
+			gameSystem->findTankObject(currentObjectId)->turn(60,60);
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		}
@@ -544,15 +600,24 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
-
+	checkAOEReticle();
 	if (ActionType == SHOOT) {
-		checkAOEReticle();
-		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkShootValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
-		moveCost = playerTank->checkMoveValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
-	else if(ActionType == ROTATENEG || ActionType == ROTATEPOS)
+		moveCost = playerTank->checkMoveValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	else if (ActionType == ROTATENEG || ActionType == ROTATEPOS) {
 		moveCost = playerTank->checkTurnValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		//if (moveCost > 0) {
+		//	actionOrigin->zRotation = queuedOrientation;
+		//	if (ActionType == ROTATENEG) 
+		//		queuedOrientation += 60;
+		//	else 
+		//		queuedOrientation -= 60;
+		//}
+	}
+		
+
 	if (moveCost > 0 && gameSystem->reticle->renderable != "TileIndicator.png") {
 		gameSystem->reticle->renderable = "TileIndicator.png";
 		gameSystem->reticle->postSpriteMsg();
@@ -572,7 +637,7 @@ void Scene_Gameplay::updateReticle() {
 }
 
 void Scene_Gameplay::checkAOEReticle() {
-	if (playerTank->getObjectType() == "Tank_Artillery") {
+	if (playerTank->getObjectType() == "Tank_Artillery" && ActionType == SHOOT) {
 		gameSystem->reticle->length = gameSystem->reticle->originalLength * 4.0f;
 		gameSystem->reticle->width = gameSystem->reticle->originalWidth * 4.0f;
 		gameSystem->reticle->postSpriteMsg();
@@ -621,4 +686,19 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 
 	mm->data = oss.str();
 	msgBus->postMessage(mm, gameSystem);
+}
+
+void Scene_Gameplay::playShotSfx(std::string objectType) {
+	if (objectType == "Tank_Scout") {
+		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Sniper") {
+		msgBus->postMessage(new Msg(SNIPER_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Heavy") {
+		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Artillery") {
+		msgBus->postMessage(new Msg(ARTILLERY_SHOT_SOUND), gameSystem);
+	}
 }

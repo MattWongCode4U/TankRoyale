@@ -47,6 +47,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						// tank 1
 						gameSystem->markerPositionPrime = 0; change = true;
 						gameSystem->tankClass = "scout";
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("scout SELECTED\n");
 						break;
 					}
@@ -54,6 +55,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						// tank 2
 						gameSystem->markerPositionPrime = 1; change = true;
 						gameSystem->tankClass = "sniper";
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("sniper SELECTED\n");
 						break;
 					}
@@ -61,13 +63,15 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						// tank 3
 						gameSystem->markerPositionPrime = 2; change = true;
 						gameSystem->tankClass = "heavy";
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("heavy SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option3") == 0 && gameSystem->markerPositionPrime != 3) {
 						// tank 4
 						gameSystem->markerPositionPrime = 3; change = true;
-						gameSystem->tankClass = "artillery"; // regular tank?
+						gameSystem->tankClass = "artillery"; 
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("artillery SELECTED\n");
 						break;
 					}
@@ -82,29 +86,23 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						// Select
 						// Load main menu
 						if (gameSystem->tankClass != "") {
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							gameSystem->loadScene(GAMEPLAY);
 							return;
 							//change = true;
 						} else {
-							// TODO: No tank selected
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							gameActive = false;
 							loadNoClassSelected();
 						}
 						break;
 					}
-				}
-			}
-			if (change)
-			{
-				msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
-
-					for (int i = 0; i < 4; i++) {
-						if (i == gameSystem->markerPositionPrime) {
-							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankSelected.png"), gameSystem);
-						}
-						else {
-							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankFrame.png"), gameSystem);
-						}
+					else if (g->id.compare("BackButton") == 0) {
+						// Back to menu
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+						gameSystem->loadScene(MAIN_MENU);
+						change = true;
+						break;
 					}
 			}
 			break;
@@ -168,6 +166,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2))) {
 					if (g->id.compare("NoClassButton") == 0) {
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						unloadNoClassSelected();
 						gameActive = true;
 					}

@@ -51,6 +51,7 @@ void Scene_InstructionsMenu::sceneHandleMessage(Msg * msg) {
 					// This is for the Back Button
 					if (g->id.compare("Menu_Item4") == 0)
 					{
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						gameSystem->loadScene(MAIN_MENU);
 						break;
 					}

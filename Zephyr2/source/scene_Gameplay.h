@@ -1,7 +1,12 @@
 #pragma once
+#include <SDL.h>
+#include <glm.hpp>
+#include <gtc\matrix_transform.hpp>
+#include <gtx\euler_angles.hpp>
 #include "Scene.h"
 #include "TankObject.h"
 #include "GridObject.h"
+
 
 class Scene_Gameplay : public Scene {
 public:
@@ -68,5 +73,16 @@ public:
 
 	void loadPauseMenu();
 	void unloadPauseMenuObjects();
+
+	void UnProject(GLfloat x, GLfloat y, GLfloat z, const glm::mat4 & view, const glm::mat4 & project, const Uint32 width, const Uint32 length, glm::vec3 & coords);
+
+	// Play selected tank's sound effect
+	void playShotSfx(std::string objectType);
+	//the position of the player after applying all queued rotation actions
+	int queuedOrientation;
+	glm::vec3 position = glm::vec3(0, -70.0f, 3.0f);
+	glm::vec3 rotation = glm::vec3(-0.8f, 0, 0);
+
+	glm::mat4 rotation2 = glm::mat4();
 };
 
