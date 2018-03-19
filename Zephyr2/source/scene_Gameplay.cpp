@@ -196,6 +196,13 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		}
 		case NETWORK_R_PING:
 			gameSystem->displayTimeLeft(stoi(msg->data));
+			if(stoi(msg->data) == 1 )
+				for (int i = gameSystem->maxActions - gameSystem->currentAction; i > 0; i--) {
+					sendNetworkActionMsg(PASS);
+				}
+				
+
+
 			break;
 		default:
 			break;
