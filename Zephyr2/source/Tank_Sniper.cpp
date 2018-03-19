@@ -62,11 +62,11 @@ void Tank_Sniper::shoot(int targetX, int targetY) {
 //checks if the targeted move action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Sniper::checkMoveValidity(int originX, int originY, int targetX, int targetY) {
+int Tank_Sniper::checkMoveValidity(GridObject* originObject, int targetX, int targetY) {
 	int range = 2;
-	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, range);
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
 
-	if (axis != -1 && axis == getAxisOrientation())
+	if (axis != -1 && axis == getAxisOrientation(originObject))
 		return 1;
 	else
 		return -1;
@@ -79,11 +79,11 @@ string Tank_Sniper::getObjectType() {
 //checks if the targeted Shooting action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Sniper::checkShootValidity(int originX, int originY, int targetX, int targetY) {
+int Tank_Sniper::checkShootValidity(GridObject* originObject, int targetX, int targetY) {
 	int range = 7;
-	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, range);
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
 	
-	if (axis != -1 && axis == getAxisOrientation())
+	if (axis != -1 && axis == getAxisOrientation(originObject))
 		return 1;
 	else
 		return -1;

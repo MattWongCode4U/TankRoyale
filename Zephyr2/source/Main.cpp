@@ -1,6 +1,12 @@
 #include "Main.h"
 
-int main(int argc, char *argv[]) { 	
+int main(int argc, char *argv[]) {
+	//////////////////////////////////////////////////////////////////
+	//						Loading SDL  							//
+	//////////////////////////////////////////////////////////////////
+	std::cout << "\nLoading SDL\n";
+	SDL_Init(SDL_INIT_EVERYTHING);
+
 	//////////////////////////////////////////////////////////////////
 	//						Loading Core							//
 	//////////////////////////////////////////////////////////////////
@@ -133,7 +139,9 @@ int main(int argc, char *argv[]) {
 	delete(aus);
 	delete(ns);
 
-	return 1;
+	SDL_Quit();
+
+	return 0;
 }
 
 // note: Must have "int id" for functinos that are to be run in worker threads

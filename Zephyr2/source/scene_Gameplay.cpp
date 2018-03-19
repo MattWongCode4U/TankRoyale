@@ -177,6 +177,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					playerTank = t;
 					actionOrigin = playerTank;
 
+					//initialize the player's orientation
+					queuedOrientation = playerTank->zRotation;
+
 					//create the playerTank Indicator
 					GameObject* arrow = gameSystem->makeGameObject("arrow.txt");
 					arrow->id = "playerArrow";
@@ -196,6 +199,11 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		}
 		case NETWORK_R_PING:
 			gameSystem->displayTimeLeft(stoi(msg->data));
+			if(stoi(msg->data) == 1 )
+				for (int i = gameSystem->maxActions - gameSystem->currentAction; i > 0; i--) {
+					sendNetworkActionMsg(PASS);
+				}
+				
 			break;
 		default:
 			break;
@@ -279,11 +287,28 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			break;
 
 		case SPACEBAR_PRESSED: {
+
+			OutputDebugString("\n");
+			OutputDebugString(to_string(queuedOrientation).c_str());
+
+			queuedOrientation = (queuedOrientation + 360) % 360;
+			actionOrigin->zRotation = queuedOrientation;
+
 			if (gameSystem->currentAction >= gameSystem->maxActions || moveCost <= 0) break;
 			if (gameSystem->currentAction > gameSystem->maxActions - moveCost) break;
 
+			
+
 			//send the action to the network system
 			sendNetworkActionMsg(ActionType);
+
+			//update the quedRotation
+			if (ActionType == ROTATENEG)
+				queuedOrientation += 60;
+			else if (ActionType == ROTATEPOS)
+				queuedOrientation -= 60;
+			queuedOrientation = (queuedOrientation + 360) % 360;
+			actionOrigin->zRotation = queuedOrientation;
 
 			//pad with empty actions iff the move cost is > 1;
 			for (int i = 1; i < moveCost; i++) {
@@ -320,6 +345,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			if (ActionType == MOVE) 
 			{
 				actionOrigin = indicator;
+
+				queuedOrientation = (queuedOrientation + 360) % 360;
+				actionOrigin->zRotation = queuedOrientation;
 				indicator->renderable = "MoveIndicator.png";
 			}
 			else if (ActionType == SHOOT)
@@ -520,13 +548,13 @@ void Scene_Gameplay::executeAction(int a) {
 		//ROTATION
 		case ROTATEPOS:
 		{
-			gameSystem->findTankObject(currentObjectId)->turn(-60);
+			gameSystem->findTankObject(currentObjectId)->turn(-60,60);
 			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		case ROTATENEG:
 		{
-			gameSystem->findTankObject(currentObjectId)->turn(60);
+			gameSystem->findTankObject(currentObjectId)->turn(60,60);
 			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
@@ -575,9 +603,19 @@ void Scene_Gameplay::updateReticle() {
 		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
-		moveCost = playerTank->checkMoveValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
-	else if(ActionType == ROTATENEG || ActionType == ROTATEPOS)
+		moveCost = playerTank->checkMoveValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+	else if (ActionType == ROTATENEG || ActionType == ROTATEPOS) {
 		moveCost = playerTank->checkTurnValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		//if (moveCost > 0) {
+		//	actionOrigin->zRotation = queuedOrientation;
+		//	if (ActionType == ROTATENEG) 
+		//		queuedOrientation += 60;
+		//	else 
+		//		queuedOrientation -= 60;
+		//}
+	}
+		
+
 	if (moveCost > 0 && gameSystem->reticle->renderable != "TileIndicator.png") {
 		gameSystem->reticle->renderable = "TileIndicator.png";
 		gameSystem->reticle->postSpriteMsg();
