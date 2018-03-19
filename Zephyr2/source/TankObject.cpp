@@ -41,7 +41,6 @@ void TankObject::shoot(int targetX, int targetY) {
 	int aYCube = -aXCube - aZCube;
 	vector<GameObject*>* gameObjects = gameSystemUtil->getGameObjectsVector();
 
-
 	//create explosion Object
 	GridObject* go = (GridObject*)gameSystemUtil->makeGameObject("explostion.txt");
 	go->id = "explosion" + to_string(rand());
@@ -113,4 +112,42 @@ int TankObject::checkShootValidity(int originX, int originY, int targetX, int ta
 		return 2;
 	else
 		return -1;
+}
+
+int TankObject::checkTurnValidity(int originX, int originY, int targetX, int targetY) {
+	if (gameSystemUtil->getGridDistance(originX, originY, targetX, targetY) == 0)
+		return 1;
+	else
+		return -1;
+}
+
+void TankObject::turn(int turnDir) {
+	//offsetPosition(0, 0, 0, turnDir);
+	int newOrientation = turnDir + zRotation;
+	newOrientation = newOrientation % 360;
+	moveTowards(x, y, z, newOrientation, 60);
+}
+
+int TankObject::getAxisOrientation() {
+	int degrees = ((int)zRotation) % 360;
+	switch (degrees) {
+	case 0: //r
+		return 0;
+		break;
+	case 180: //l
+		return 1;
+		break;
+	case 60: //ur
+		return 2;
+		break;
+	case 240: //dl
+		return 3;
+		break;
+	case 120: //ul
+		return 4;
+		break;
+	case 300: //dr
+		return 5;
+		break;
+	}
 }
