@@ -20,12 +20,12 @@ public:
 	//checks if the targeted move action is valid for this tankObject
 	//returns -1 if action invalid
 	//returns the action cost if valid
-	int checkMoveValidity(int originX, int originY, int targetX, int targetY) override;
+	int checkMoveValidity(GridObject* originObject, int targetX, int targetY) override;
 
 	//checks if the targeted Shooting action is valid for this tankObject
 	//returns -1 if action invalid
 	//returns the action cost if valid
-	int checkShootValidity(int originX, int originY, int targetX, int targetY) override;
+	int checkShootValidity(GridObject* originObject, int targetX, int targetY) override;
 
 	
 };
