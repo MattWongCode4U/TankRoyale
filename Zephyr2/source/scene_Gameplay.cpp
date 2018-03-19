@@ -521,7 +521,7 @@ void Scene_Gameplay::executeAction(int a) {
 		switch (receivedAction) {
 		case SHOOT: {
 			gameSystem->findTankObject(currentObjectId)->shoot(stoi(playerAction[2]), stoi(playerAction[3]));
-
+			playShotSfx(gameSystem->findTankObject(currentObjectId)->getObjectType());
 			break;
 		}
 
@@ -538,6 +538,7 @@ void Scene_Gameplay::executeAction(int a) {
 					}
 				}
 			}
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 		break;
 		case PASS:
 		{
@@ -548,11 +549,13 @@ void Scene_Gameplay::executeAction(int a) {
 		case ROTATEPOS:
 		{
 			gameSystem->findTankObject(currentObjectId)->turn(-60,60);
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		case ROTATENEG:
 		{
 			gameSystem->findTankObject(currentObjectId)->turn(60,60);
+			msgBus->postMessage(new Msg(MOVEMENT_SOUND), gameSystem);
 			break;
 		}
 		}
@@ -595,12 +598,9 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
-
-	
-
+	checkAOEReticle();
 	if (ActionType == SHOOT) {
-		checkAOEReticle();
-		moveCost = playerTank->checkShootValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkShootValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
 		moveCost = playerTank->checkMoveValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
@@ -635,7 +635,7 @@ void Scene_Gameplay::updateReticle() {
 }
 
 void Scene_Gameplay::checkAOEReticle() {
-	if (playerTank->getObjectType() == "Tank_Artillery") {
+	if (playerTank->getObjectType() == "Tank_Artillery" && ActionType == SHOOT) {
 		gameSystem->reticle->length = gameSystem->reticle->originalLength * 4.0f;
 		gameSystem->reticle->width = gameSystem->reticle->originalWidth * 4.0f;
 		gameSystem->reticle->postSpriteMsg();
@@ -684,4 +684,19 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 
 	mm->data = oss.str();
 	msgBus->postMessage(mm, gameSystem);
+}
+
+void Scene_Gameplay::playShotSfx(std::string objectType) {
+	if (objectType == "Tank_Scout") {
+		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Sniper") {
+		msgBus->postMessage(new Msg(SNIPER_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Heavy") {
+		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
+	}
+	else if (objectType == "Tank_Artillery") {
+		msgBus->postMessage(new Msg(ARTILLERY_SHOT_SOUND), gameSystem);
+	}
 }
