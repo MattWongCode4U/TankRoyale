@@ -1,7 +1,12 @@
 #pragma once
+#include <SDL.h>
+#include <glm.hpp>
+#include <gtc\matrix_transform.hpp>
+#include <gtx\euler_angles.hpp>
 #include "Scene.h"
 #include "TankObject.h"
 #include "GridObject.h"
+
 
 class Scene_Gameplay : public Scene {
 public:
@@ -13,6 +18,8 @@ public:
 
 	//Runs once per gameloop frame
 	void sceneUpdate();
+
+	void updateActionBar(int a);
 
 	//runs whenever a message is received by GameSystem
 	void sceneHandleMessage(Msg * msg);
@@ -32,38 +39,28 @@ public:
 	void executeAction(int actionNumber);
 
 	//the possible types of actions
-	enum ActionTypes { MOVE, SHOOT, PASS, DEAD };
+	enum ActionTypes { MOVE, SHOOT, PASS, DEAD, ROTATEPOS, ROTATENEG };
 
 	void setActionType(ActionTypes a);
 
 	//the current action being set up
 	ActionTypes ActionType = MOVE;
 
-	//deal aoe damage to all tiles in the affected area
-	void dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
-
-	//deal damage in a straight line from the origin position along an axis
-	void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
-
-	//returns true if the two points are on the same specified axis
-	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-	bool sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length);
-	
-	//returns the axis that is shared by the 2 points. 
-	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-	//if not on any of the axis, return -1
-	int onAxis(int x1, int y1, int x2, int y2, int range);
-
-	//returns the tile distance in between two tiles on the grid;
-	int getGridDistance(int aX, int aY, int bx, int bY);
+	GameObject* actionIndicator;
+	GameObject* reticle;
 
 	//updates the reticle spright, and postion.
 	void updateReticle();
 
-	void updatePlayerHealthBar(std::string playerID);
+	void checkAOEReticle();
 
-	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
-	bool validMove = false;
+	//sends a message to network system with the specified action
+	void sendNetworkActionMsg(ActionTypes actionType);
+
+	//the action point cost of the current action. -1 if action not allowed
+	//bool validMove = false;
+	int moveCost = -1;
+
 
 	//the local player tank object
 	TankObject* playerTank;
@@ -76,5 +73,12 @@ public:
 
 	void loadPauseMenu();
 	void unloadPauseMenuObjects();
+
+	void UnProject(GLfloat x, GLfloat y, GLfloat z, const glm::mat4 & view, const glm::mat4 & project, const Uint32 width, const Uint32 length, glm::vec3 & coords);
+
+	glm::vec3 position = glm::vec3(0, -70.0f, 3.0f);
+	glm::vec3 rotation = glm::vec3(-0.8f, 0, 0);
+
+	glm::mat4 rotation2 = glm::mat4();
 };
 

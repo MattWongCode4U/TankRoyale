@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
 				ostringstream oss;
 				INT32 x, y;
 				SDL_GetWindowSize(rs->GetSDLWindow(), &x, &y);
+
 				oss << windowEvent.button.x << "," << windowEvent.button.y << "," << x << "," << y;
 				mbus->postMessage(new Msg(LEFT_MOUSE_BUTTON, oss.str()), NULL);
 			}

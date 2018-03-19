@@ -5,8 +5,8 @@ GameObject::GameObject() {
 
 GameObject::~GameObject() {
 }
-GameObject::GameObject(map <string, string> paramsMap, ObjectData* _objData) {
-	objData = _objData;
+GameObject::GameObject(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) {
+	gameSystemUtil = _gameSystemUtil;
 	try {
 		id = paramsMap.find("id")->second;
 		renderable = paramsMap.find("renderable")->second;
@@ -95,7 +95,11 @@ string GameObject::getObjectType() {
 }
 
 void GameObject::earlyUpdate() {
-
+	if (offsetFrames > 0) {
+		offsetPosition(offsetX, offsetY, offsetZ, rotationOffsetZ);
+		offsetFrames--;
+	}
+		
 }
 
 void GameObject::midUpdate() {
@@ -163,30 +167,14 @@ void GameObject::offsetPosition(float offsetX, float offsetY, float offsetZ, flo
 	z += offsetZ;
 	zRotation += rotation;
 
-	std::ostringstream oss;
-	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");
-
-	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
-	oss << id << ","
-		<< renderable << ","
-		<< x << ","
-		<< y << ","
-		<< z << ","
-		<< xRotation << ","
-		<< yRotation << ","
-		<< zRotation << ","
-		<< width << ","
-		<< length << ","
-		<< height << ","
-		<< getObjectType();
-
-	mm->data = oss.str();
-	objData->toPostVector.push_back(mm);
+	postPostionMsg();
 }
 
 void GameObject::setParent(GameObject* newParent) {
 	parentObject = newParent;
 	parentObject->childObjects.push_back(this);
+
+	offsetPosition(parentObject->x, parentObject->y, parentObject->z, parentObject->zRotation);
 	//parentObject->offsetPosition(300, 300, 0);
 }
 
@@ -205,11 +193,66 @@ bool GameObject::removeChild(GameObject* child2Remove) {
 	}
 	return false;
 }
+
 //destroy the objects with its children
 void GameObject::destroyWithChildren() {
 	for (GameObject* g : childObjects) {
 		g->destroyWithChildren();
 	}
 	parentObject->removeChild(this);
-	objData->toDestroyVector.push_back(this);
+	gameSystemUtil->deleteGameObject(this);
+}
+
+/*move object towards the specified position in the number of frames
+params:
+float targetX, targetY, targetZ = the target position
+float turnZ = the number of degrees to turn around z direction
+int frames = number of frames to move in
+*/
+void GameObject::moveTowards(float targetX, float targetY, float targetZ, float turnZ, int frames) {
+	//if (offsetFrames <= 0) return; //if already moving towards, ignore
+	offsetFrames = frames;
+	offsetX = (targetX-x) / (float)frames;
+	offsetY = (targetY-y) / (float)frames;
+	offsetZ = (targetZ-z) / (float)frames;
+	int newRotation = (int)(turnZ - zRotation) % 360;
+	rotationOffsetZ = (float)newRotation / (float)frames;
+}
+
+
+void GameObject::postPostionMsg() {
+	ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJECT_POSITION, "");
+
+	//UPDATE_OBJECT_POSITION, //id,renderable,x,y,z,orientation,width,length,type
+	oss << id << ","
+		<< renderable << ","
+		<< x << ","
+		<< y << ","
+		<< z << ","
+		<< xRotation << ","
+		<< yRotation << ","
+		<< zRotation << ","
+		<< width << ","
+		<< length << ","
+		<< height << ","
+		<< getObjectType();
+
+	mm->data = oss.str();
+
+	gameSystemUtil->postMessageToBus(mm);
+}
+
+void GameObject::postSpriteMsg() {
+	ostringstream oss;
+	Msg* mm = new Msg(UPDATE_OBJ_SPRITE, "");
+
+	//UPDATE_OBJ_SPRITE, id,Frames,renderable
+	oss << id << ","
+		<< "1,"
+		<< renderable;
+	
+	mm->data = oss.str();
+
+	gameSystemUtil->postMessageToBus(mm);
 }

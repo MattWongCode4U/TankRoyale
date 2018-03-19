@@ -1,11 +1,55 @@
 #include "GameSystem.h"
 
 GameSystem::GameSystem(MessageBus* mbus) : System(mbus) {
-	objData = *(new ObjectData());
 }
 
 
 GameSystem::~GameSystem() {
+}
+
+//creates a gameobject from a file and returns a pointer to it
+//DOES NOT ADD OBJECT TO gameobjects vector
+GameObject* GameSystem::makeGameObject(string fileName) {
+	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
+	vector<string> splitObjData = split(data, ',');
+
+	std::map<std::string, std::string> gameObjDataMap;
+	//loop through elements of each GameObject and add them to the object parameter map
+	for (int i = 0; i < splitObjData.size(); i++) {
+		vector<string> keyValue = split(splitObjData[i], ':');
+		gameObjDataMap[keyValue[0]] = keyValue[1];
+	}
+	GameObject* g = NULL;
+	//gets the gameObject type
+	string gameObjectType = gameObjDataMap.find("gameObjectType")->second;
+	
+	//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
+	if (gameObjectType.compare("GridObject") == 0) {
+		g = new GridObject(gameObjDataMap, this);
+		//OutputDebugString(g->toString().c_str());
+	}
+	else if (gameObjectType.compare("GameObject") == 0) {
+		g = new GameObject(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("FullscreenObj") == 0) {
+		g = new FullscreenObj(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("TankObject") == 0) {
+		g = new Tank_Artillery(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Artillery") == 0) {
+		g = new Tank_Artillery(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Heavy") == 0) {
+		g = new Tank_Heavy(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Scout") == 0) {
+		g = new Tank_Scout(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Tank_Sniper") == 0) {
+		g = new Tank_Sniper(gameObjDataMap, this);
+	}
+	return g;
 }
 
 //reads gameobjects from a file. instantiates them and adds them to the list of active objects
@@ -13,7 +57,7 @@ void GameSystem::addGameObjects(string fileName) {
 
 	std::string data = openFileFromAsset(fileName, ASSET_TYPE::DATA, true);
 	
-	vector<string> splitDataVector = split(data, ';');//split gameobjects by
+	vector<string> splitDataVector = split(data, ';');//split gameobjects by ;
 
 	GameObject* g; //new gameobject to be created
 	//loop through objects read in from file
@@ -33,17 +77,29 @@ void GameSystem::addGameObjects(string fileName) {
 		g = NULL;
 		//just hard coded else ifs for now... should probably make retreive available classes automatically <- Did some research, cpp doesn't support reflection (Hank)
 		if (gameObjectType.compare("GridObject") == 0) {
-			g = new GridObject(gameObjDataMap, &objData);
+			g = new GridObject(gameObjDataMap, this);
 			//OutputDebugString(g->toString().c_str());
 		}
 		else if (gameObjectType.compare("GameObject") == 0) {
-			g = new GameObject(gameObjDataMap, &objData);
+			g = new GameObject(gameObjDataMap, this);
 		}
 		else if (gameObjectType.compare("FullscreenObj") == 0) {
-			g = new FullscreenObj(gameObjDataMap, &objData);
+			g = new FullscreenObj(gameObjDataMap, this);
 		}
 		else if (gameObjectType.compare("TankObject") == 0) {
-			g = new TankObject(gameObjDataMap, &objData);
+			g = new Tank_Artillery(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Artillery") == 0) {
+			g = new Tank_Artillery(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Heavy") == 0) {
+			g = new Tank_Heavy(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Scout") == 0) {
+			g = new Tank_Scout(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Tank_Sniper") == 0) {
+			g = new Tank_Sniper(gameObjDataMap, this);
 		}
 
 		if (g != NULL) {
@@ -71,17 +127,7 @@ void GameSystem::createGameObject(GameObject* g) {
 			return;
 		}
 	}
-	//set the object's parent
-	if (g->parentId != "") {
-		for (GameObject* p : gameObjects) {
-			if (p->id == g->parentId) {
-				g->setParent(p);
-				g->offsetPosition(p->x, p->y, 0, p->zRotation);
-			}
-				
-			
-		}	
-	}
+
 
 	gameObjects.push_back(g);
 	std::ostringstream oss; //id,renderable,x,y,z,orientation,width,length,height,physicsEnabled,objectType,imageFrames,renderType,model,normalMap,smoothness, animationDelay, animateOnce
@@ -106,6 +152,17 @@ void GameSystem::createGameObject(GameObject* g) {
 	// what physics needs
 
 	msgBus->postMessage(new Msg(GO_ADDED, oss.str()), this);
+
+	//set the object's parent
+	if (g->parentId != "") {
+		for (GameObject* p : gameObjects) {
+			if (p->id == g->parentId) {
+				g->setParent(p);
+				//g->offsetPosition(p->x, p->y, p->z, p->zRotation);
+				//g->offsetPosition(0, 0, 0, 0);
+			}
+		}
+	}
 }
 
 
@@ -155,27 +212,6 @@ void GameSystem::startSystemLoop() {
 		for (GameObject* obj : gameObjects) {
 			obj->lateUpdate();
 		}
-
-		//loop through list of objects to create added by the gameobjects
-		for (GameObject* c : objData.toCreateVector) {
-			createGameObject(c);
-		}
-		objData.toCreateVector.clear();
-
-		//loop through list of objects to destroy added by the gameobjects
-		for (GameObject* g : objData.toDestroyVector) {
-			gameObjectRemoved(g);
-			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
-		}
-		objData.toDestroyVector.clear();
-
-		//loop through list of messages to send that were added by Game objects
-		for (Msg* m : objData.toPostVector) {
-			msgBus->postMessage(m, this);
-		}
-		objData.toPostVector.clear();
-
-		delete(m);
 	}
 }
 
@@ -213,21 +249,11 @@ void GameSystem::deleteGameObject(string id) {
 
 // Delete game objects and removes them from the renderer
 void GameSystem::deleteGameObject(GameObject* go) {
-	if (findGameObject(go->id) != nullptr) {
-		gameObjectRemoved(findGameObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGameObject(go->id)), gameObjects.end());
-	}
-	else if (findFullscreenObject(go->id) != nullptr) {
-		gameObjectRemoved(findFullscreenObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findFullscreenObject(go->id)), gameObjects.end());
-	}
-	else if (findGridObject(go->id) != nullptr) {
-		gameObjectRemoved(findGridObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findGridObject(go->id)), gameObjects.end());
-	}
-	else if (findTankObject(go->id) != nullptr) {
-		gameObjectRemoved(findTankObject(go->id));
-		gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), findTankObject(go->id)), gameObjects.end());
+	for (GameObject* g : gameObjects) {
+		if (g == go) {
+			gameObjectRemoved(g);
+			gameObjects.erase(remove(gameObjects.begin(), gameObjects.end(), g), gameObjects.end());
+		}
 	}
 }
 
@@ -322,14 +348,18 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 	return obj;
 }
 TankObject* GameSystem::findTankObject(std::string objectID) {
-	TankObject* obj = nullptr;
+	TankObject* tank = nullptr;
 	for (GameObject *g : gameObjects) {
-		if (g->id == objectID && g->getObjectType() == "TankObject") {
-			obj = (TankObject*)g;
-			return obj;
+		if (g->id == objectID) {
+			if (TankObject* tank = dynamic_cast<TankObject*>(g)) {
+				//OutputDebugString("\nFOund Tank\n");
+				//TankObject* tank = dynamic_cast<TankObject*>(g);
+				return tank;
+			}
 		}
+			
 	}
-	return obj;
+	return nullptr;
 }
 GridObject* GameSystem::findGridObject(std::string objectID) {
 	GridObject* obj = nullptr;
@@ -382,4 +412,244 @@ void  GameSystem::loadScene(SceneType _scene){
 	}
 
 	scene->startScene();
+}
+
+//post message on the message bus
+//implementation of gameSystemUtil virtual function
+//used to allow Gameobjects to send messages without giving them full access to GameSystem and messageSystem
+void GameSystem::postMessageToBus(Msg* message) {
+	msgBus->postMessage(message, this);
+}
+
+std::vector<GameObject*>* GameSystem::getGameObjectsVector() {
+	return &gameObjects;
+}
+
+int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
+	int aXCube = aX - (aY - (aY & 1)) / 2;
+	int aZCube = aY;
+	int aYCube = -aXCube - aZCube;
+	int bXCube = bX - (bY - (bY & 1)) / 2;
+	int bZCube = bY;
+	int bYCube = -bXCube - bZCube;
+
+	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
+}
+
+//Position of tank firing: _originX, _originY
+//how many tiles the shot can go: length
+//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
+/*void GameSystem::dealLineDamage(int _originX, int _originY, int length, int axis, int damage) {
+	vector<TankObject *> thingsHit; //list of things hit
+
+	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
+		if (go->getObjectType() == "TankObject") {
+			TankObject* tank = (TankObject*)go;
+			if (sameAxisShot(axis, _originX, _originY, tank->gridX, tank->gridY, length)) { //if on same axis and in range
+				thingsHit.push_back(tank); //add things that are in firing range along the axis to the list
+			}
+		}
+	}
+
+	//Find the first thing hit from the list
+	if (thingsHit.size() > 0) {
+		TankObject* currClosestTank = nullptr;
+		int dist = -1;
+		for (TankObject* t : thingsHit) {
+			OutputDebugString((t->id).c_str());
+			OutputDebugString(" hit\n");
+			if (dist < getGridDistance(_originX, _originY, t->gridX, t->gridY)) {
+				dist = getGridDistance(_originX, _originY, t->gridX, t->gridY);
+				currClosestTank = t;
+			}
+		}
+
+		//deal damage to closest tank;
+		if (currClosestTank != nullptr) {
+			currClosestTank->health -= damage;
+			if (currClosestTank->health <= 0)
+				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"), gameSystem);
+			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
+		}
+	}
+}*/
+
+bool GameSystem::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length) {
+	bool result = false;
+
+	int aXCube = x1 - (y1 - (y1 & 1)) / 2;
+	int aZCube = y1;
+	int aYCube = -aXCube - aZCube;
+
+	int bXCube = x2 - (y2 - (y2 & 1)) / 2;
+	int bZCube = y2;
+	int bYCube = -bXCube - bZCube;
+
+	int axisBase[3] = { 0, 0, 0 };
+
+	switch (axis) {
+	case 0: //r (+1, -1, 0)
+		axisBase[0] = 1;
+		axisBase[1] = -1;
+		axisBase[2] = 0;
+		break;
+
+	case 1: //l (-1, +1, 0)
+		axisBase[0] = -1;
+		axisBase[1] = 1;
+		axisBase[2] = 0;
+		break;
+
+	case 2: //ur (0, -1, 1)
+		axisBase[0] = 0;
+		axisBase[1] = -1;
+		axisBase[2] = 1;
+		break;
+
+	case 3: //dl (0, 1, -1)
+		axisBase[0] = 0;
+		axisBase[1] = 1;
+		axisBase[2] = -1;
+		break;
+
+	case 4: //ul (-1, 0, 1)
+		axisBase[0] = -1;
+		axisBase[1] = 0;
+		axisBase[2] = 1;
+		break;
+
+	case 5: //dr (1, 0, -1)
+		axisBase[0] = 1;
+		axisBase[1] = 0;
+		axisBase[2] = -1;
+		break;
+	}
+
+	//Test if the point line up on the specified axis
+	for (int i = 1; i < length; i++) {
+		int tempaXCube = aXCube + axisBase[0] * i;
+		int tempaYCube = aYCube + axisBase[1] * i;
+		int tempaZCube = aZCube + axisBase[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			result = true;
+			break;
+		}
+	}
+
+	return result;
+}
+
+//For selecting a direction to shoot along an axis
+//position of player's tank: (x1, y1)
+//position of click: (x2, y2)
+//returns 0=r 1=l 2=ur 3=dl 4=ul 5=dr -1=none
+int GameSystem::onAxis(int x1, int y1, int x2, int y2, int range) {
+	if (x1 == x2 && y1 == y2) { //same location
+		return -1;
+	}
+
+	int aXCube = x1 - (y1 - (y1 & 1)) / 2;
+	int aZCube = y1;
+	int aYCube = -aXCube - aZCube;
+
+	int bXCube = x2 - (y2 - (y2 & 1)) / 2;
+	int bZCube = y2;
+	int bYCube = -bXCube - bZCube;
+
+	//Check directions then return if it is in that direction
+
+	//r (+1, -1, 0)
+	int r[3] = { 1, -1, 0 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + r[0] * i;
+		int tempaYCube = aYCube + r[1] * i;
+		int tempaZCube = aZCube + r[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("right\n");
+			return 0;
+		}
+	}
+
+	//l (-1, +1, 0)
+	int l[3] = { -1, 1, 0 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + l[0] * i;
+		int tempaYCube = aYCube + l[1] * i;
+		int tempaZCube = aZCube + l[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("left\n");
+			return 1;
+		}
+	}
+
+	//ur (0, -1, 1)
+	int ur[3] = { 0, -1, 1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + ur[0] * i;
+		int tempaYCube = aYCube + ur[1] * i;
+		int tempaZCube = aZCube + ur[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("up right\n");
+			return 2;
+		}
+	}
+
+	//dl (0, 1, -1)
+	int dl[3] = { 0, 1, -1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + dl[0] * i;
+		int tempaYCube = aYCube + dl[1] * i;
+		int tempaZCube = aZCube + dl[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("down left\n");
+			return 3;
+		}
+	}
+
+	//ul (-1, 0, 1)
+	int ul[3] = { -1, 0, 1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + ul[0] * i;
+		int tempaYCube = aYCube + ul[1] * i;
+		int tempaZCube = aZCube + ul[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("up left\n");
+			return 4;
+		}
+	}
+
+	//dr (1, 0, -1)
+	int dr[3] = { 1, 0, -1 };
+	for (int i = 1; i < range; i++) {
+		int tempaXCube = aXCube + dr[0] * i;
+		int tempaYCube = aYCube + dr[1] * i;
+		int tempaZCube = aZCube + dr[2] * i;
+
+		if ((tempaXCube == bXCube)
+			&& (tempaYCube == bYCube)
+			&& (tempaZCube == bZCube)) {
+			OutputDebugString("down right\n");
+			return 5;
+		}
+	}
+
+	return -1; //Not on any axis or in range
 }

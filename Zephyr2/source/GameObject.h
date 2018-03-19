@@ -2,9 +2,9 @@
 #include <windows.h>
 #include <map>
 #include <iostream>
-#include "ObjectData.h"
 #include "Vector2.h"
 #include "renderer\RenderableTypes.h"
+#include "GameSystemUtil.h"
 using namespace std;
 
 class GameObject {
@@ -35,21 +35,21 @@ public:
 	//use parentObject* instead of this, unless you know what you're doing
 	std::string parentId = "";
 
-	ObjectData* objData;
-
 	std::string renderable;
 	RenderableType renderType;
 	std::string model;
 	std::string normalMap;
 	float smoothness;
 
+	GameSystemUtil* gameSystemUtil;//pointer to the active gamesystem. only has access to utility functions not the rest
+
 	GameObject();
 	~GameObject();
-	GameObject(std::map <std::string, std::string> paramsMap, ObjectData* objData);
+	GameObject(std::map <std::string, std::string> paramsMap, GameSystemUtil* _gameSystemUtil);
 	virtual std::string getObjectType();
 	virtual std::string toString();
 	void earlyUpdate();
-	virtual void midUpdate();
+	void midUpdate();
 	void lateUpdate();
 	virtual void onCollide(GameObject* otherObj);
 
@@ -67,6 +67,24 @@ public:
 	bool removeChild(GameObject* child2Remove);
 
 	void destroyWithChildren();
+
+	float offsetX, offsetY, offsetZ, rotationOffsetZ;//how much to offset the object by, each turn;
+	int offsetFrames = 0; //number of frames left in current movement
+
+	/*move object towards the specified position in the number of frames
+	params:
+	float targetX, targetY, targetZ = the target position
+	float turnZ = the number of degrees to turn around z direction
+	int frames = number of frames to move in
+	*/
+	void moveTowards(float targetX, float targetY, float targetZ, float turnZ, int frames);
+
+
+	//sends an UPDATE_POSIION message to the bus. includes sprite info
+	void postPostionMsg();
+
+	//sends an UPDATE_SPRITE message to the bus. includes sprite info
+	void postSpriteMsg();
 
 	GameObject* parentObject = nullptr;
 	std::vector<GameObject*> childObjects;
