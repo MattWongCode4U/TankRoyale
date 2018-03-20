@@ -79,6 +79,8 @@ public:
 	*/
 	void moveTowards(float targetX, float targetY, float targetZ, float turnZ, int frames);
 
+	//turn the object around the zAxis in the direction specified. optionally do it over <turnTime> number of frames
+	void turn(int turnDir, int turnTime = 0);
 
 	//sends an UPDATE_POSIION message to the bus. includes sprite info
 	void postPostionMsg();

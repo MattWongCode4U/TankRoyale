@@ -1772,13 +1772,15 @@ glm::vec4 RenderPipeline::computeAnimationOffsets(const RenderableObject & objec
 
 	float finalYOffset = (1.0f / (float)numberOfRows) * yoffset;
 
-	if (frames > 20) {
+	/*
+	if (frames > 20 && animationCount <= 30) {
 		std::ostringstream ss;
 		ss << finalYOffset << "\t" << yoffset << "\t" << animationCount << "\t" << tempacount << "\t" << currentRow << "\t" << numberOfRows << "\t" << offset;
-		//SDL_Log(ss.str().c_str());
+		SDL_Log(ss.str().c_str());
 	}
+	*/
 
-	return glm::vec4((1.0f / (float)xframes) * offset, finalYOffset, 1.0f / (float)frames, (float)fheight);
+	return glm::vec4((1.0f / (float)xframes) * offset, finalYOffset, 1.0f / (float)xframes, (float)fheight);
 }
 
 /// <summary>

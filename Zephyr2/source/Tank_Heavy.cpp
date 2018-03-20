@@ -1,6 +1,10 @@
 #include "Tank_Heavy.h"
 
 Tank_Heavy::Tank_Heavy(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Heavy.png";
+	moveOverlayRenderable = "range_Move.png";
+	shootOverlaySize = 40;
+	moveOverlaySize = 20;
 }
 
 Tank_Heavy::~Tank_Heavy() {
@@ -18,7 +22,7 @@ string Tank_Heavy::getObjectType() {
 
 void Tank_Heavy::shoot(int targetX, int targetY) {
 	OutputDebugString("\nHEAVY SHOT\n");
-	int range = 3;
+	int range = 4;
 	int damage = 29;
 	int aXCube = targetX - (targetY - (targetY & 1)) / 2;
 	int aZCube = targetY;
@@ -70,8 +74,11 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 //checks if the targeted move action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Heavy::checkMoveValidity(int originX, int originY, int targetX, int targetY) {
-	if (gameSystemUtil->getGridDistance(originX, originY, targetX, targetY) == 1)
+int Tank_Heavy::checkMoveValidity(GridObject* originObject, int targetX, int targetY) {
+	int range = 2;
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
+
+	if (axis != -1 && axis == getAxisOrientation(originObject))
 		return 1;
 	else
 		return -1;
@@ -80,9 +87,9 @@ int Tank_Heavy::checkMoveValidity(int originX, int originY, int targetX, int tar
 //checks if the targeted Shooting action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Heavy::checkShootValidity(int originX, int originY, int targetX, int targetY) {
+int Tank_Heavy::checkShootValidity(GridObject* originObject, int targetX, int targetY) {
 	int range = 4;
-	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, range);
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
 
 	if (axis != -1)
 		return 1;

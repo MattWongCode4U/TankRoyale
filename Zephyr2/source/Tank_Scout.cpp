@@ -1,6 +1,10 @@
 #include "Tank_Scout.h"
 
 Tank_Scout::Tank_Scout(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Heavy.png";
+	moveOverlayRenderable = "range_MoveLong.png";
+	shootOverlaySize = 30;
+	moveOverlaySize = 30;
 }
 
 Tank_Scout::~Tank_Scout() {
@@ -63,11 +67,11 @@ void Tank_Scout::shoot(int targetX, int targetY) {
 //checks if the targeted move action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Scout::checkMoveValidity(int originX, int originY, int targetX, int targetY) {
+int Tank_Scout::checkMoveValidity(GridObject* originObject, int targetX, int targetY) {
 	int range = 3;
-	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, range);
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
 
-	if (axis != -1 && axis == getAxisOrientation())
+	if (axis != -1 && axis == getAxisOrientation(originObject))
 		return 1;
 	else
 		return -1;
@@ -80,9 +84,9 @@ string Tank_Scout::getObjectType() {
 //checks if the targeted Shooting action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Scout::checkShootValidity(int originX, int originY, int targetX, int targetY) {
+int Tank_Scout::checkShootValidity(GridObject* originObject, int targetX, int targetY) {
 	int range = 3;
-	int axis = gameSystemUtil->onAxis(originX, originY, targetX, targetY, range);
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
 
 	if (axis != -1)
 		return 1;

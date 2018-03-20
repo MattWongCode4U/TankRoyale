@@ -31,12 +31,14 @@ public:
 	//checks if the targeted move action is valid for this tankObject
 	//returns -1 if action invalid
 	//returns the action cost if valid
-	virtual int checkMoveValidity(int originX, int originY, int targetX, int targetY);
+	virtual int checkMoveValidity(GridObject* originObject, int targetX, int targetY);
 
 	//checks if the targeted Shooting action is valid for this tankObject
 	//returns -1 if action invalid
 	//returns the action cost if valid
-	virtual int checkShootValidity(int originX, int originY, int targetX, int targetY);
+	//virtual int checkShootValidity(int originX, int originY, int targetX, int targetY);
+	virtual int checkShootValidity(GridObject* originObject, int targetX, int targetY);
+	
 
 	int checkTurnValidity(int originX, int originY, int targetX, int targetY);
 
@@ -44,6 +46,11 @@ public:
 	float hpBarWidth;//the original width of the hp bar
 	float maxHealth;//the maximum hp pool
 	
-	void turn(int turnDir);
-	int getAxisOrientation();
+	string shootOverlayRenderable = "range_Shoot_Artillery.png";
+	string moveOverlayRenderable = "range_Move.png";
+	float shootOverlaySize = 60;
+	float moveOverlaySize = 20;
+
+	//int getAxisOrientation();
+
 };

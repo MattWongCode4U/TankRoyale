@@ -1,6 +1,10 @@
 #include "Tank_Artillery.h"
 
 Tank_Artillery::Tank_Artillery(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Artillery.png";
+	moveOverlayRenderable = "range_Move.png";
+	shootOverlaySize = 60;
+	moveOverlaySize = 20;
 }
 
 Tank_Artillery::~Tank_Artillery() {
@@ -46,8 +50,11 @@ void Tank_Artillery::shoot(int targetX, int targetY) {
 //checks if the targeted move action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Artillery::checkMoveValidity(int originX, int originY, int targetX, int targetY) {
-	if (gameSystemUtil->getGridDistance(originX, originY, targetX, targetY) == 1)
+int Tank_Artillery::checkMoveValidity(GridObject* originObject, int targetX, int targetY) {
+	int range = 2;
+	int axis = gameSystemUtil->onAxis(originObject->gridX, originObject->gridY, targetX, targetY, range);
+
+	if (axis != -1 && axis == getAxisOrientation(originObject))
 		return 1;
 	else
 		return -1;
@@ -56,9 +63,9 @@ int Tank_Artillery::checkMoveValidity(int originX, int originY, int targetX, int
 //checks if the targeted Shooting action is valid for this tankObject
 //returns -1 if action invalid
 //returns the action cost if valid
-int Tank_Artillery::checkShootValidity(int originX, int originY, int targetX, int targetY) {
+int Tank_Artillery::checkShootValidity(GridObject* originObject, int targetX, int targetY) {
 	int range = 6;
-	int distancetoTarget = gameSystemUtil->getGridDistance(originX, originY, targetX, targetY);
+	int distancetoTarget = gameSystemUtil->getGridDistance(originObject->gridX, originObject->gridY, targetX, targetY);
 
 	if (distancetoTarget < range && distancetoTarget > 0)
 		return 2;

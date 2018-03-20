@@ -28,6 +28,11 @@ public:
 	//set objects coordinates in grid space. Automatically updates the world space as well
 	void setGridCoords(int _gridX, int _gridY);
 
+	//gets the grid orientation of the  specified gridObject object (0-5)
+	int getAxisOrientation(GridObject* g = 0);
+
+
+
 	//object's position in in grid coordinates
 	int gridX;
 	int gridY;

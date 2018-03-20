@@ -256,3 +256,10 @@ void GameObject::postSpriteMsg() {
 
 	gameSystemUtil->postMessageToBus(mm);
 }
+
+void GameObject::turn(int turnDir, int turnTime) {
+	//offsetPosition(0, 0, 0, turnDir);
+	int newOrientation = turnDir + zRotation;
+	newOrientation = newOrientation % 360;
+	moveTowards(x, y, z, newOrientation, turnTime);
+}
