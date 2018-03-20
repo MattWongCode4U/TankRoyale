@@ -215,8 +215,8 @@ void GameObject::moveTowards(float targetX, float targetY, float targetZ, float 
 	offsetX = (targetX-x) / (float)frames;
 	offsetY = (targetY-y) / (float)frames;
 	offsetZ = (targetZ-z) / (float)frames;
-	int newRotation = (int)(turnZ - zRotation) % 360;
-	rotationOffsetZ = (float)newRotation / (float)frames;
+	float newRotation = std::fmod((turnZ - zRotation),360);
+	rotationOffsetZ = newRotation / (float)frames;
 }
 
 
@@ -257,9 +257,9 @@ void GameObject::postSpriteMsg() {
 	gameSystemUtil->postMessageToBus(mm);
 }
 
-void GameObject::turn(int turnDir, int turnTime) {
+void GameObject::turn(float turnDir, int turnTime) {
 	//offsetPosition(0, 0, 0, turnDir);
-	int newOrientation = turnDir + zRotation;
-	newOrientation = newOrientation % 360;
+	float newOrientation = turnDir + zRotation;
+	newOrientation = std::fmod(newOrientation,360);
 	moveTowards(x, y, z, newOrientation, turnTime);
 }
