@@ -1,0 +1,12 @@
+gameObjectType: GameObject,
+id: hpBar,
+renderable: green_hpbar,
+xPos: 0,
+yPos: 0,
+zPos: 12,
+width: 10,
+length: 1.2,
+renderType: billboard,
+model: quad,
+imageFrames: 1;
+

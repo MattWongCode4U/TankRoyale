@@ -1,11 +1,12 @@
 #pragma once
 #include "GameObject.h"
+#include "GridVector3.h"
 
 class GridObject : public GameObject {
 public:
-	GridObject(map<string, string> params, ObjectData* objData);
+	GridObject(map<string, string> params, GameSystemUtil* _gameSystemUtil);
 
-	GridObject(std::string id, std::string renderable, float xPos, float yPos, int zPos, int orientation, int width, int length, int imageFrames, int gridX, int gridY);
+	//GridObject(ObjectData* _objData, std::string id, std::string renderable, float xPos, float yPos, int zPos, int orientation, int width, int length, int imageFrames, int gridX, int gridY, std::string _parent);
 	
 	~GridObject();
 
@@ -21,15 +22,22 @@ public:
 	void GridObject::lateUpdate();
 
 	//updates the world coordinates to match the grid coordinates
-	void updateWorldCoords();
+	//optionaly do it over a number of frames
+	void updateWorldCoords(int frameDelay = 0);
 
 	//set objects coordinates in grid space. Automatically updates the world space as well
 	void setGridCoords(int _gridX, int _gridY);
-	
+
+	//gets the grid orientation of the  specified gridObject object (0-5)
+	int getAxisOrientation(GridObject* g = 0);
+
+
 
 	//object's position in in grid coordinates
 	int gridX;
 	int gridY;
 
-	const int hexSize = 50;
+	GridVector3 gridPos;
+
+	const float hexSize = 7.1f;
 };

@@ -10,6 +10,7 @@
 #include <thread>
 #include "fmod.hpp"
 #include "fmod_errors.h"
+#include "GlobalPrefs.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ struct Vector3 {
 
 struct AudioManager {
 	AudioManager();
+	~AudioManager();
 
 	void Update();
 	void Mute();
@@ -54,6 +56,7 @@ public:
 	int PlayAudio(const string &strSoundName, const Vector3 &vPosition = Vector3{ 0, 0, 0 }, float fVolumedB = 5.0f);
 	void SetChannel3dPosition(int nChannelId, const Vector3 &vPosition);
 	void SetChannelvolume(int nChannelId, float fVolumedB);
+	void SetSoundVolume(float volume);
 	float dbToVolume(float db);
 	float VolumeTodb(float volume);
 	FMOD_VECTOR VectorToFmod(const Vector3 &vPosition);

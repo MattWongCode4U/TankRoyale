@@ -6,6 +6,15 @@ AudioManager::AudioManager()
 	mpSystem = NULL;
 	AudioEngine::FmodError(FMOD::System_Create(&mpSystem));
 	AudioEngine::FmodError(mpSystem->init(512, FMOD_INIT_NORMAL, 0));
+
+	FMOD::ChannelGroup *masterChannelGroup;
+	AudioEngine::FmodError(mpSystem->getMasterChannelGroup(&masterChannelGroup));
+	masterChannelGroup->setVolume(GlobalPrefs::aMasterVolume);
+}
+
+AudioManager::~AudioManager()
+{
+	AudioEngine::FmodError(mpSystem->release());
 }
 
 void AudioManager::Update()
@@ -45,7 +54,7 @@ void AudioManager::UnMute()
 	}
 }
 
-AudioManager* audioManager = nullptr; //DEBUG: What is this doing here?
+AudioManager* audioManager = nullptr; 
 
 //AUDIO ENGINE SECTION
 AudioEngine::AudioEngine()
@@ -151,6 +160,12 @@ int AudioEngine::PlayAudio(const string &strSoundName, const Vector3 &vPosition,
 		audioManager->ChannelObjects[nChannelId] = pChannel;
 	}
 	return nChannelId;
+}
+
+void AudioEngine::SetSoundVolume(float volume) { // DEBUG: This step isn't working
+	FMOD::ChannelGroup *masterChannelGroup;
+	AudioEngine::FmodError(audioManager->mpSystem->getMasterChannelGroup(&masterChannelGroup));
+	masterChannelGroup->setVolume(volume); // This is not being run
 }
 
 void AudioEngine::SetChannel3dPosition(int nChannelId, const Vector3 &vPosition)

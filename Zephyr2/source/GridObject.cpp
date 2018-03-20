@@ -1,28 +1,8 @@
 #include "GridObject.h"
 
-GridObject::GridObject(map <string, string> paramsMap, ObjectData* objData) : GameObject(paramsMap, objData) {
+GridObject::GridObject(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : GameObject(paramsMap, _gameSystemUtil) {
 	gridX = stoi(paramsMap.find("gridX")->second);
 	gridY = stoi(paramsMap.find("gridY")->second);
-}
-
-GridObject::GridObject(std::string _id, std::string _renderable, float _x, float _y, int _z, int _orientation, int _width, int _length, int _imageFrames, int _gridX, int _gridY) {
-	id = _id;
-	renderable = _renderable;
-	x = _x;
-	y = _y;
-	z = _z;
-	orientation = _orientation;
-	width = _width;
-	length = _length;
-	imageFrames = _imageFrames;
-	gridX = _gridX;
-	gridY = _gridY;
-
-	//set New renderable variables to default
-	renderType = RenderableType::OVERLAY;
-	model = "cube";
-	normalMap = std::string();
-	smoothness = 0.5f;
 }
 
 string GridObject::toString() {
@@ -57,15 +37,53 @@ void GridObject::setGridCoords(int _gridX, int _gridY) {
 }
 
 //sets world coords to match grid coordinates
-void GridObject::updateWorldCoords() {
+void GridObject::updateWorldCoords(int frameDelay) {
 	float hexHeight = hexSize * 2.0f; //height of a single hex tile
 	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
 	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
 	
-	x = hexWidth * gridX;
-	y = vertDist * gridY;
-	
+	float newX = hexWidth * gridX;
+
 	if (gridY % 2 != 0) {
-		x += hexWidth / 2;
+		newX += hexWidth / 2;
+	}
+	float newY = vertDist * (float)gridY;
+
+	if(frameDelay == 0)
+		setPosition(newX, vertDist * gridY, z);
+	else
+		moveTowards(newX, newY, z, zRotation, frameDelay);
+	//x = newX;
+	//y = vertDist * gridY;
+	//z = z;
+}
+
+
+
+int GridObject::getAxisOrientation(GridObject* g) {
+	//if no grid object specified, find orientation for this object
+	if (g == 0)
+		g = this;
+
+	int degrees = ((int)g->zRotation) % 360;
+	switch (degrees) {
+	case 0: //r
+		return 0;
+		break;
+	case 180: //l
+		return 1;
+		break;
+	case 60: //ur
+		return 2;
+		break;
+	case 240: //dl
+		return 3;
+		break;
+	case 120: //ul
+		return 4;
+		break;
+	case 300: //dr
+		return 5;
+		break;
 	}
 }

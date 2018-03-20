@@ -4,7 +4,51 @@ using namespace std;
 
 NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 	m = new Msg(EMPTY_MESSAGE, "");
+}
 
+NetworkSystem::~NetworkSystem()
+{
+}
+
+void NetworkSystem::startSystemLoop() {
+	clock_t thisTime = clock();
+
+	int currentGameTime = 0;
+	int timerGameTime = 0;
+
+	while (alive) {
+		thisTime = clock();
+		if (thisTime < currentGameTime) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
+		}
+		handleMsgQ();
+
+		// if testing mode
+		if (echoMode && timerActive) {
+			int timeLeft = 30 - ((clock() - turnStartTime) / 1000);
+
+			//post the time left message (includes the actual time left in the message data)
+			m->type = NETWORK_R_PING;
+			m->data = to_string(timeLeft);
+			msgBus->postMessage(m, this);
+
+			if (timeLeft <= 0) {
+				broadcastTurnInfo();
+				timerActive = false;
+			}
+
+		} 
+		else {
+			networkUpdate();
+		}
+
+		currentGameTime = thisTime + timeFrame;
+
+
+	}
+}
+
+void NetworkSystem::setupNetwork(std::string classType) {
 	if (!echoMode) {
 		// create WSADATA object
 		WSADATA wsaData;
@@ -86,6 +130,8 @@ NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 			exit(1);
 		}
 
+		Sleep(1000);
+
 		// send init packet
 		const unsigned int packet_size = sizeof(Data);
 		char packet_data[packet_size];
@@ -93,51 +139,13 @@ NetworkSystem::NetworkSystem(MessageBus* mbus) : System(mbus) {
 		Data packet;
 		packet.packet_type = INIT_CONNECTION;
 
+		packet.setData(classType.c_str());
+
 		packet.serialize(packet_data);
 
 		NetworkHelpers::sendMessage(ConnectSocket, packet_data, packet_size);
-	}
-}
 
-NetworkSystem::~NetworkSystem()
-{
-}
-
-void NetworkSystem::startSystemLoop() {
-	clock_t thisTime = clock();
-
-	int currentGameTime = 0;
-	int timerGameTime = 0;
-
-	while (alive) {
-		thisTime = clock();
-		if (thisTime < currentGameTime) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(currentGameTime - thisTime));
-		}
-		handleMsgQ();
-
-		// if testing mode
-		if (echoMode && timerActive) {
-			int timeLeft = 30 - ((clock() - turnStartTime) / 1000);
-
-			//post the time left message (includes the actual time left in the message data)
-			m->type = NETWORK_R_PING;
-			m->data = to_string(timeLeft);
-			msgBus->postMessage(m, this);
-
-			if (timeLeft <= 0) {
-				broadcastTurnInfo();
-				timerActive = false;
-			}
-
-		} 
-		else {
-			networkUpdate();
-		}
-
-		currentGameTime = thisTime + timeFrame;
-
-
+		OutputDebugString("MESSAGE SHOULD BE SENT\n");
 	}
 }
 
@@ -154,6 +162,8 @@ void NetworkSystem::handleMessage(Msg *msg) {
 			break;
 		case READY_TO_START_GAME:
 			if (!echoMode) {
+				OutputDebugString("READY TO START GAME RECIEVED\n");
+				setupNetwork(msg->data);
 				sendActionPackets();
 			}
 			else {
@@ -162,7 +172,8 @@ void NetworkSystem::handleMessage(Msg *msg) {
 				OutputDebugString("SENT NETWORK_R_START_TURN from NetworkSystem\n");
 
 				//testing sending NETWORK_R_GAMESTART_OK message
-				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,defaultClientID,id3,id4,"), this);
+				//id1,class1|id2,class2|etc.
+				msgBus->postMessage(new Msg(NETWORK_R_GAMESTART_OK, "id2,artillery|defaultClientID,"+ msg->data +"|id3,sniper|id4,scout|"), this);
 			}
 			break;
 		case NETWORK_S_ANIMATIONS:
@@ -206,10 +217,10 @@ void NetworkSystem::broadcastTurnInfo() {
 	if (echoMode) {
 		// needs to be changed later to use a loop in case we change max action count
 		turnInfo =
-			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player3, 0, -2,1]player4, 0, -1,0]\n" +
-			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player3, 0, -2,3]player4, 0, -1,-1]\n" +
-			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player3, 0, -1,0]player4, 0, -3,-3]\n" +
-			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player3, 0, -2,4]player4, 0, -2,-4]";
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[0] + "," + playerTurnTargetX[0] + "," + playerTurnTargetY[0] + "]player3, 0, 1,-3]player4, 0, -2,3]\n" +
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[1] + "," + playerTurnTargetX[1] + "," + playerTurnTargetY[1] + "]player3, 0, 1,-3]player4, 0, -2,3]\n" +
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[2] + "," + playerTurnTargetX[2] + "," + playerTurnTargetY[2] + "]player3, 0, 1,-3]player4, 0, -2,3]\n" +
+			"player2, 0, 1,3]" + playerID + "," + playerTurnAction[3] + "," + playerTurnTargetX[3] + "," + playerTurnTargetY[3] + "]player3, 0, 1,-3]player4, 0, -2,3]";
 	}
 
 	// im being lazy here and just sending out the string since ideally the network class doesn't know how to parse. alternatively i can parse here, depends on
@@ -270,11 +281,13 @@ void NetworkSystem::sendActionPackets()
 		// send failed
 		OutputDebugString("SEND FAILED");
 	}
+
+	OutputDebugString("ACTIONS SENT \n");
 }
 
 void NetworkSystem::networkUpdate() {
 	Data packet;
-	int data_length = receivePackets(network_data);
+	int data_length = receivePackets(network_data); 
 	Msg* m = new Msg(EMPTY_MESSAGE);
 
 	if (data_length <= 0)

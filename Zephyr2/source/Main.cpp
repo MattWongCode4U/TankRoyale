@@ -1,12 +1,25 @@
 #include "Main.h"
 
-int main(int argc, char *argv[]) { 	
+int main(int argc, char *argv[]) {
+	//////////////////////////////////////////////////////////////////
+	//						Loading SDL  							//
+	//////////////////////////////////////////////////////////////////
+	std::cout << "\nLoading SDL\n";
+	SDL_Init(SDL_INIT_EVERYTHING);
+
 	//////////////////////////////////////////////////////////////////
 	//						Loading Core							//
 	//////////////////////////////////////////////////////////////////
 	std::cout << "\nLoading Core\n";
 	// create ONE message bus that goes to ALL the systems
 	mbus = new MessageBus();
+
+	//////////////////////////////////////////////////////////////////
+	//						Loading Config							//
+	//////////////////////////////////////////////////////////////////
+	//int numberOfWorkerThreads = 16; // Default to 16
+	std::cout << "\nLoading Config\n";
+	GlobalPrefs::load();
 
 	//////////////////////////////////////////////////////////////////
 	//						SYSTEM CREATION							//
@@ -28,23 +41,6 @@ int main(int argc, char *argv[]) {
 	mbus->addSystem(ns);
 
 	std::cout << "All systems created";
-
-	//////////////////////////////////////////////////////////////////
-	//						Loading Config							//
-	//////////////////////////////////////////////////////////////////
-	//int numberOfWorkerThreads = 16; // Default to 16
-
-	std::string rawConfigData = openFileFromAsset("config.txt", ASSET_TYPE::DATA, true);
-	
-	// Temporary config file is structured to only list the time frames for
-	// GameSystem, RenderThread, and ioThread
-	std::vector<std::string> configData = split(rawConfigData, ',');
-	std::string::size_type sz;
-
-	//gs->timeFrame = std::stoi(configData.at(0), &sz);
-	//rs->timeFrame = std::stoi(configData.at(1), &sz);
-	//ios->timeFrame = std::stoi(configData.at(2), &sz);
-	//ps->timeFrame = std::stoi(configData.at(3), &sz);
 
 	// Not using this right now, move it to game system/Render/Physics later maybe
 	//// Create worker thread pool
@@ -96,6 +92,7 @@ int main(int argc, char *argv[]) {
 				ostringstream oss;
 				INT32 x, y;
 				SDL_GetWindowSize(rs->GetSDLWindow(), &x, &y);
+
 				oss << windowEvent.button.x << "," << windowEvent.button.y << "," << x << "," << y;
 				mbus->postMessage(new Msg(LEFT_MOUSE_BUTTON, oss.str()), NULL);
 			}
@@ -142,7 +139,9 @@ int main(int argc, char *argv[]) {
 	delete(aus);
 	delete(ns);
 
-	return 1;
+	SDL_Quit();
+
+	return 0;
 }
 
 // note: Must have "int id" for functinos that are to be run in worker threads

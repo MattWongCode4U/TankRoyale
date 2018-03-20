@@ -1,0 +1,12 @@
+gameObjectType: GameObject,
+id: actionIndicator,
+renderable: rotateIconCCW.png,
+xPos: 0,
+yPos: 0,
+zPos: -.05,
+zRotation: 0,
+width: 3.5,
+length: 3.5,
+model: quad,
+renderType: forward3d,
+imageFrames: 1

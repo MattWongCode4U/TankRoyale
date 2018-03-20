@@ -10,10 +10,19 @@
 #include <ctime>
 #include <thread>
 #include "System.h"
+#include "GameSystemUtil.h"
 #include "FullscreenObj.h"
 #include "GridObject.h"
 #include "TankObject.h"
-#include "ObjectData.h"
+#include "Tank_Artillery.h"
+#include "Tank_Heavy.h"
+#include "Tank_Scout.h"
+#include "Tank_Sniper.h"
+#include "Scene_MainMenu.h"
+#include "Scene_Lobby.h"
+#include "Scene_Gameplay.h"
+#include "Scene_SettingsMenu.h"
+#include "Scene_InstructionsMenu.h"
 
 extern volatile bool malive;
 
@@ -24,7 +33,9 @@ enum PlayerID {
 	PLAYER4 = 4
 };
 
-class GameSystem : public System {
+enum SceneType { MAIN_MENU, LOBBY_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
+
+class GameSystem : public System, GameSystemUtil {
 public:
 	GameSystem(MessageBus* mbus);
 	~GameSystem();
@@ -34,19 +45,41 @@ public:
 	void startSystemLoop();
 	//void startTestLevel();
 	void addGameObjects(string fileName);
+	GameObject* GameSystem::makeGameObject(string fileName);
 	void saveToFIle(string fileName);
 	void createGameObject(GameObject* g);
 	void gameObjectRemoved(GameObject* g);
 	std::vector<GameObject*> gameObjects;
-	
-	//returns the tile distance in between two tiles on the grid;
-	int getGridDistance(int aX, int aY, int bx, int bY);
 
-	ObjectData objData;
+	//closes the old scene and opens a new one 
+	void  loadScene(SceneType _scene);
 	void removeAllGameObjects();
+	void deleteGameObject(string id);
+	void deleteGameObject(GameObject* go);
+	std::vector<GameObject*>* getGameObjectsVector();
+	int getGridDistance(int aX, int aY, int bX, int bY);//gets the distance between 2 points on the hex grid
+
+	//deal damage in a straight line from the origin position along an axis
+	//void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
+
+	//returns true if the two points are on the same specified axis
+	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
+	bool sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length);
+
+	//returns the axis that is shared by the 2 points. 
+	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
+	//if not on any of the axis, return -1
+	int onAxis(int x1, int y1, int x2, int y2, int range);
+
+	//post message on the bus
+	void postMessageToBus(Msg* message);
+
+
+	//the currently loaded scene
+	Scene* scene;
 
 	const int timeFrame = 20;
-	int turnStartTime = 0;
+	
 
 	// -1	= no level loaded
 	// 0	= Main Menu
@@ -56,94 +89,44 @@ public:
 	// 4	= Instructions
 	int levelLoaded = -1;
 
+	// The position of the marker, goes from 0 to 2, 0 being the top
+	int markerPosition = 0;
+	int markerPositionPrime = 0;
+
 	int score = 0;
+
+	std::string clientID = "defaultClientID";//the id of the client on the server
+
+	//void setPlayerTank(std::string playerID);
 
 	GameObject* findGameObject(std::string objectID);
 	TankObject* findTankObject(std::string objectID);
 	GridObject* findGridObject(std::string objectID);
 	FullscreenObj* findFullscreenObject(std::string objectID);
 
-private:
-	//handler functions for the scenes in the game
-	void mainMenuHandler(Msg * msg);
-	void settingsMenuHandler(Msg * msg);
-	void instructionMenuHandler(Msg * msg);
-	void lvl1Handler(Msg * msg);
-	void gameOverMenuHandler(Msg * msg);
-	void executeAction(int actionNumber);
+	//the reticle controlled by the arrow keys. used for aiming and queing up actions
+	GridObject* reticle;
 
 	//Displays the amount to time left in the turn
 	void displayTimeLeft(int time);
-	void updatePlayerHealthBar(string playerID);
-
-	//converts grid coordinates to world coordinates
-	Vector2 gridToWorldCoord(int gridX, int gridY);
 
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
-
-	//updates the reticle spright, and postion.
-	void updateReticle();
-
-	//deal aoe damage to all tiles in the affected area
-	void GameSystem::dealAOEDamage(int _originX, int _originY, int affectedRadius, int damage);
-	
-
-	// The position of the marker, goes from 0 to 2, 0 being the top
-	int markerPosition = 0;
 
 	int currentAction = 0;//the current action that is being set
 
 	vector<string> actionsToExecute; //the actions to be executed this turn. Received from the network system
 
-	//time since the start of the current turn
-	int framesSinceTurnStart = 0;
-
-	int hexSize = 50; //"radius" of a single hexagon in the grid
-
-	//the reticle controlled by the arrow keys. used for aiming and queing up actions
-	GridObject* reticle;
-
-	//the origin of the current action. (The Tank's expected position at the start of the action)
-	GridObject* actionOrigin;
+	float hexSize = 7.1f; //"radius" of a single hexagon in the grid
 
 	//for getting the position of the highlighted button
 	GameObject* buttonHighlighted;
 
-	//is the currently selected move action. Used to determine if the player is allowed to exectue selected action
-	bool validMove = false;
-
-	//the possible types of actions
-	enum ActionTypes { MOVE, SHOOT, PASS, DEAD };
-
-	//the current action being set up
-	ActionTypes ActionType = MOVE;
-
-	//sets the current action to the action specified. logic for switching action icons goes here
-	void setActionType(ActionTypes a);
-
-	//range of the specified ability
-	int range = 1;
-
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
-	std::string clientID = "defaultClientID";//the id of the client on the server
+	std::string tankClass = "heavy";
 
-	//maps local player Id's to unique id's 
-	//std::map<std::string, std::string> playerIdMap;
-	//std::string playerOrder[4];
-
-	//is the game actively receiving player input? false when it game is waiting/animating
-	bool gameActive = false;
-
-	//the Id of the tank being controlled by the player
-	//std::string playerTankID = "player1";
-
-	//the local player tank object
-	TankObject* playerTank;
-
-	void setPlayerTank(std::string playerID);
 
 	Msg *m;
 

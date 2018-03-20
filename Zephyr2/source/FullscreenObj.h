@@ -6,9 +6,9 @@ class FullscreenObj :
 	public GameObject {
 public:
 	FullscreenObj();
-	FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation);
+	FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation, GameSystemUtil* _gameSystemUtil);
 	//DummyGameObj(std::vector<std::string> params);
-	FullscreenObj(map<string, string> params, ObjectData* objData);
+	FullscreenObj(map<string, string> params, GameSystemUtil* _gameSystemUtil);
 	~FullscreenObj();
 	std::string getObjectType();
 	std::string toString();

@@ -2,7 +2,8 @@
 
 FullscreenObj::FullscreenObj() {}; // Empty Constructor necessary
 
-FullscreenObj::FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation) {
+FullscreenObj::FullscreenObj(int idNum, std::string renderableName, float xpos, float ypos, int orientation, GameSystemUtil* _gameSystemUtil) {
+	gameSystemUtil = _gameSystemUtil;
 	id = idNum;
 	renderable = renderableName;
 	x = xpos;
@@ -11,7 +12,7 @@ FullscreenObj::FullscreenObj(int idNum, std::string renderableName, float xpos, 
 	direction = 0;
 }
 
-FullscreenObj::FullscreenObj(map <string, string> paramsMap, ObjectData* objData) : GameObject(paramsMap, objData) {
+FullscreenObj::FullscreenObj(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : GameObject(paramsMap, _gameSystemUtil) {
 	
 }
 
