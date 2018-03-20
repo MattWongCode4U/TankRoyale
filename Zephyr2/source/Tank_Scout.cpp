@@ -45,11 +45,11 @@ void Tank_Scout::shoot(int targetX, int targetY) {
 	//Find the first thing hit from the list
 	if (thingsHit.size() > 0) {
 		TankObject* currClosestTank = nullptr;
-		int dist = -1;
+		int dist = INT32_MAX;
 		for (TankObject* t : thingsHit) {
 			OutputDebugString((t->id).c_str());
 			OutputDebugString(" hit\n");
-			if (dist < gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY)) {
+			if (dist > gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY)) {
 				dist = gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY);
 				currClosestTank = t;
 			}
