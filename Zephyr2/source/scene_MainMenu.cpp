@@ -111,7 +111,7 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 			{
-				if (g->id.compare("Menu_Item0") == 0 && gameSystem->markerPosition != 0)
+				if (g->id.compare("Menu_Item0") == 0 && gameSystem->markerPosition != -1)
 				{
 					gameSystem->markerPosition = 0; change = true;
 				}

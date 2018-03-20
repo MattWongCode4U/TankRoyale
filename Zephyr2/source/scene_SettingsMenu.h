@@ -1,11 +1,11 @@
 #pragma once
 #include "Scene.h"
 
-#define POSITION_1 135
-#define POSITION_2 75
-#define POSITION_3 15
-#define POSITION_4 -45
-#define POSITION_5 -115
+#define POSITION_1 120
+#define POSITION_2 60
+#define POSITION_3 0
+#define POSITION_4 -60
+#define POSITION_5 -120
 
 class Scene_SettingsMenu : public Scene {
 public:
