@@ -215,8 +215,8 @@ void GameObject::moveTowards(float targetX, float targetY, float targetZ, float 
 	offsetX = (targetX-x) / (float)frames;
 	offsetY = (targetY-y) / (float)frames;
 	offsetZ = (targetZ-z) / (float)frames;
-	float newRotation = std::fmod((turnZ - zRotation),360);
-	rotationOffsetZ = newRotation / (float)frames;
+	//float newRotation = std::fmod((turnZ - zRotation),360);
+	rotationOffsetZ = (turnZ - zRotation) / (float)frames;
 }
 
 

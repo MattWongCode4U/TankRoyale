@@ -748,7 +748,7 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 void Scene_Gameplay::updateActionOrigin(GridObject* newOrigin) {
 	if (newOrigin == nullptr) return;
 
-	queuedOrientation = (queuedOrientation + 360) % 360;
+	//queuedOrientation = (queuedOrientation + 360) % 360;
 
 	actionOrigin = newOrigin;
 
