@@ -31,7 +31,8 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 	bool change;
 	vector<string> objectData;
 	//GameObject* g;
-	if (gameActive) {
+	if (gameActive) 
+	{
 		switch (msg->type) {
 		case LEFT_MOUSE_BUTTON:
 		{
@@ -43,7 +44,9 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 			x -= width / 2; y -= length / 2;
 			y = -y;
 			change = false;
-			for (GameObject *g : gameSystem->gameObjects) {
+
+			for (GameObject *g : gameSystem->gameObjects) 
+			{
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2))) {
 					if (g->id.compare("Option0") == 0 && gameSystem->markerPositionPrime != -1) {
@@ -80,6 +83,8 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 					}
 					else if (g->id.compare("Option4") == 0) {
 						// Back to menu
+						change = false;
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						gameSystem->loadScene(MAIN_MENU);
 						return;
 						//change = true;
@@ -101,16 +106,26 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						}
 						break;
 					}
-					else if (g->id.compare("BackButton") == 0) {
-						// Back to menu
-						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
-						gameSystem->loadScene(MAIN_MENU);
-						change = true;
-						break;
+				}
+			}
+
+			if (change) 
+			{
+				msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
+
+				for (int i = 0; i < 4; i++) 
+				{
+					if (i == gameSystem->markerPositionPrime) {
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankSelected.png"), gameSystem);
+					}
+					else {
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankFrame.png"), gameSystem);
 					}
 				}
-				break;
 			}
+
+			break;
+		}
 
 		case MOUSE_MOVE:
 		{
@@ -155,11 +170,12 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 		default:
 			break;
 		}
-		}
 	}
-	else {
+
+	else 
+	{
 		switch (msg->type) {
-			case LEFT_MOUSE_BUTTON:
+		case LEFT_MOUSE_BUTTON:
 			objectData = split(msg->data, ',');
 			x = atoi(objectData[0].c_str());
 			y = atoi(objectData[1].c_str());

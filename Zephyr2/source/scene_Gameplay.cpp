@@ -84,9 +84,7 @@ void Scene_Gameplay::updateActionBar(int a)
 			break;
 		}
 	}
-	if (ActionType == MOVE) bar->renderable = "MoveAction.png";
-	else if (ActionType == SHOOT) bar->renderable = "MoveAction.png";
-	else if (ActionType == PASS) bar->renderable = "MoveAction.png";
+	bar->renderable = "IdleAction.png";
 	msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
 }
 
@@ -266,6 +264,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			gameSystem->reticle->gridX = gridLocationX;
 			gameSystem->reticle->gridY = gridLocationY;
 			updateReticle();
+
 			break;
 		}
 		case DOWN_ARROW_PRESSED: {
@@ -343,8 +342,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				}
 			}
 
-			bar->renderable = "bar" + to_string(gameSystem->currentAction + 1) + "_Green.png";
-			if (ActionType == MOVE) 
+			//bar->renderable = "bar" + to_string(gameSystem->currentAction + 1) + "_Green.png";
+			if (ActionType == MOVE || ActionType == ROTATEPOS || ActionType == ROTATENEG) 
 			{
 				actionOrigin = indicator;
 
@@ -355,10 +354,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			else if (ActionType == SHOOT)
 			{
 				indicator->renderable = "ShootIndicator.png";
-				if (bar2 != NULL)
-				{
-					bar2->renderable = "bar" + to_string(gameSystem->currentAction + 2) + "_Green.png";
-				}
 			}
 
 			indicator->gridX = gameSystem->reticle->gridX;
@@ -367,6 +362,13 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			gameSystem->sendUpdatePosMessage(indicator);//send indicator position message
 
 			//send update sprite message. maybe this sould be included in update position?
+			if (ActionType == MOVE) bar->renderable = "MoveAction.png";
+			else if (ActionType == SHOOT) {
+				bar->renderable = "AttackAction.png";
+
+				if (bar2 != NULL)
+					bar2->renderable = "PassAction.png";
+			}
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
 			if (bar2 != NULL)
@@ -468,15 +470,17 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 						(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 					{
-						if (g->id.compare("PauseMenuItem0") == 0)
+						if (g->id.compare("PauseMenuItem3") == 0)
 						{
 							// Load main menu
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							gameSystem->loadScene(MAIN_MENU);
 							change = true;
 							break;
-						} else if (g->id.compare("PauseMenuItem1") == 0)
+						} else if (g->id.compare("PauseMenuItem4") == 0)
 						{
 							// unload game objects from pause menu
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							unloadPauseMenuObjects();
 							// continue game
 							gameActive = true;
@@ -495,6 +499,46 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				unloadPauseMenuObjects();
 				gameActive = true;
 				break;
+			case MOUSE_MOVE:
+			{
+				vector<string> objectData = split(msg->data, ',');
+				INT32 x = atoi(objectData[0].c_str());
+				INT32 y = atoi(objectData[1].c_str());
+				INT32 width = atoi(objectData[2].c_str());
+				INT32 length = atoi(objectData[3].c_str());
+				x -= width / 2; y -= length / 2;
+				y = -y;
+				bool change = false;
+
+				for (GameObject *g : gameSystem->gameObjects)
+				{
+					if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+						(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+					{
+						if (g->id.compare("PauseMenuItem3") == 0 && gameSystem->markerPosition != 2)
+						{
+							gameSystem->markerPosition = 3; change = true;
+						}
+						else if (g->id.compare("PauseMenuItem4") == 0 && gameSystem->markerPosition != 4)
+						{
+							gameSystem->markerPosition = 4; change = true;
+						}
+					}
+				}
+
+				if (change) {
+					for (int i = 3; i < 5; i++) {
+						if (i == gameSystem->markerPosition) {
+							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+						}
+						else {
+							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+						}
+					}
+				}
+				break;
+			}
+				
 			default:
 				break;
 			}
@@ -671,8 +715,9 @@ void Scene_Gameplay::loadPauseMenu() {
 }
 
 void Scene_Gameplay::unloadPauseMenuObjects() {
-	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem0"));
-	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem1"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem3"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem4"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("Frame"));
 }
 
 void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {

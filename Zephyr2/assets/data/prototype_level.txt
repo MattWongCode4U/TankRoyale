@@ -51,7 +51,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: actionBar1,
-renderable: AttackAction.png,
+renderable: IdleAction.png,
 xPos: -174,
 yPos: -300,
 zPos: 11,
@@ -63,7 +63,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: actionBar2,
-renderable: AttackAction.png,
+renderable: IdleAction.png,
 xPos: -60,
 yPos: -300,
 zPos: 11,
@@ -75,7 +75,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: actionBar3,
-renderable: AttackAction.png,
+renderable: IdleAction.png,
 xPos: 59,
 yPos: -300,
 zPos: 11,
@@ -87,7 +87,7 @@ imageFrames: 1;
 
 gameObjectType: FullscreenObj,
 id: actionBar4,
-renderable: AttackAction.png,
+renderable: IdleAction.png,
 xPos: 174,
 yPos: -300,
 zPos: 11,

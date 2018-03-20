@@ -1,6 +1,6 @@
 gameObjectType: FullscreenObj,
 id: backgroundObj,
-renderable: tempBackground.png,
+renderable: Background.png,
 xPos: 0,
 yPos: 0,
 zPos: 10,
@@ -10,8 +10,8 @@ length: 720,
 physicsEnabled: 0,
 windScale: 0,
 renderType: overlay,
-animationDelay: 1,
-imageFrames: 1;
+animationDelay: 2,
+imageFrames: 120;
 
 gameObjectType: FullscreenObj,
 id: CTitle_Item,
