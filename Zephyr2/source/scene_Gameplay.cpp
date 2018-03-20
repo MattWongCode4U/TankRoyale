@@ -18,10 +18,8 @@ void Scene_Gameplay::startScene() {
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
 	
-	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
-
 	validActionsOverlay = gameSystem->findGridObject("validActionsOverlay");
-
+	
 	//gameSystem->reticle = gameSystem->findGridObject("reticle");
 	if (gameSystem->reticle = gameSystem->findGridObject("reticle")) {
 		GameObject* g = gameSystem->makeGameObject("reticleActionIndicator.txt");
@@ -31,7 +29,7 @@ void Scene_Gameplay::startScene() {
 		}
 	setActionType(ROTATEPOS);
 		
-	
+	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
 }
 
 //called every frame of the gameloop
@@ -72,7 +70,7 @@ void Scene_Gameplay::sceneUpdate() {
 		}	
 	}
 	else if (framesSinceTurnStart == 400) {//actions animation done, return control to player
-		setActionType(ActionType);
+		//setActionType(ActionType);
 	}
 	framesSinceTurnStart++;
 }
@@ -135,6 +133,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 			validActionsOverlay->renderable = "nothing.png";
 			validActionsOverlay->postSpriteMsg();
+
 
 			OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
 
@@ -579,7 +578,6 @@ void Scene_Gameplay::executeAction(int a) {
 		}
 		
 	}
-	
 }
 
 void Scene_Gameplay::setActionType(ActionTypes a) {
@@ -631,14 +629,15 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
+	updateActionOrigin(actionOrigin);
 	checkAOEReticle();
 	if (ActionType == SHOOT) {
-		moveCost = playerTank->checkShootValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkShootValidity(validActionsOverlay, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
-		moveCost = playerTank->checkMoveValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkMoveValidity(validActionsOverlay, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	else if (ActionType == ROTATENEG || ActionType == ROTATEPOS) {
-		moveCost = playerTank->checkTurnValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkTurnValidity(validActionsOverlay->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 		
 
@@ -650,14 +649,6 @@ void Scene_Gameplay::updateReticle() {
 		gameSystem->reticle->renderable = "TileIndicatorRed";
 		gameSystem->reticle->postSpriteMsg();
 	}
-		
-
-
-	//std::ostringstream oss;
-	//Msg* mm = new Msg(EMPTY_MESSAGE, "");
-
-	////UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
-	//msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
 }
 
 void Scene_Gameplay::checkAOEReticle() {
@@ -718,9 +709,11 @@ void Scene_Gameplay::updateActionOrigin(GridObject* newOrigin) {
 	queuedOrientation = (queuedOrientation + 360) % 360;
 
 	actionOrigin = newOrigin;
-	actionOrigin->zRotation = queuedOrientation;
 
-	validActionsOverlay->zRotation = actionOrigin->zRotation;
+
+	//actionOrigin->zRotation = queuedOrientation;
+
+	validActionsOverlay->zRotation = queuedOrientation;
 	validActionsOverlay->gridX = newOrigin->gridX;
 	validActionsOverlay->gridY = newOrigin->gridY;
 	validActionsOverlay->updateWorldCoords();
