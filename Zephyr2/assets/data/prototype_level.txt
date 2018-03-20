@@ -15,13 +15,13 @@ imageFrames: 1;
 
 gameObjectType: GameObject, 
 id: bGround, 
-renderable: hexGridVersion2, 
+renderable: hexGridVersion3, 
 xPos: 0, 
 yPos: 0, 
 zPos: -80, 
 zRotation: 0, 
-width: 50, 
-length: 54, 
+width: 150, 
+length: 162, 
 renderType: object3d, 
 model: quad, 
 imageFrames: 1; 
