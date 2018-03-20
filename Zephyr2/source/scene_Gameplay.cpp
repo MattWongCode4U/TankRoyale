@@ -177,7 +177,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				gameSystem->createGameObject(t);
 				t->updateWorldCoords();
 				t->createhpBar();//create the hp bar
-				
+				OutputDebugString("\nCilendId");
+				OutputDebugString(gameSystem->clientID.c_str());
 
 				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
@@ -208,6 +209,12 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 			break;
 		}
+		case NETWORK_CONNECT:
+			gameSystem->clientID = msg->data;
+			OutputDebugString("GAMESCENE: NETWORK_CONNECT RECEIVED: \n");
+			OutputDebugString(gameSystem->clientID.c_str());
+			OutputDebugString("\n");
+			break;
 		case NETWORK_R_PING:
 			gameSystem->displayTimeLeft(stoi(msg->data));
 			if(stoi(msg->data) == 1 )
@@ -363,7 +370,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 				/*queuedOrientation = (queuedOrientation + 360) % 360;
 				actionOrigin->zRotation = queuedOrientation;*/
-				updateActionOrigin(actionOrigin);
+				//updateActionOrigin(actionOrigin);
 
 				indicator->renderable = "MoveIndicator.png";
 			}

@@ -225,12 +225,12 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 	break;
 	*/
 
-	case NETWORK_CONNECT:
-		gameSystem->clientID = msg->data;
-		OutputDebugString("GS: NETWORK_CONNECT RECEIVED: \n");
-		OutputDebugString(gameSystem->clientID.c_str());
-		OutputDebugString("\n");
-		break;
+	//case NETWORK_CONNECT:
+	//	gameSystem->clientID = msg->data;
+	//	OutputDebugString("GS: NETWORK_CONNECT RECEIVED: \n");
+	//	OutputDebugString(gameSystem->clientID.c_str());
+	//	OutputDebugString("\n");
+	//	break;
 	default:
 		break;
 	}
