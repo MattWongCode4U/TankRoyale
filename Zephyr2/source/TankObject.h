@@ -46,7 +46,11 @@ public:
 	float hpBarWidth;//the original width of the hp bar
 	float maxHealth;//the maximum hp pool
 	
-	
+	string shootOverlayRenderable = "range_Shoot_Artillery.png";
+	string moveOverlayRenderable = "range_Move.png";
+	float shootOverlaySize = 60;
+	float moveOverlaySize = 20;
+
 	//int getAxisOrientation();
 
 };

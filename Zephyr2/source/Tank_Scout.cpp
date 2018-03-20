@@ -1,6 +1,10 @@
 #include "Tank_Scout.h"
 
 Tank_Scout::Tank_Scout(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Heavy.png";
+	moveOverlayRenderable = "range_MoveLong.png";
+	shootOverlaySize = 30;
+	moveOverlaySize = 30;
 }
 
 Tank_Scout::~Tank_Scout() {
