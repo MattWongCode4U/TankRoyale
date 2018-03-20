@@ -55,8 +55,9 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 		for (TankObject* t : thingsHit) {
 			OutputDebugString((t->id).c_str());
 			OutputDebugString(" hit\n");
-			if (dist > gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY)) {
-				dist = gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY);
+			int curDist = gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY);
+			if (dist > curDist && curDist > 1) {
+				dist = curDist;
 				currClosestTank = t;
 			}
 		}
