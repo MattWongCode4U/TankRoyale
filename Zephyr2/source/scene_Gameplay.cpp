@@ -154,7 +154,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				
 
 				//create Tank Object
-				TankObject* t = (TankObject*)gameSystem->makeGameObject("Tank_" + tankIdClassVector[1] + ".txt");
+				TankObject* t = (TankObject*)gameSystem->makeGameObject("Tank_" + tankIdClassVector[0] + ".txt");
 				t->id = "player" + to_string(i+1);
 
 				//set starting pos
