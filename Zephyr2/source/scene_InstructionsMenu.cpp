@@ -57,10 +57,39 @@ void Scene_InstructionsMenu::sceneHandleMessage(Msg * msg) {
 					}
 				}
 			}
-			//if (change)
-			//{
-			//	msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
-			//	gameSystem->setPlayerTank("player1");
-			//}
+		}
+		if (msg->type == MOUSE_MOVE)
+		{
+			vector<string> objectData = split(msg->data, ',');
+			INT32 x = atoi(objectData[0].c_str());
+			INT32 y = atoi(objectData[1].c_str());
+			INT32 width = atoi(objectData[2].c_str());
+			INT32 length = atoi(objectData[3].c_str());
+			x -= width / 2; y -= length / 2;
+			y = -y;
+			bool change = false;
+
+			for (GameObject *g : gameSystem->gameObjects)
+			{
+				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+				{
+					if (g->id.compare("Menu_Item4") == 0 && gameSystem->markerPosition != 3)
+					{
+						gameSystem->markerPosition = 4; change = true;
+					}
+				}
+			}
+
+			if (change) {
+				for (int i = 4; i < 5; i++) {
+					if (i == gameSystem->markerPosition) {
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Menu_Item" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+					}
+					else {
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Menu_Item" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+					}
+				}
+			}
 		}
 	}
