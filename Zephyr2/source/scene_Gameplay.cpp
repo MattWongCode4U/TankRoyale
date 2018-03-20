@@ -381,17 +381,11 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			if (ActionType == MOVE) bar->renderable = "MoveAction.png";
 			else if (ActionType == SHOOT) {
 				bar->renderable = "AttackAction.png";
-
-				if (bar2 != NULL)
-					bar2->renderable = "PassAction.png";
+				if (bar2 != NULL) bar2->renderable = "AttackAction.png";
 			}
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
-			if (bar2 != NULL)
-			{
-				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
-			}
-
+			if (bar2 != NULL) msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
 			updateActionOrigin(actionOrigin);
 			gameSystem->currentAction += moveCost;
 			break;
@@ -400,14 +394,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
 			
 			break;
-
-		case KEY_D_PRESSED: {
-
-			break;
-		}
 		case KEY_W_PRESSED: {
 			setActionType(MOVE);
-			
 			break;
 		}
 		case KEY_S_PRESSED: {
@@ -639,8 +627,8 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 		validActionsOverlay->postPostionMsg();
 
 		actionIndicator->renderable = "Reticle.png";
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
+		/*msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);*/
 		break;
 	case MOVE:
 		validActionsOverlay->renderable = playerTank->moveOverlayRenderable;
@@ -650,8 +638,8 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 		validActionsOverlay->postPostionMsg();
 
 		actionIndicator->renderable = "moveIcon2.png";
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);	
+		/*msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);	*/
 		break;
 	case ROTATENEG:
 		validActionsOverlay->renderable = "nothing.png";

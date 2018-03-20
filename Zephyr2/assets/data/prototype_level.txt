@@ -1,39 +1,16 @@
 gameObjectType: FullscreenObj,
-id: backgroundObj,
-renderable: wasteland_background.png,
+id: groundObj,
+renderable: ground_terrain.png,
 xPos: 0,
 yPos: 0,
-zPos: -601,
+zPos: -81,
+xRotation: 0,
+yRotation: 0,
 zRotation: 0,
-width: 1280,
-length: 720,
-renderType: overlay,
-imageFrames: 1;
-
-gameObjectType: GameObject,
-id: bGround,
-renderable: hexGridVersion2,
-xPos: 0,
-yPos: 0,
-zPos: -80,
-zRotation: 0,
-width: 50,
-length: 54,
+width: 750,
+length: 500,
 renderType: object3d,
 model: quad,
-imageFrames: 1;
-
-gameObjectType: GameObject,
-id: fObject,
-renderable: hexGridVersion2,
-xPos: 0,
-yPos: 0,
-zPos: -600,
-zRotation: 0,
-width: 5,
-length: 5,
-renderType: forward3d,
-model: monkey,
 imageFrames: 1;
 
 gameObjectType: GameObject,
@@ -183,30 +160,6 @@ renderType: object3d,
 imageFrames: 1,
 gridX: 0,
 gridY: 0;
-
-
-gameObjectType: GameObject,
-id: shootIcon,
-renderable: moveIconActive.png,
-xPos: 480,
-yPos: -290,
-zPos: 10,
-zRotation: 0,
-width: 100,
-length: 100,
-imageFrames: 1;
-
-
-gameObjectType: GameObject,
-id: moveIcon,
-renderable: ReticleInactive.png,
-xPos: 570,
-yPos: -290,
-zPos: 10,
-zRotation: 0,
-width: 100,
-length: 100,
-imageFrames: 1;
 
 gameObjectType: GameObject,
 id: timeLeftpos0,
