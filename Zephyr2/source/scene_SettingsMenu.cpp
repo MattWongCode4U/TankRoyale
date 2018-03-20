@@ -30,31 +30,6 @@ void Scene_SettingsMenu::sceneHandleMessage(Msg * msg) {
 		std::ostringstream oss;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 		switch (msg->type) {
-		case DOWN_ARROW_PRESSED:
-			// move the marker location and let rendering know?
-			gameSystem->markerPosition++;
-			if (gameSystem->markerPosition > 2) {
-				gameSystem->markerPosition = 2;
-			}
-
-			mm->type = UPDATE_OBJ_SPRITE;
-			oss << "obj3,1,Z6_Marker_P" << gameSystem->markerPosition << ".png,";
-			mm->data = oss.str();
-			msgBus->postMessage(mm, gameSystem);
-			break;
-		case UP_ARROW_PRESSED:
-			// move the marker location and let rendering know?
-			gameSystem->markerPosition--;
-			if (gameSystem->markerPosition < 0) {
-				gameSystem->markerPosition = 0;
-			}
-			gameSystem->markerPosition = gameSystem->markerPosition % 3;
-
-			mm->type = UPDATE_OBJ_SPRITE;
-			oss << "obj3,1,Z6_Marker_P" << gameSystem->markerPosition << ".png,";
-			mm->data = oss.str();
-			msgBus->postMessage(mm, gameSystem);
-			break;
 		case SPACEBAR_PRESSED:
 			if (gameSystem->markerPosition == 2) {
 				gameSystem->loadScene(MAIN_MENU);
@@ -194,7 +169,6 @@ void Scene_SettingsMenu::updateSliderPosition(int num) {
 		slider->y = POSITION_2;
 		slider->postPostionMsg();
 		break;
-	case 0: // should technically get from last position picked, or the config
 	case 3:
 		slider->y = POSITION_3;
 		slider->postPostionMsg();
