@@ -19,7 +19,7 @@ void Scene_SettingsMenu::startScene() {
 	msgBus->postMessage(m, gameSystem);
 	updateSliderPosition(3); // Default 0.6f
 	
-	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
+	//msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
 }
 
 //called every frame of the gameloop
