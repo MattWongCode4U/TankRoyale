@@ -1,6 +1,10 @@
 #include "Tank_Artillery.h"
 
 Tank_Artillery::Tank_Artillery(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Artillery.png";
+	moveOverlayRenderable = "range_Move.png";
+	shootOverlaySize = 60;
+	moveOverlaySize = 20;
 }
 
 Tank_Artillery::~Tank_Artillery() {

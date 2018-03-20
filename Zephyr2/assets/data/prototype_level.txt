@@ -223,8 +223,8 @@ id: validActionsOverlay,
 renderable: rotateIconCCW.png,
 xPos: 0,
 yPos: 0,
-zPos: -79,
-zRotation: 0,
+zPos: -79.8,
+zRotation: 30,
 width: 20,
 length: 20,
 model: quad,
@@ -232,6 +232,3 @@ renderType: forward3d,
 imageFrames: 1,
 gridX: 0,
 gridY: 0;
-
-
-

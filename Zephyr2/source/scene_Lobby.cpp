@@ -46,24 +46,28 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 					if (g->id.compare("Option0") == 0) {
 						// tank 1
 						gameSystem->tankClass = "scout";
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("scout SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option1") == 0) {
 						// tank 2
 						gameSystem->tankClass = "sniper";
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("sniper SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option2") == 0) {
 						// tank 3
 						gameSystem->tankClass = "heavy";
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("heavy SELECTED\n");
 						break;
 					}
 					else if (g->id.compare("Option3") == 0) {
 						// tank 4
-						gameSystem->tankClass = "artillery"; // regular tank?
+						gameSystem->tankClass = "artillery"; 
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						OutputDebugString("artillery SELECTED\n");
 						break;
 					}
@@ -71,10 +75,11 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 						// Select
 						// Load main menu
 						if (gameSystem->tankClass != "") {
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							gameSystem->loadScene(GAMEPLAY);
 							change = true;
 						} else {
-							// TODO: No tank selected
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 							gameActive = false;
 							loadNoClassSelected();
 						}
@@ -82,6 +87,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 					}
 					else if (g->id.compare("BackButton") == 0) {
 						// Back to menu
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						gameSystem->loadScene(MAIN_MENU);
 						change = true;
 						break;
@@ -109,6 +115,7 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2))) {
 					if (g->id.compare("NoClassButton") == 0) {
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						unloadNoClassSelected();
 						gameActive = true;
 					}

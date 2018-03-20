@@ -17,6 +17,7 @@ void Scene_SettingsMenu::startScene() {
 	gameSystem->levelLoaded = 1;
 	Msg* m = new Msg(LEVEL_LOADED, "1");
 	msgBus->postMessage(m, gameSystem);
+	updateSliderPosition(3); // Default 0.6f
 	
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, ""), gameSystem);
 }
@@ -26,7 +27,6 @@ void Scene_SettingsMenu::sceneUpdate() {
 }
 //called everytime a message is received by the gameSystem
 void Scene_SettingsMenu::sceneHandleMessage(Msg * msg) {
-	OutputDebugString("\nDETECTED SETTINGS CLICK\n");
 		std::ostringstream oss;
 		Msg* mm = new Msg(EMPTY_MESSAGE, "");
 		switch (msg->type) {
@@ -89,17 +89,83 @@ void Scene_SettingsMenu::sceneHandleMessage(Msg * msg) {
 				if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 					(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 				{
+					// Check if click within bounds? Or set some empty objects, for slider selection
+
+
 					// This is for the Back Button
 					if (g->id.compare("Menu_Item4") == 0)
 					{
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						gameSystem->loadScene(MAIN_MENU);
+						break;
+					}
+					if (g->id.compare("Sound_On_Button") == 0) {
+						msgBus->postMessage(new Msg(AUDIO_MUTE, "0"), gameSystem);
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+						break;
+					}
+					if (g->id.compare("Sound_Off_Button") == 0) {
+						msgBus->postMessage(new Msg(AUDIO_MUTE, "1"), gameSystem);
+						msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
 						break;
 					}
 				}
 			}
 			break;
 		}
+		case NUM_1_PRESSED:
+			// move slider
+			updateSliderPosition(1);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.2"), gameSystem);
+			break;
+		case NUM_2_PRESSED:
+			updateSliderPosition(2);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.4"), gameSystem);
+			break;
+		case NUM_3_PRESSED:
+			updateSliderPosition(3);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.6"), gameSystem);
+			break;
+		case NUM_4_PRESSED:
+			updateSliderPosition(4);
+			msgBus->postMessage(new Msg(AUDIO_SET, "0.8"), gameSystem);
+			break;
+		case NUM_5_PRESSED:
+			updateSliderPosition(5);
+			msgBus->postMessage(new Msg(AUDIO_SET, "1.0"), gameSystem);
+			break;
 		default:
 			break;
 		}
+}
+
+void Scene_SettingsMenu::updateSliderPosition(int num) {
+	// TODO: Get the game volume and set the position to that
+	FullscreenObj *slider = gameSystem->findFullscreenObject("Sound_Select");
+	if (slider == nullptr) return;
+	switch (num) {
+	case 1:
+		slider->y = POSITION_1;
+		slider->postPostionMsg();
+		break;
+	case 2:
+		slider->y = POSITION_2;
+		slider->postPostionMsg();
+		break;
+	case 0: // should technically get from last position picked, or the config
+	case 3:
+		slider->y = POSITION_3;
+		slider->postPostionMsg();
+		break;
+	case 4:
+		slider->y = POSITION_4;
+		slider->postPostionMsg();
+		break;
+	case 5:
+		slider->y = POSITION_5;
+		slider->postPostionMsg();
+		break;
+	default:
+		break;
 	}
+}

@@ -1,6 +1,10 @@
 #include "Tank_Heavy.h"
 
 Tank_Heavy::Tank_Heavy(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Heavy.png";
+	moveOverlayRenderable = "range_Move.png";
+	shootOverlaySize = 40;
+	moveOverlaySize = 20;
 }
 
 Tank_Heavy::~Tank_Heavy() {
@@ -18,7 +22,7 @@ string Tank_Heavy::getObjectType() {
 
 void Tank_Heavy::shoot(int targetX, int targetY) {
 	OutputDebugString("\nHEAVY SHOT\n");
-	int range = 3;
+	int range = 4;
 	int damage = 29;
 	int aXCube = targetX - (targetY - (targetY & 1)) / 2;
 	int aZCube = targetY;

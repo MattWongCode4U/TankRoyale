@@ -1,6 +1,10 @@
 #include "Tank_Sniper.h"
 
 Tank_Sniper::Tank_Sniper(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Sniper.png";
+	moveOverlayRenderable = "range_Move.png";
+	shootOverlaySize = 80;
+	moveOverlaySize = 20;
 }
 
 Tank_Sniper::~Tank_Sniper() {
