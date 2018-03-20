@@ -13,6 +13,19 @@ renderType: object3d,
 model: quad,
 imageFrames: 1;
 
+gameObjectType: GameObject, 
+id: bGround, 
+renderable: hexGridVersion2, 
+xPos: 0, 
+yPos: 0, 
+zPos: -80, 
+zRotation: 0, 
+width: 50, 
+length: 54, 
+renderType: object3d, 
+model: quad, 
+imageFrames: 1; 
+
 gameObjectType: GameObject,
 id: bObject,
 renderable: sciFiTank,
