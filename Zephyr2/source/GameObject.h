@@ -51,7 +51,13 @@ public:
 	void earlyUpdate();
 	void midUpdate();
 	void lateUpdate();
-	virtual void onCollide(GameObject* otherObj);
+
+	int collisionsEnabled; //are collisions enabled on the gameObject. 1= enabled 0 = disabled
+
+	//called by the checkColliision() in gameSystem. 
+	//should get called every frame that the object is colliding with another object 
+	//only used by objects with the collisions enabled flag set to true
+	void onCollide(GameObject* otherObj);
 
 	//sets the object's (x,y) position to the coordinates specified by the vector2 parameter
 	void setPostion(Vector2 posVector); 
