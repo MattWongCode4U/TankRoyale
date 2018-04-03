@@ -188,7 +188,6 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\renderer\RenderPipeline.cpp" />
     <ClCompile Include="source\renderer\RenderWrapper.cpp" />
     <ClCompile Include="source\renderer\Shaders.cpp" />
-    <ClCompile Include="source\renderer\Sort.cpp" />
     <ClCompile Include="source\RenderSystem.cpp" />
     <ClCompile Include="source\Scene.cpp" />
     <ClCompile Include="source\scene_GameOver.cpp" />
