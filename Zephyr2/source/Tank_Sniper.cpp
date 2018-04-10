@@ -16,7 +16,7 @@ void Tank_Sniper::takeDamage(int damage) {
 }
 
 void Tank_Sniper::shoot(int targetX, int targetY) {
-	int range = 5;
+	int range = 7;
 	int damage = 29;
 	int aXCube = targetX - (targetY - (targetY & 1)) / 2;
 	int aZCube = targetY;
@@ -35,7 +35,7 @@ void Tank_Sniper::shoot(int targetX, int targetY) {
 	int axis = gameSystemUtil->onAxis(gridX, gridY, targetX, targetY, range);
 	for (GameObject *go : *gameObjects) { //look through all gameobjects
 		if (TankObject* tank = dynamic_cast<TankObject*>(go)) {
-			if (gameSystemUtil->sameAxisShot(axis, gridX, gridY, targetX, targetY, range)) {//if on same axis and in range
+			if (gameSystemUtil->sameAxisShot(axis, gridX, gridY, tank->gridX, tank->gridY, range)) {//if on same axis and in range
 				thingsHit.push_back(tank);//add things that are in firing range along the axis to the list
 			}
 		}
@@ -49,9 +49,11 @@ void Tank_Sniper::shoot(int targetX, int targetY) {
 			OutputDebugString((t->id).c_str());
 			OutputDebugString(" hit\n");
 			int curDist = gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY);
-			if (dist > curDist && curDist > 1) {
-				dist = curDist;
-				currClosestTank = t;
+			if (dist > curDist && curDist > 0) {
+				if (t->health > 0) {
+					dist = curDist;
+					currClosestTank = t;
+				}
 			}
 		}
 
