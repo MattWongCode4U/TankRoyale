@@ -64,7 +64,9 @@ void Lobby::receiveFromClients() {
 				break;
 			case INIT_CONNECTION:
 				p->classType = packet.actualData;
-				printf("Data:\n"); printf(packet.actualData);
+				printf("Data:\n"); 
+				printf(packet.actualData);
+				printf("\n");
 				sendConnID(p);
 				break;
 			case ACTION_EVENT:
@@ -171,6 +173,9 @@ void Lobby::sendToClient(Client*& c, char* packets, int totalSize) {
 
 void Lobby::sendStartGamePackets()
 {
+
+	printf("\nSENDING START GAME\n");
+
 	// clear the previous turn info if any exists
 	turnInfo.clear();
 
@@ -196,6 +201,9 @@ void Lobby::sendStartGamePackets()
 	std::string s = oss.str();
 	packet.setData(s.c_str());
 	packet.serialize(packet_data);
+
+	printf("\nSENDING START GAME\n");
+	printf(s.c_str());
 
 	sendToPlayers(packet_data, MAX_PACKET_SIZE);
 }
@@ -228,6 +236,7 @@ void Lobby::sendTimerPackets()
 	timerPacketsSent++;
 
 	if (timerPacketsSent == 30) {
+		printf("TIMER UP\n");
 		sendTurnInformation();
 		timerPacketsSent = 0;
 	}
