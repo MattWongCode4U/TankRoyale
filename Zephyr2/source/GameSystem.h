@@ -33,6 +33,27 @@ enum PlayerID {
 	PLAYER4 = 4
 };
 
+//Node for the collision detection quad tree
+struct quadTreeNode {
+	float x; //the x position of the center of the node
+	float y; //the y position of the center of the node
+	float size;//width and height of the box
+	bool isEmpty;//does the node contain any Objects
+	bool isLeaf;
+	quadTreeNode* childNodes[4] = {};//each node that isn't a leaf has 4 child nodes
+	vector<GameObject*> containedObjects;//Gameobject that are in the node
+
+	//constructor for a quad tree node
+	//params: the x and y coodinates of the center of the node, and the length/width of the sides of the node
+	quadTreeNode(float _x, float _y, float _size) {
+		x = _x;
+		y = _y;
+		size = _size;
+		isEmpty = true;
+		isLeaf = true;
+	};
+};
+
 enum SceneType { MAIN_MENU, LOBBY_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
 
 class GameSystem : public System, GameSystemUtil {
@@ -74,6 +95,27 @@ public:
 	//post message on the bus
 	void postMessageToBus(Msg* message);
 
+	//handles the collisions using the quad tree
+	void handleCollisions();
+
+	bool checkCollision(GameObject* a, GameObject* b);
+	bool checkCollision(quadTreeNode* a, GameObject* b);
+
+	//inset the gameObject into the collision quad tree
+	void insertIntoQuadTree(quadTreeNode* root, GameObject* g);
+
+	//remove the object from the collision quad tree
+	void removeFromQuadTree(quadTreeNode* root, GameObject* g);
+	
+	//clear all gameobjects from the collision quad tree
+	void clearQuadTree(quadTreeNode* root);
+
+	//checks if the specified object is colliding with anything, using the collision quad tree
+	//returns true if there has been any collisions
+	bool checkTreeCollision(quadTreeNode* root, GameObject* g);
+
+	//the root node of the collision quad tree
+	quadTreeNode* quadTreeRoot;
 
 	//the currently loaded scene
 	Scene* scene;

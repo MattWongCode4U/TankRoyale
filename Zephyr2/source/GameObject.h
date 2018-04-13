@@ -51,7 +51,13 @@ public:
 	void earlyUpdate();
 	void midUpdate();
 	void lateUpdate();
-	virtual void onCollide(GameObject* otherObj);
+
+	int collisionsEnabled; //are collisions enabled on the gameObject. 1= enabled 0 = disabled
+
+	//called by the checkColliision() in gameSystem. 
+	//should get called every frame that the object is colliding with another object 
+	//only used by objects with the collisions enabled flag set to true
+	void onCollide(GameObject* otherObj);
 
 	//sets the object's (x,y) position to the coordinates specified by the vector2 parameter
 	void setPostion(Vector2 posVector); 
@@ -80,7 +86,7 @@ public:
 	void moveTowards(float targetX, float targetY, float targetZ, float turnZ, int frames);
 
 	//turn the object around the zAxis in the direction specified. optionally do it over <turnTime> number of frames
-	void turn(int turnDir, int turnTime = 0);
+	void turn(float turnDir, int turnTime = 0);
 
 	//sends an UPDATE_POSIION message to the bus. includes sprite info
 	void postPostionMsg();

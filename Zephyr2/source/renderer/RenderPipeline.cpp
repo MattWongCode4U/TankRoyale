@@ -12,6 +12,7 @@
 #include "Shaders.h"
 #include "Quad.h"
 #include "OBJImport.h"
+#include "Sort.h"
 //#include "Cube.h";
 
 //TODO move these
@@ -951,11 +952,11 @@ void RenderPipeline::drawObject(RenderableObject *object)
 	//transform!
 	glm::mat4 objectMVM = glm::mat4();
 	objectMVM = glm::translate(objectMVM, object->position);
-	//SDL_Log("%f, %f, %f", object->position.x, object->position.y, object->position.z);
-	objectMVM = glm::scale(objectMVM, object->scale);
+	//SDL_Log("%f, %f, %f", object->position.x, object->position.y, object->position.z);	
 	objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
 	objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
 	objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+	objectMVM = glm::scale(objectMVM, object->scale);
 	glm::mat4 objectMVPM = _baseModelViewProjectionMatrix * objectMVM;
 	//glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
 	glUniformMatrix4fv(_geometryPassData.programMVPM, 1, GL_FALSE, &objectMVPM[0][0]);
@@ -1464,10 +1465,10 @@ void RenderPipeline::drawForwardObject(RenderableObject * object)
 	{	
 		glm::mat4 objectMVM = glm::mat4();
 		objectMVM = glm::translate(objectMVM, object->position);
-		objectMVM = glm::scale(objectMVM, object->scale);
 		objectMVM = glm::rotate(objectMVM, object->rotation.z, glm::vec3(0, 0, 1));
 		objectMVM = glm::rotate(objectMVM, object->rotation.x, glm::vec3(1, 0, 0));
 		objectMVM = glm::rotate(objectMVM, object->rotation.y, glm::vec3(0, 1, 0));
+		objectMVM = glm::scale(objectMVM, object->scale);
 		glm::mat4 objectMVM2 = _baseModelViewMatrix * objectMVM;
 		glUniformMatrix4fv(_forwardPassData.programMVM, 1, GL_FALSE, &objectMVM2[0][0]);
 		glUniformMatrix4fv(_forwardPassData.programMM, 1, GL_FALSE, &objectMVM[0][0]);
@@ -1642,7 +1643,8 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//turns out we do have to sort elements
-	std::sort(overlay->elements.begin(), overlay->elements.end(), [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; }); //congratulations you found the JS programmer
+	//std::sort(overlay->elements.begin(), overlay->elements.end(), [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; }); //congratulations you found the JS programmer
+	Sort::ShellSort<RenderableObject>(overlay->elements, [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; });
 
 	//actually draw the stuff
 	for (RenderableObject &el : overlay->elements)

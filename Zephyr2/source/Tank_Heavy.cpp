@@ -1,6 +1,10 @@
 #include "Tank_Heavy.h"
 
 Tank_Heavy::Tank_Heavy(map <string, string> paramsMap, GameSystemUtil* _gameSystemUtil) : TankObject(paramsMap, _gameSystemUtil) {
+	shootOverlayRenderable = "range_Shoot_Heavy.png";
+	moveOverlayRenderable = "range_Move.png";
+	shootOverlaySize = 40;
+	moveOverlaySize = 20;
 }
 
 Tank_Heavy::~Tank_Heavy() {
@@ -18,7 +22,7 @@ string Tank_Heavy::getObjectType() {
 
 void Tank_Heavy::shoot(int targetX, int targetY) {
 	OutputDebugString("\nHEAVY SHOT\n");
-	int range = 3;
+	int range = 4;
 	int damage = 29;
 	int aXCube = targetX - (targetY - (targetY & 1)) / 2;
 	int aZCube = targetY;
@@ -38,7 +42,7 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 	int axis = gameSystemUtil->onAxis(gridX, gridY, targetX, targetY, range);
 	for (GameObject *go : *gameObjects) { //look through all gameobjects
 		if (TankObject* tank = dynamic_cast<TankObject*>(go)) {
-			if (gameSystemUtil->sameAxisShot(axis, gridX, gridY, targetX, targetY, range)) {//if on same axis and in range
+			if (gameSystemUtil->sameAxisShot(axis, gridX, gridY, tank->gridX, tank->gridY, range)) {//if on same axis and in range
 				thingsHit.push_back(tank);//add things that are in firing range along the axis to the list
 			}
 		}
@@ -47,13 +51,16 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 	//Find the first thing hit from the list
 	if (thingsHit.size() > 0) {
 		TankObject* currClosestTank = nullptr;
-		int dist = -1;
+		int dist = INT32_MAX;
 		for (TankObject* t : thingsHit) {
 			OutputDebugString((t->id).c_str());
 			OutputDebugString(" hit\n");
-			if (dist < gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY)) {
-				dist = gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY);
-				currClosestTank = t;
+			int curDist = gameSystemUtil->getGridDistance(gridX, gridY, t->gridX, t->gridY);
+			if (dist > curDist && curDist > 0) {
+				if (t->health > 0) {
+					dist = curDist;
+					currClosestTank = t;
+				}
 			}
 		}
 

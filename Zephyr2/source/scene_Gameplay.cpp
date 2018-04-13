@@ -10,6 +10,7 @@ Scene_Gameplay::~Scene_Gameplay() {
 
 //called whene the scene is first loaded. Do any initial setup here
 void Scene_Gameplay::startScene() {
+	gameSystem->currentAction = 0;
 	framesSinceTurnStart = 99999;
 	gameSystem->addGameObjects("prototype_level.txt");
 	setPlayerTank("player1");	
@@ -17,8 +18,8 @@ void Scene_Gameplay::startScene() {
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
 	
-	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
-
+	validActionsOverlay = gameSystem->findGridObject("validActionsOverlay");
+	
 	//gameSystem->reticle = gameSystem->findGridObject("reticle");
 	if (gameSystem->reticle = gameSystem->findGridObject("reticle")) {
 		GameObject* g = gameSystem->makeGameObject("reticleActionIndicator.txt");
@@ -28,8 +29,7 @@ void Scene_Gameplay::startScene() {
 		}
 	setActionType(ROTATEPOS);
 		
-
-	//add healthBars to tanks
+	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
 }
 
 //called every frame of the gameloop
@@ -67,8 +67,10 @@ void Scene_Gameplay::sceneUpdate() {
 				gameSystem->gameObjects.erase(remove(gameSystem->gameObjects.begin(), gameSystem->gameObjects.end(), ex), gameSystem->gameObjects.end());
 				gameSystem->gameObjectRemoved(ex);
 			}
-		}
-		
+		}	
+	}
+	else if (framesSinceTurnStart == 400) {//actions animation done, return control to player
+		//setActionType(ActionType);
 	}
 	framesSinceTurnStart++;
 }
@@ -109,7 +111,7 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		case NETWORK_R_START_TURN:
 			gameActive = true;
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
-			actionOrigin = playerTank;
+			updateActionOrigin(playerTank);
 
 			if (playerTank != nullptr && playerTank->health <= 0) {
 				string spoofData = gameSystem->clientID + ",3,0,0";
@@ -128,7 +130,13 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			gameSystem->currentAction = 0;
 			framesSinceTurnStart = 0;
 			gameActive = false;
+
+			validActionsOverlay->renderable = "nothing.png";
+			validActionsOverlay->postSpriteMsg();
+
+
 			OutputDebugString("RECEVIED NETWORK_TURN_BROADCAST... INPUT BLOCKED\n");
+
 			break;
 		case NETWORK_R_GAMESTART_OK: {//id1,class1|id2,class2|etc.
 			vector<string> clientIDVector = split(msg->data, '|');
@@ -169,16 +177,20 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				gameSystem->createGameObject(t);
 				t->updateWorldCoords();
 				t->createhpBar();//create the hp bar
-				
+				OutputDebugString("\nCilendId");
+				OutputDebugString(gameSystem->clientID.c_str());
 
 				if (tankIdClassVector[0] == gameSystem->clientID) {
 					//set the new player tank
 					//setPlayerTank("player" + to_string(i + 1));
 					playerTank = t;
-					actionOrigin = playerTank;
+					//updateActionOrigin(playerTank);
+					
 
 					//initialize the player's orientation
 					queuedOrientation = playerTank->zRotation;
+
+					updateActionOrigin(playerTank);
 
 					//create the playerTank Indicator
 					GameObject* arrow = gameSystem->makeGameObject("arrow.txt");
@@ -197,6 +209,12 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 
 			break;
 		}
+		case NETWORK_CONNECT:
+			gameSystem->clientID = msg->data;
+			OutputDebugString("GAMESCENE: NETWORK_CONNECT RECEIVED: \n");
+			OutputDebugString(gameSystem->clientID.c_str());
+			OutputDebugString("\n");
+			break;
 		case NETWORK_R_PING:
 			gameSystem->displayTimeLeft(stoi(msg->data));
 			if(stoi(msg->data) == 1 )
@@ -292,8 +310,9 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			OutputDebugString("\n");
 			OutputDebugString(to_string(queuedOrientation).c_str());
 
-			queuedOrientation = (queuedOrientation + 360) % 360;
-			actionOrigin->zRotation = queuedOrientation;
+			//queuedOrientation = (queuedOrientation + 360) % 360;
+			//actionOrigin->zRotation = queuedOrientation;
+			updateActionOrigin(actionOrigin);
 
 			if (gameSystem->currentAction >= gameSystem->maxActions || moveCost <= 0) break;
 			if (gameSystem->currentAction > gameSystem->maxActions - moveCost) break;
@@ -308,8 +327,10 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				queuedOrientation += 60;
 			else if (ActionType == ROTATEPOS)
 				queuedOrientation -= 60;
-			queuedOrientation = (queuedOrientation + 360) % 360;
-			actionOrigin->zRotation = queuedOrientation;
+
+			/*queuedOrientation = (queuedOrientation + 360) % 360;
+			actionOrigin->zRotation = queuedOrientation;*/
+			updateActionOrigin(actionOrigin);
 
 			//pad with empty actions iff the move cost is > 1;
 			for (int i = 1; i < moveCost; i++) {
@@ -345,10 +366,12 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			//bar->renderable = "bar" + to_string(gameSystem->currentAction + 1) + "_Green.png";
 			if (ActionType == MOVE || ActionType == ROTATEPOS || ActionType == ROTATENEG) 
 			{
-				actionOrigin = indicator;
+				updateActionOrigin(indicator);
 
-				queuedOrientation = (queuedOrientation + 360) % 360;
-				actionOrigin->zRotation = queuedOrientation;
+				/*queuedOrientation = (queuedOrientation + 360) % 360;
+				actionOrigin->zRotation = queuedOrientation;*/
+				//updateActionOrigin(actionOrigin);
+
 				indicator->renderable = "MoveIndicator.png";
 			}
 			else if (ActionType == SHOOT)
@@ -365,17 +388,12 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			if (ActionType == MOVE) bar->renderable = "MoveAction.png";
 			else if (ActionType == SHOOT) {
 				bar->renderable = "AttackAction.png";
-
-				if (bar2 != NULL)
-					bar2->renderable = "PassAction.png";
+				if (bar2 != NULL) bar2->renderable = "AttackAction.png";
 			}
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, indicator->id + ",1," + indicator->renderable), gameSystem);
 			msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar->id + ",1," + bar->renderable), gameSystem);
-			if (bar2 != NULL)
-			{
-				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
-			}
-
+			if (bar2 != NULL) msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, bar2->id + ",1," + bar2->renderable), gameSystem);
+			updateActionOrigin(actionOrigin);
 			gameSystem->currentAction += moveCost;
 			break;
 		}
@@ -383,14 +401,8 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			(ActionType == MOVE) ? setActionType(SHOOT) : setActionType(MOVE);
 			
 			break;
-
-		case KEY_D_PRESSED: {
-
-			break;
-		}
 		case KEY_W_PRESSED: {
 			setActionType(MOVE);
-			
 			break;
 		}
 		case KEY_S_PRESSED: {
@@ -607,7 +619,6 @@ void Scene_Gameplay::executeAction(int a) {
 		}
 		
 	}
-	
 }
 
 void Scene_Gameplay::setActionType(ActionTypes a) {
@@ -617,19 +628,34 @@ void Scene_Gameplay::setActionType(ActionTypes a) {
 
 	switch (a) {
 	case SHOOT:
+		validActionsOverlay->renderable = playerTank->shootOverlayRenderable;
+		validActionsOverlay->width = playerTank->shootOverlaySize;
+		validActionsOverlay->length = playerTank->shootOverlaySize;
+		validActionsOverlay->postPostionMsg();
+
 		actionIndicator->renderable = "Reticle.png";
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);
+		/*msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,Reticle.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconInactive.png"), gameSystem);*/
 		break;
 	case MOVE:
+		validActionsOverlay->renderable = playerTank->moveOverlayRenderable;
+		validActionsOverlay->width = playerTank->moveOverlaySize;
+		validActionsOverlay->length = playerTank->moveOverlaySize;
+		validActionsOverlay->zRotation = actionOrigin->zRotation;
+		validActionsOverlay->postPostionMsg();
+
 		actionIndicator->renderable = "moveIcon2.png";
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);	
+		/*msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "shootIcon,1,ReticleInactive.png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "moveIcon,1,moveIconActive.png"), gameSystem);	*/
 		break;
 	case ROTATENEG:
+		validActionsOverlay->renderable = "nothing.png";
+		validActionsOverlay->postSpriteMsg();
 		actionIndicator->renderable = "rotateIconCW.png";
 		break;
 	case ROTATEPOS:
+		validActionsOverlay->renderable = "nothing.png";
+		validActionsOverlay->postSpriteMsg();
 		actionIndicator->renderable = "rotateIconCCW.png";
 		break;
 	}
@@ -644,21 +670,15 @@ void Scene_Gameplay::updateReticle() {
 	gameSystem->reticle->updateWorldCoords(15);
 	//gameSystem->sendUpdatePosMessage(gameSystem->reticle);
 	if (!playerTank) return; //if the player tank is null return
+	updateActionOrigin(actionOrigin);
 	checkAOEReticle();
 	if (ActionType == SHOOT) {
-		moveCost = playerTank->checkShootValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkShootValidity(validActionsOverlay, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 	else if(ActionType == MOVE)
-		moveCost = playerTank->checkMoveValidity(actionOrigin, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
+		moveCost = playerTank->checkMoveValidity(validActionsOverlay, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	else if (ActionType == ROTATENEG || ActionType == ROTATEPOS) {
-		moveCost = playerTank->checkTurnValidity(actionOrigin->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
-		//if (moveCost > 0) {
-		//	actionOrigin->zRotation = queuedOrientation;
-		//	if (ActionType == ROTATENEG) 
-		//		queuedOrientation += 60;
-		//	else 
-		//		queuedOrientation -= 60;
-		//}
+		moveCost = playerTank->checkTurnValidity(validActionsOverlay->gridX, actionOrigin->gridY, gameSystem->reticle->gridX, gameSystem->reticle->gridY);
 	}
 		
 
@@ -670,14 +690,6 @@ void Scene_Gameplay::updateReticle() {
 		gameSystem->reticle->renderable = "TileIndicatorRed";
 		gameSystem->reticle->postSpriteMsg();
 	}
-		
-
-
-	//std::ostringstream oss;
-	//Msg* mm = new Msg(EMPTY_MESSAGE, "");
-
-	////UPDATE_OBJECT_SPRITE, //id,#Frames,Renderable
-	//msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, gameSystem->reticle->id + ",1," + gameSystem->reticle->renderable), gameSystem);
 }
 
 void Scene_Gameplay::checkAOEReticle() {
@@ -700,8 +712,7 @@ void Scene_Gameplay::setPlayerTank(std::string playerID) {
 	for (GameObject* g : gameSystem->gameObjects) {
 		if (g->id == playerID)
 			if(playerTank = dynamic_cast<TankObject*>(g)) {
-			//playerTank = (TankObject*)g;
-				actionOrigin = playerTank;
+				updateActionOrigin(playerTank);
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank.png,"), gameSystem);
 
 				string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
@@ -733,6 +744,27 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 	msgBus->postMessage(mm, gameSystem);
 }
 
+
+void Scene_Gameplay::updateActionOrigin(GridObject* newOrigin) {
+	if (newOrigin == nullptr) return;
+
+	//queuedOrientation = (queuedOrientation + 360) % 360;
+
+	actionOrigin = newOrigin;
+
+
+	//actionOrigin->zRotation = queuedOrientation;
+
+	validActionsOverlay->zRotation = queuedOrientation;
+	validActionsOverlay->gridX = newOrigin->gridX;
+	validActionsOverlay->gridY = newOrigin->gridY;
+	validActionsOverlay->updateWorldCoords();
+
+	
+
+	
+	
+}
 void Scene_Gameplay::playShotSfx(std::string objectType) {
 	if (objectType == "Tank_Scout") {
 		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);
@@ -746,4 +778,5 @@ void Scene_Gameplay::playShotSfx(std::string objectType) {
 	else if (objectType == "Tank_Artillery") {
 		msgBus->postMessage(new Msg(ARTILLERY_SHOT_SOUND), gameSystem);
 	}
+
 }
