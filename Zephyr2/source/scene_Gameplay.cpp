@@ -17,6 +17,7 @@ void Scene_Gameplay::startScene() {
 	gameSystem->levelLoaded = 2;
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
+	outOfGame = false;
 	
 	validActionsOverlay = gameSystem->findGridObject("validActionsOverlay");
 	
@@ -26,7 +27,7 @@ void Scene_Gameplay::startScene() {
 		g->parentId = gameSystem->reticle->id;
 		gameSystem->createGameObject(g);
 		actionIndicator = g;
-		}
+	}
 	setActionType(ROTATEPOS);
 		
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
@@ -72,6 +73,12 @@ void Scene_Gameplay::sceneUpdate() {
 	else if (framesSinceTurnStart == 400) {//actions animation done, return control to player
 		//setActionType(ActionType);
 	}
+	if (!outOfGame && playerTank != nullptr && playerTank->health <= 0)
+	{
+		outOfGame = true;
+		loadGameOverMenu();
+		OutputDebugString("Dead");
+	}
 	framesSinceTurnStart++;
 }
 
@@ -109,7 +116,10 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		//messages to be read in both active and inactive game state
 		switch (msg->type) {
 		case NETWORK_R_START_TURN:
-			gameActive = true;
+			if (!outOfGame)
+				gameActive = true;
+			else
+				gameActive = false;
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
 			updateActionOrigin(playerTank);
 
@@ -451,7 +461,14 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		
 		case KEY_ESC_RELEASED:
 			// Pause the game (lock control, display 2 buttons)
-			loadPauseMenu();
+			if (!outOfGame)
+			{
+				loadPauseMenu();
+			}
+			else
+			{
+				loadGameOverMenu();
+			}
 			gameActive = false;
 			break;
 		default:
@@ -498,6 +515,23 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 							gameActive = true;
 							break;
 						}
+						if (g->id.compare("GameOverMenuItem3") == 0)
+						{
+							// Load main menu
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+							gameSystem->loadScene(MAIN_MENU);
+							change = true;
+							break;
+						}
+						else if (g->id.compare("GameOverMenuItem4") == 0)
+						{
+							// unload game objects from pause menu
+							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+							unloadGameOverMenuObjects();
+							// continue game
+							gameActive = true;
+							break;
+						}
 					}
 				}
 				if (change)
@@ -508,7 +542,14 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			case KEY_ESC_RELEASED:
 				// resume gameplay
 				// basically button 1
-				unloadPauseMenuObjects();
+				if (!outOfGame)
+				{
+					unloadPauseMenuObjects();
+				}
+				else
+				{
+					unloadGameOverMenuObjects();
+				}
 				gameActive = true;
 				break;
 			case MOUSE_MOVE:
@@ -535,17 +576,38 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 						{
 							gameSystem->markerPosition = 4; change = true;
 						}
+						else if (g->id.compare("GameOverMenuItem3") == 0 && gameSystem->markerPosition != 2)
+						{
+							gameSystem->markerPosition = 3; change = true;
+						}
+						else if (g->id.compare("GameOverMenuItem4") == 0 && gameSystem->markerPosition != 4)
+						{
+							gameSystem->markerPosition = 4; change = true;
+						}
 					}
 				}
 
 				if (change) {
 					for (int i = 3; i < 5; i++) {
-						if (i == gameSystem->markerPosition) {
-							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+						if (!outOfGame)
+						{
+							if (i == gameSystem->markerPosition) {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+							}
+							else {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+							}
 						}
-						else {
-							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+						else
+						{
+							if (i == gameSystem->markerPosition) {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+							}
+							else {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+							}
 						}
+						
 					}
 				}
 				break;
@@ -729,6 +791,18 @@ void Scene_Gameplay::unloadPauseMenuObjects() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem3"));
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem4"));
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("Frame"));
+}
+
+
+void Scene_Gameplay::loadGameOverMenu() {
+	gameSystem->addGameObjects("gameover_menu.txt");
+}
+
+void Scene_Gameplay::unloadGameOverMenuObjects() {
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("GameOverMenuItem3"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("GameOverMenuItem4"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("Frame"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("GameOverTest4"));
 }
 
 void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {

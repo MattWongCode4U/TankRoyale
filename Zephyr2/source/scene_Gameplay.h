@@ -70,12 +70,12 @@ public:
 
 	//is the game actively receiving player input? false when it game is waiting/animating
 	bool gameActive = false;
+	bool outOfGame = false;
 
 	void loadPauseMenu();
+	void loadGameOverMenu();
+	void unloadGameOverMenuObjects();
 	void unloadPauseMenuObjects();
-
-	void UnProject(GLfloat x, GLfloat y, GLfloat z, const glm::mat4 & view, const glm::mat4 & project, const Uint32 width, const Uint32 length, glm::vec3 & coords);
-
 
 	void updateActionOrigin(GridObject* newOrigin);
 
