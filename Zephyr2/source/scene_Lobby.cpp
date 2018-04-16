@@ -117,9 +117,11 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 				{
 					if (i == gameSystem->markerPositionPrime) {
 						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankSelected.png"), gameSystem);
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "TankFramePic" + to_string(i) + ",1,FrameS" + to_string(i) + ".png"), gameSystem);
 					}
 					else {
 						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "Option" + to_string(i) + ",1,TankFrame.png"), gameSystem);
+						msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "TankFramePic" + to_string(i) + ",1,Frame" + to_string(i) + ".png"), gameSystem);
 					}
 				}
 			}
