@@ -429,11 +429,11 @@ length: 25,
 renderType: overlay,
 imageFrames: 1;
 
-gameObjectType: GridObject,
+gameObjectType: Tank_Artillery,
 id: tree1,
 renderable: treeTexture.png,
 xPos: -18.57,
-yPos: 32,
+yPos: 36,
 zPos: -79,
 xRotation: 90,
 yRotation: -95,
@@ -444,16 +444,16 @@ height: 5,
 model: tree,
 renderType: object3d,
 imageFrames: 1,
-gridX: 2,
-gridY: 0,
+gridX: -2,
+gridY: 3,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: Tank_Artillery,
 id: tree2,
 renderable: treeTexture.png,
 xPos: -7,
-yPos: 30,
+yPos: 36,
 zPos: -79,
 xRotation: 90,
 yRotation: -105,
@@ -464,12 +464,12 @@ height: 5,
 model: tree,
 renderType: object3d,
 imageFrames: 1,
-gridX: 2,
-gridY: 0,
+gridX: -1,
+gridY: 3,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree3,
 renderable: treeTexture.png,
 xPos: -7,
@@ -489,7 +489,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree4,
 renderable: treeTexture.png,
 xPos: 7,
@@ -509,7 +509,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree5,
 renderable: treeTexture.png,
 xPos: 18,
@@ -529,7 +529,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree6,
 renderable: treeTexture.png,
 xPos: 12,
@@ -549,7 +549,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree7,
 renderable: treeTexture.png,
 xPos: 36,
@@ -569,7 +569,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree8,
 renderable: treeTexture.png,
 xPos: -36,
@@ -589,7 +589,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree9,
 renderable: treeTexture.png,
 xPos: -23,
@@ -609,7 +609,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree10,
 renderable: treeTexture.png,
 xPos: -75,
@@ -629,7 +629,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree11,
 renderable: treeTexture.png,
 xPos: -78,
@@ -649,7 +649,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree12,
 renderable: treeTexture.png,
 xPos: -75,
@@ -669,7 +669,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree13,
 renderable: treeTexture.png,
 xPos: 6,
@@ -689,7 +689,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree14,
 renderable: treeTexture.png,
 xPos: 2,
@@ -709,7 +709,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree15,
 renderable: treeTexture.png,
 xPos: 12,
@@ -729,7 +729,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree16,
 renderable: treeTexture.png,
 xPos: 18,
@@ -749,7 +749,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree17,
 renderable: treeTexture.png,
 xPos: -60,
@@ -769,7 +769,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree18,
 renderable: treeTexture.png,
 xPos: 62,
@@ -789,7 +789,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree19,
 renderable: treeTexture.png,
 xPos: 74,
@@ -809,7 +809,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree20,
 renderable: treeTexture.png,
 xPos: 74,
@@ -829,7 +829,7 @@ gridY: 0,
 health: 1,
 collisionsEnabled: 1;
 
-gameObjectType: GridObject,
+gameObjectType: TankObject,
 id: tree21,
 renderable: treeTexture.png,
 xPos: 74,
