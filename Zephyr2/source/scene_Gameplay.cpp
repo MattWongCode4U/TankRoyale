@@ -569,29 +569,45 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				x -= width / 2; y -= length / 2;
 				y = -y;
 				bool change = false;
-
-				for (GameObject *g : gameSystem->gameObjects)
+				auto it = gameSystem->gameObjects.begin();
+				for (; it != gameSystem->gameObjects.end(); ++it)
 				{
-					if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
-						(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+					if ((x < (*it)->x + ((*it)->width / 2) && x >(*it)->x - ((*it)->width / 2)) &&
+						(y < (*it)->y + ((*it)->length / 2) && y >(*it)->y - ((*it)->length / 2)))
 					{
-						if (g->id.compare("PauseMenuItem3") == 0 && gameSystem->markerPosition != 2)
+						if (playerTank != nullptr && !playerTank->outOfMatch)
 						{
-							gameSystem->markerPosition = 3; change = true;
+							if ((*it)->id.compare("PauseMenuItem3") == 0)
+							{
+								gameSystem->markerPosition = 3; change = true;
+								break;
+							}
+							else if ((*it)->id.compare("PauseMenuItem4") == 0)
+							{
+								gameSystem->markerPosition = 4; change = true;
+								break;
+							}
 						}
-						else if (g->id.compare("PauseMenuItem4") == 0 && gameSystem->markerPosition != 4)
+						else
 						{
-							gameSystem->markerPosition = 4; change = true;
-						}
-						else if (g->id.compare("GameOverMenuItem3") == 0 && gameSystem->markerPosition != 2)
-						{
-							gameSystem->markerPosition = 3; change = true;
-						}
-						else if (g->id.compare("GameOverMenuItem4") == 0 && gameSystem->markerPosition != 4)
-						{
-							gameSystem->markerPosition = 4; change = true;
+							if ((*it)->id.compare("GameOverMenuItem3") == 0)
+							{
+								gameSystem->markerPosition = 3; change = true;
+								break;
+							}
+							else if ((*it)->id.compare("GameOverMenuItem4") == 0)
+							{
+								gameSystem->markerPosition = 4; change = true;
+								break;
+							}
 						}
 					}
+				}
+
+				if (it == gameSystem->gameObjects.end() && (gameSystem->markerPosition == 3 || gameSystem->markerPosition == 4))
+				{
+					change = true;
+					gameSystem->markerPosition = 0;
 				}
 
 				if (change) {
