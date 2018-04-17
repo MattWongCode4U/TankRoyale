@@ -51,6 +51,9 @@ public:
 	float shootOverlaySize = 60;
 	float moveOverlaySize = 20;
 
+	// Check if still in game
+	bool outOfMatch = false;
+
 	//int getAxisOrientation();
 
 };

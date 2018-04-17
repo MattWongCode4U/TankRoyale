@@ -23,6 +23,7 @@
 #include "Scene_Gameplay.h"
 #include "Scene_SettingsMenu.h"
 #include "Scene_InstructionsMenu.h"
+#include "scene_GameOver.h"
 
 extern volatile bool malive;
 
@@ -168,9 +169,9 @@ public:
 	int maxActions = 4;
 
 	std::string tankClass = "heavy";
-
-
+	
 	Msg *m;
 
+	std::vector<std::string> _gameOverList;
 
 };

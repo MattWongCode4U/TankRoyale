@@ -25,7 +25,7 @@ void NetworkSystem::startSystemLoop() {
 
 		// if testing mode
 		if (echoMode && timerActive) {
-			int timeLeft = 30 - ((clock() - turnStartTime) / 1000);
+			int timeLeft = 5 - ((clock() - turnStartTime) / 1000);
 
 			//post the time left message (includes the actual time left in the message data)
 			m->type = NETWORK_R_PING;

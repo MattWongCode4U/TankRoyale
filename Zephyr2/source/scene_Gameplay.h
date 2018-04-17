@@ -54,6 +54,8 @@ public:
 
 	void checkAOEReticle();
 
+	void checkPlayers();
+
 	//sends a message to network system with the specified action
 	void sendNetworkActionMsg(ActionTypes actionType);
 
@@ -70,7 +72,6 @@ public:
 
 	//is the game actively receiving player input? false when it game is waiting/animating
 	bool gameActive = false;
-	bool outOfGame = false;
 
 	void loadPauseMenu();
 	void loadGameOverMenu();
