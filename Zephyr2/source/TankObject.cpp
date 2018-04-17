@@ -78,18 +78,20 @@ void TankObject::createhpBar() {
 //updates the hpBar
 void TankObject::updatehpBar() {
 	//set bar width
-	hpBar->width*= ((float)health / maxHealth);
+	if (hpBar != nullptr) {
+		hpBar->width *= ((float)health / maxHealth);
 
-	//set color
-	if ((float)health / maxHealth < .3f)
-		hpBar->renderable = "red_hpbar";
-	else if ((float)health / maxHealth < .5f)
-		hpBar->renderable = "orange_hpbar";
-	else if ((float)health / maxHealth > .8f)
-		hpBar->renderable = "green_hpbar";
+		//set color
+		if ((float)health / maxHealth < .3f)
+			hpBar->renderable = "red_hpbar";
+		else if ((float)health / maxHealth < .5f)
+			hpBar->renderable = "orange_hpbar";
+		else if ((float)health / maxHealth > .8f)
+			hpBar->renderable = "green_hpbar";
 
-	//post updated information message for the renderer
-	hpBar->postPostionMsg();
+		//post updated information message for the renderer
+		hpBar->postPostionMsg();
+	}
 }
 
 //checks if the targeted move action is valid for this tankObject
