@@ -54,12 +54,15 @@ public:
 
 	void checkAOEReticle();
 
+	void checkPlayers();
+
 	//sends a message to network system with the specified action
 	void sendNetworkActionMsg(ActionTypes actionType);
 
 	//the action point cost of the current action. -1 if action not allowed
 	//bool validMove = false;
 	int moveCost = -1;
+	std::size_t _playersOut = 0;
 
 
 	//the local player tank object
@@ -72,10 +75,9 @@ public:
 	bool gameActive = false;
 
 	void loadPauseMenu();
+	void loadGameOverMenu();
+	void unloadGameOverMenuObjects();
 	void unloadPauseMenuObjects();
-
-	void UnProject(GLfloat x, GLfloat y, GLfloat z, const glm::mat4 & view, const glm::mat4 & project, const Uint32 width, const Uint32 length, glm::vec3 & coords);
-
 
 	void updateActionOrigin(GridObject* newOrigin);
 

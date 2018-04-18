@@ -230,5 +230,8 @@
     <ClInclude Include="source\Tank_Sniper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\renderer\Sort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

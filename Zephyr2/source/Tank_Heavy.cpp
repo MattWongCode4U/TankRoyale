@@ -41,8 +41,8 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 
 	vector<TankObject *> thingsHit; //list of things hit
 	int axis = gameSystemUtil->onAxis(gridX, gridY, targetX, targetY, range);
-	for (GameObject *go : *gameObjects) { //look through all gameobjects
-		if (TankObject* tank = dynamic_cast<TankObject*>(go)) {
+	for (GameObject *hitobj : *gameObjects) { //look through all gameobjects
+		if (TankObject* tank = dynamic_cast<TankObject*>(hitobj)) {
 			if (gameSystemUtil->sameAxisShot(axis, gridX, gridY, tank->gridX, tank->gridY, range)) {//if on same axis and in range
 				thingsHit.push_back(tank);//add things that are in firing range along the axis to the list
 			}

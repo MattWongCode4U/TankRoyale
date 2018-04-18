@@ -415,8 +415,10 @@ void  GameSystem::loadScene(SceneType _scene){
 	case INSTRUCTION_MENU:
 		scene = new Scene_InstructionsMenu(msgBus, this);
 		break;
+	case GAME_OVER:
+		scene = new Scene_GameOver(msgBus, this);
+		break;
 	}
-
 	scene->startScene();
 }
 

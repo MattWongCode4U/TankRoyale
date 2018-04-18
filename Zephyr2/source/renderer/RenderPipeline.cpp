@@ -12,6 +12,7 @@
 #include "Shaders.h"
 #include "Quad.h"
 #include "OBJImport.h"
+#include "Sort.h"
 //#include "Cube.h";
 
 //TODO move these
@@ -1642,7 +1643,8 @@ void RenderPipeline::drawOverlay(RenderableOverlay *overlay)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//turns out we do have to sort elements
-	std::sort(overlay->elements.begin(), overlay->elements.end(), [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; }); //congratulations you found the JS programmer
+	//std::sort(overlay->elements.begin(), overlay->elements.end(), [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; }); //congratulations you found the JS programmer
+	Sort::ShellSort<RenderableObject>(overlay->elements, [](RenderableObject a, RenderableObject b) {return a.position.z < b.position.z; });
 
 	//actually draw the stuff
 	for (RenderableObject &el : overlay->elements)

@@ -105,36 +105,38 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 		y = -y;
 		bool change = false;
 
-
-		for (GameObject *g : gameSystem->gameObjects)
+		auto it = gameSystem->gameObjects.begin();
+		for (; it != gameSystem->gameObjects.end(); ++it)
 		{
-			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
-				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+			if ((x < (*it)->x + ((*it)->width / 2) && x >(*it)->x - ((*it)->width / 2)) &&
+				(y < (*it)->y + ((*it)->length / 2) && y >(*it)->y - ((*it)->length / 2)))
 			{
-				if (g->id.compare("Menu_Item0") == 0 && gameSystem->markerPosition != -1)
+				if ((*it)->id.compare("Menu_Item0") == 0)
 				{
 					gameSystem->markerPosition = 0; change = true;
+					break;
 				}
-				else if (g->id.compare("Menu_Item1") == 0 && gameSystem->markerPosition != 1)
+				else if ((*it)->id.compare("Menu_Item1") == 0)
 				{
 					gameSystem->markerPosition = 1; change = true;
+					break;
 				}
-				else if (g->id.compare("Menu_Item2") == 0 && gameSystem->markerPosition != 2)
+				else if ((*it)->id.compare("Menu_Item2") == 0)
 				{
 					gameSystem->markerPosition = 2; change = true;
+					break;
 				}
-				else if (g->id.compare("Menu_Item3") == 0 && gameSystem->markerPosition != 3)
+				else if ((*it)->id.compare("Menu_Item3") == 0)
 				{
 					gameSystem->markerPosition = 3; change = true;
+					break;
 				}
-
-				/*
-				// This is for the back button
-				else if (g->id.compare("Menu_Item4") == 0 && markerPosition != 0)
-				{
-				markerPosition = 4; change = true;
-				}*/
 			}
+		}
+		if (it == gameSystem->gameObjects.end() && (gameSystem->markerPosition != -1)) 
+		{
+			change = true;
+			gameSystem->markerPosition = -1;
 		}
 		if (change) {
 			for (int i = 0; i < 4; i++) {
