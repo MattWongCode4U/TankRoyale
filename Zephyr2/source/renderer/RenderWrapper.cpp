@@ -10,6 +10,7 @@ RenderWrapper Constructor.
 RenderWrapper::RenderWrapper(RenderSystem *system) {
 	this->system = system;
 
+	//create window (now handled here)
 	window = SDL_CreateWindow("Zephyr2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, GlobalPrefs::windowWidth, GlobalPrefs::windowHeight, SDL_WINDOW_OPENGL);
 	if (GlobalPrefs::windowFullscreen)
 		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -30,26 +31,25 @@ RenderWrapper::~RenderWrapper() {
 	delete pipeline;
 	delete scene;
 	delete objects;
-	//SDL_DestroyWindow(window);
 }
 
 /*
 Initialize RenderWrapper.
+Mostly sets initial values.
 */
 void RenderWrapper::init() {
 
-	//setup initial camera rig and main light	
+	//setup initial camera rig
 	RenderableCamera cam;
 	cam.farPlane = 1000;
 	cam.nearPlane = 1;
 	cam.clearColor = glm::vec3(0.25f, 0.25f, 0.25f);
 	cam.viewAngle = glm::radians(60.0f);
-	//cam.position = glm::vec3(0, 0, -100.0f);
-	//cam.rotation = glm::vec3(0, glm::pi<float>(), 0);
 	cam.position = glm::vec3(0, -70.0f, 3.0f);
 	cam.rotation = glm::vec3(-0.8f, 0, 0);
 	scene->camera = cam;
 
+	//setup main light
 	RenderableLight mainLight;
 	mainLight.type = RenderableLightType::AMBIENT;
 	mainLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -67,11 +67,11 @@ void RenderWrapper::startSystemLoop() {
 	pipeline->setupGLOnThread();
 	pipeline->setupSceneOnThread();
 
-	//TODO TEMPORARY loadall resources
+	//load all resources
 	state = RendererState::loading;
 	pipeline->loadAllResources();
 
-	//TEMPORARY: set state
+	//set state (retained from RACE, not used as much now)
 	state = RendererState::rendering;
 	running = true;
 	
@@ -137,32 +137,18 @@ RenderWrapper handle messages from the message bus.
 void RenderWrapper::handleMessage(Msg *msg) {
 	std::string s = std::to_string(std::hash<std::thread::id>()(std::this_thread::get_id()));
 
-	////Display Thread ID for Debugging
-	//OutputDebugString("Render  Handle Messsage on thread: ");
-	//OutputDebugString(s.c_str());
-	//OutputDebugString("\n");
-	// call the parent first 
-
-	// personal call 
 	switch (msg->type) {
 	case EXIT_GAME:
 		running = false;
 		break;
 	case UPDATE_OBJECT_POSITION:
-		//mtx.lock();
 		updateObjPosition(msg);
-		//	mtx.unlock();
 		break;
 	case GO_ADDED:
-		// parse data from msg to add obj to list
-		//mtx.lock();
 		addObjectToRenderList(msg);
-		//mtx.unlock();
 		break;
 	case GO_REMOVED:
-		//	mtx.lock();
 		removeObjectFromRenderList(msg);
-		//	mtx.unlock();
 		break;
 	case UPDATE_OBJ_SPRITE:
 		updateObjSprite(msg);
@@ -179,37 +165,6 @@ void RenderWrapper::handleMessage(Msg *msg) {
 	case CONFIG_PIPELINE:
 		updatePipelineConfig(msg);
 		break;
-		//PANNING CAMERA
-
-		/*case SPACEBAR_PRESSED:
-		if (loadedLevel == 2) {
-		cameraToPlayer();
-		}
-		break;
-		case UP_ARROW_PRESSED:
-		if (loadedLevel == 2) {
-		panUp();
-		positionUpdated();
-		}
-		break;
-		case DOWN_ARROW_PRESSED:
-		if (loadedLevel == 2) {
-		panDown();
-		positionUpdated();
-		}
-		break;
-		case RIGHT_ARROW_PRESSED:
-		if (loadedLevel == 2) {
-		panRight();
-		positionUpdated();
-		}
-		break;
-		case LEFT_ARROW_PRESSED:
-		if (loadedLevel == 2) {
-		panLeft();
-		positionUpdated();
-		}
-		break;*/
 	default:
 		break;
 	}
@@ -220,14 +175,12 @@ Parse message and create an id/RenderableObject pair
 */
 std::pair<std::string, RenderableObject> RenderWrapper::parseObject(std::string data)
 {
-	//SDL_Log(data.c_str());
-
 	std::vector<std::string> objectData = split(data, ',');
 
 	RenderableObject obj;
 	std::string id;
 
-	//derived from old renderObject implementation, could be optimized
+	//derived from old renderObject implementation
 	std::string sprite, model, normal;
 	float x, y, z, xRotation, yRotation, zRotation, w, l, h, smoothness;
 	int frames = 1;
@@ -325,7 +278,6 @@ Update the sprite of an object (legacy)
 */
 void RenderWrapper::updateObjSprite(Msg* m)
 {
-	//SDL_Log(m->data.c_str());
 	std::vector<std::string> dataVector = split(m->data, ',');
 	std::string id = dataVector.at(0);
 	std::string sprite = dataVector.at(2);
@@ -343,7 +295,6 @@ Update the sprite, model, other rendering data of an object
 */
 void RenderWrapper::updateObjRender(Msg * m)
 {
-	//SDL_Log(m->data.c_str());
 
 	//id,renderable,renderType,model,normalMap,smoothness,frameCount, frameDelay, animateOnce
 	std::vector<std::string> objectData = split(m->data, ',');
@@ -434,7 +385,6 @@ void RenderWrapper::cameraToPlayer() {
 Handle message when the level is loaded.
 */
 void RenderWrapper::levelLoaded(Msg* m) {
-	//TODO purge objects?
 
 	state = RendererState::rendering;
 	loadedLevel = atoi(m->data.c_str()); //what does this do?

@@ -1,6 +1,10 @@
 #include "RenderSystem.h"
 #include "renderer\RenderWrapper.h"
 
+/*
+This is an implementation of the PIMPL idiom so there's no functionality here
+*/
+
 RenderSystem::RenderSystem(MessageBus * mbus) : System(mbus)
 {
 	_wrapper = new RenderWrapper(this);
