@@ -15,7 +15,6 @@ enum class RendererState : int_fast8_t
 
 struct ModelData
 {
-	//std::string name; //don't need this, will be stored in hashtable
 	GLuint vboID;
 	GLuint vaoID;
 	GLuint numVerts;
@@ -24,20 +23,17 @@ struct ModelData
 
 struct TextureData
 {
-	//std::string name; //don't need this, will be stored in hashtable
 	GLuint texID; 
 };
 
 struct ModelLoadingData
 {
-	//TODO data to be stored while waiting for it to load
 	size_t hash;
 	std::string name;
 };
 
 struct TextureLoadingData
 {
-	//TODO data to be stored while waiting for it to load
 	size_t hash;
 	std::string name;
 };
