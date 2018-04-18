@@ -10,16 +10,19 @@ Tank_Heavy::Tank_Heavy(map <string, string> paramsMap, GameSystemUtil* _gameSyst
 Tank_Heavy::~Tank_Heavy() {
 }
 
+//Updates the tank's health with damage dealt
 void Tank_Heavy::takeDamage(int damage) {
 	OutputDebugString("\nHEAVY Damaged\n");
 	health -= damage;
 	updatehpBar();
 }
 
+//Returns the object type as a string
 string Tank_Heavy::getObjectType() {	
 	return "Tank_Heavy";
 }
 
+//Creates projectile and shoots at the coordinates
 void Tank_Heavy::shoot(int targetX, int targetY) {
 	OutputDebugString("\nHEAVY SHOT\n");
 	int range = 4;

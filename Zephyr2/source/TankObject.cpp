@@ -5,6 +5,7 @@ TankObject::TankObject(map <string, string> paramsMap, GameSystemUtil* _gameSyst
 	maxHealth = health;
 }
 
+//returns the string representation of the objects data. Compatible with save file syntax
 string TankObject::toString() {
 	string output = GameObject::toString();
 	output += "\nhealth: " + to_string(health) + ",";
@@ -14,25 +15,26 @@ string TankObject::toString() {
 TankObject::~TankObject() {
 }
 
+//returns the object type string e.g. "GridObject"
 string TankObject::getObjectType() {
 	return "TankObject";
 }
-
+//returns the tanks health
 int TankObject::getHealth() {
 	// this->id
 	return this->health;
 }
-
+//sets the tanks health to the specified value
 void TankObject::setHealth(int newHealth) {
 	this->health = newHealth;
 }
-
+//updates the tanks health minus the damage taken
 void TankObject::takeDamage(int damage) {
 	OutputDebugString("\nBASE TakeDamgage\n");
 	health -= damage;
 	updatehpBar();
 }
-
+//Creates projectile and shoots at the coordinates
 void TankObject::shoot(int targetX, int targetY) {
 	int affectedRadius = 1;
 	int damage = 29;
@@ -121,35 +123,10 @@ int TankObject::checkShootValidity(GridObject* originObject, int targetX, int ta
 		return -1;
 }
 
+//checks if the turn is a valid move
 int TankObject::checkTurnValidity(int originX, int originY, int targetX, int targetY) {
 	if (gameSystemUtil->getGridDistance(originX, originY, targetX, targetY) == 0)
 		return 1;
 	else
 		return -1;
 }
-
-
-
-//int TankObject::getAxisOrientation() {
-//	int degrees = ((int)zRotation) % 360;
-//	switch (degrees) {
-//	case 0: //r
-//		return 0;
-//		break;
-//	case 180: //l
-//		return 1;
-//		break;
-//	case 60: //ur
-//		return 2;
-//		break;
-//	case 240: //dl
-//		return 3;
-//		break;
-//	case 120: //ul
-//		return 4;
-//		break;
-//	case 300: //dr
-//		return 5;
-//		break;
-//	}
-//}

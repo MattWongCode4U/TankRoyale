@@ -9,13 +9,14 @@ Tank_Scout::Tank_Scout(map <string, string> paramsMap, GameSystemUtil* _gameSyst
 
 Tank_Scout::~Tank_Scout() {
 }
-
+//Updates the tank's health with damage dealt
 void Tank_Scout::takeDamage(int damage) {
 	OutputDebugString("\nSCOUT Damaged\n");
 	health -= damage;
 	updatehpBar();
 }
 
+//Creates projectile and shoots at the coordinates
 void Tank_Scout::shoot(int targetX, int targetY) {
 	int range = 3;
 	int damage = 29;
@@ -92,6 +93,7 @@ int Tank_Scout::checkMoveValidity(GridObject* originObject, int targetX, int tar
 		return -1;
 }
 
+//Returns the objects type as a string
 string Tank_Scout::getObjectType() {
 	return "Tank_Scout";
 }

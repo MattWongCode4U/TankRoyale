@@ -200,11 +200,11 @@ void Scene_Lobby::sceneHandleMessage(Msg * msg) {
 		}
 	}
 };
-
+//Displays an 'error' popup
 void Scene_Lobby::loadNoClassSelected() {
 	gameSystem->addGameObjects("no_class_selected.txt");
 };
-
+//Removes the 'error' popup
 void Scene_Lobby::unloadNoClassSelected() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("NoClassButton"));
 };
