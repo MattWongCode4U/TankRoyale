@@ -28,8 +28,20 @@ void Tank_Artillery::shoot(int targetX, int targetY) {
 	int aYCube = -aXCube - aZCube;
 	vector<GameObject*>* gameObjects = gameSystemUtil->getGameObjectsVector();
 
-	//create explosion Object
+
+	//create target firing explosion Object
 	GridObject* go = (GridObject*)gameSystemUtil->makeGameObject("explostion.txt");
+	go->id = "explosion" + to_string(rand());
+	go->x = x;
+	go->y = y;
+	go->width = 4;
+	go->length = 4;
+	go->animationDelay = 1;
+	gameSystemUtil->createGameObject(go);
+	//go->updateWorldCoords();
+
+	//create target explosion Object
+	go = (GridObject*)gameSystemUtil->makeGameObject("explostion.txt");
 	go->id = "explosion" + to_string(rand());
 	go->gridX = targetX;
 	go->gridY = targetY;
