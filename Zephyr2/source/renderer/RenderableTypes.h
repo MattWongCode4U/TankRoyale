@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-//TODO move some of these into RendererInternalTypes.h
+//most of these have been moved to RendererInternalTypes
 
 /// <summary>
 /// Types of lights that can be rendered

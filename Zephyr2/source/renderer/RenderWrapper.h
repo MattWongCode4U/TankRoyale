@@ -9,6 +9,12 @@
 
 const float CAMERA_PAN_STEP = 1.0f;
 
+/*
+RenderWrapper sits between the RenderPipeline and the rest of the engine.
+It handles renderer state, messaging, and most of the object management
+This is largely an adapter between RACE and Zephyr paradigms
+Further information in RenderWrapper.cpp
+*/
 class RenderWrapper {
 public:
 	RenderWrapper(RenderSystem *system);
@@ -28,11 +34,13 @@ private:
 	int loadedLevel = 0;
 	RendererState state;
 
+	//pointers to managed objects
 	RenderSystem *system;
 	RenderPipeline *pipeline;
 	SDL_Window *window;
 	std::mutex mtx;
 
+	//list of objects handled
 	std::map<std::string, RenderableObject> *objects;
 	RenderableScene *scene;
 	RenderableOverlay *overlay;

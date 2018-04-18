@@ -10,16 +10,19 @@ Tank_Artillery::Tank_Artillery(map <string, string> paramsMap, GameSystemUtil* _
 Tank_Artillery::~Tank_Artillery() {
 }
 
+//Returns the objects type as a string
 string Tank_Artillery::getObjectType() {
 	return "Tank_Artillery";
 }
 
+//Updates the tank's health with damage dealt
 void Tank_Artillery::takeDamage(int damage) {
 	OutputDebugString("\nARTI Damaged\n");
 	health -= damage;
 	updatehpBar();
 }
 
+//Creates projectile and shoots at the coordinates
 void Tank_Artillery::shoot(int targetX, int targetY) {
 	int affectedRadius = 1;
 	int damage = 29;

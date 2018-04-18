@@ -34,73 +34,73 @@ void Scene_GameOver::sceneHandleMessage(Msg * msg)
 	// only one option; to go back to menu
 	switch (msg->type)
 	{
-	case SPACEBAR_PRESSED:
+	case SPACEBAR_PRESSED:									// arbitrary relocate if mouse click fails
 		gameSystem->loadScene(MAIN_MENU);
 		break;
-	case LEFT_MOUSE_BUTTON:
+	case LEFT_MOUSE_BUTTON:									// When the left mouse is pushed
 	{
 		vector<string> objectData = split(msg->data, ',');
 		INT32 x = atoi(objectData[0].c_str());
 		INT32 y = atoi(objectData[1].c_str());
 		INT32 width = atoi(objectData[2].c_str());
 		INT32 length = atoi(objectData[3].c_str());
-		x -= width / 2; y -= length / 2;
-		y = -y;
+		x -= width / 2; y -= length / 2;	
+		y = -y;												// Get location relative to center of screen
 		bool change = false;
 
 
-		for (GameObject *g : gameSystem->gameObjects)
+		for (GameObject *g : gameSystem->gameObjects)		// Search through the game objects
 		{
-			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
+			if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&	// Check bounds of items
 				(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 			{
-				if (g->id.compare("GameOverMenuItem3") == 0)
+				if (g->id.compare("GameOverMenuItem3") == 0)	// if it is the retreat button
 				{
 					// Load main menu
-					msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
-					gameSystem->loadScene(MAIN_MENU);
+					msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);	// Post message to sound
+					gameSystem->loadScene(MAIN_MENU);			// load Main Menu
 					change = true;
 					break;
 				}
 			}
 		}
-		if (change)
+		if (change)												// Just so this is only called once
 		{
-			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);
+			msgBus->postMessage(new Msg(LEVEL_LOADED, std::to_string(gameSystem->levelLoaded)), gameSystem);	// Post to change level
 		}
 		break;
 	}
-	case MOUSE_MOVE:
+	case MOUSE_MOVE:												// When mouse is moved on game screen
 	{
 		vector<string> objectData = split(msg->data, ',');
 		INT32 x = atoi(objectData[0].c_str());
 		INT32 y = atoi(objectData[1].c_str());
 		INT32 width = atoi(objectData[2].c_str());
 		INT32 length = atoi(objectData[3].c_str());
-		x -= width / 2; y -= length / 2;
+		x -= width / 2; y -= length / 2;							// realtive position
 		y = -y;
 		bool change = false;
 		auto it = gameSystem->gameObjects.begin();
-		for (; it != gameSystem->gameObjects.end(); ++it)
+		for (; it != gameSystem->gameObjects.end(); ++it)			// all game objects
 		{
-			if ((x < (*it)->x + ((*it)->width / 2) && x >(*it)->x - ((*it)->width / 2)) &&
+			if ((x < (*it)->x + ((*it)->width / 2) && x >(*it)->x - ((*it)->width / 2)) &&	// check bounds + location
 				(y < (*it)->y + ((*it)->length / 2) && y >(*it)->y - ((*it)->length / 2)))
 			{
-				if ((*it)->id.compare("GameOverMenuItem3") == 0)
+				if ((*it)->id.compare("GameOverMenuItem3") == 0)	// if retreat button
 				{
-					gameSystem->markerPosition = 3; change = true;
+					gameSystem->markerPosition = 3; change = true;	// set marker and flag this has changed
 					break;
 				}
 			}
 		}
-		if (it == gameSystem->gameObjects.end() && gameSystem->markerPosition == 3)
+		if (it == gameSystem->gameObjects.end() && gameSystem->markerPosition == 3)	// If there was no object found + marker still is retreat button
 		{
 			change = true;
-			gameSystem->markerPosition = 0;
+			gameSystem->markerPosition = 0;							// reset button
 		}
 		
-		if (change) {
-			if (gameSystem->markerPosition == 3)
+		if (change) {												// Update retreat button with new render item
+			if (gameSystem->markerPosition == 3)					
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverMenuItem" + to_string(3) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
 			else
 				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverMenuItem" + to_string(3) + ",1,MenuItem" + to_string(3) + ".png"), gameSystem);
@@ -110,6 +110,11 @@ void Scene_GameOver::sceneHandleMessage(Msg * msg)
 	}
 }
 
+/*
+* Populates the table from a vector of strings from the game system
+* Could only do this since scenes are deleted once exit
+* goes through list and switches the renderable object with player name
+*/
 void Scene_GameOver::PopulateTable(const std::vector<std::string> & vec)
 {
 	int count = 4, which = 1;

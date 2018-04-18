@@ -3,6 +3,9 @@
 #include <string>
 #include <map>
 
+/*
+Game preferences are stored here
+*/
 class GlobalPrefs
 {
 private:

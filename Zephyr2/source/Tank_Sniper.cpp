@@ -10,11 +10,13 @@ Tank_Sniper::Tank_Sniper(map <string, string> paramsMap, GameSystemUtil* _gameSy
 Tank_Sniper::~Tank_Sniper() {
 }
 
+//Updates the tank's health with damage dealt
 void Tank_Sniper::takeDamage(int damage) {
 	health -= damage;
 	updatehpBar();
 }
 
+//Creates projectile and shoots at the coordinates
 void Tank_Sniper::shoot(int targetX, int targetY) {
 	int range = 7;
 	int damage = 29;

@@ -3,6 +3,7 @@
 
 //const int TANK_MAX_HEALTH = 100;
 
+//Heavy tank class
 class Tank_Heavy : public TankObject {
 public:
 	Tank_Heavy(map<string, string> params, GameSystemUtil* _gameSystemUtil);
@@ -11,9 +12,10 @@ public:
 	//returns the object type string e.g. "GridObject"
 	std::string getObjectType();
 
-	void takeDamage(int damage);//reduce health and update hpBar
+	//Updates the tank's health with damage dealt
+	void takeDamage(int damage);
 
-	//deals damage and creates animations for the shooting action
+	//Creates projectile and shoots at the coordinates
 	void shoot(int targetX,int targetY) override;
 
 	//checks if the targeted move action is valid for this tankObject

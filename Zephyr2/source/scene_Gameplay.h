@@ -52,15 +52,16 @@ public:
 	//updates the reticle spright, and postion.
 	void updateReticle();
 
+	//Check the range of artillery tanks
 	void checkAOEReticle();
 
+	//Check players on the map and their status
 	void checkPlayers();
 
 	//sends a message to network system with the specified action
 	void sendNetworkActionMsg(ActionTypes actionType);
 
 	//the action point cost of the current action. -1 if action not allowed
-	//bool validMove = false;
 	int moveCost = -1;
 	std::size_t _playersOut = 0;
 
