@@ -29,8 +29,8 @@ imageFrames: 1;
 
 
 gameObjectType: FullscreenObj,
-id: aasdffa,
-renderable: TankFrameScout.png,
+id: TankFramePic0,
+renderable: Frame0.png,
 xPos: -150,
 yPos: 150,
 zPos: 19,
@@ -43,8 +43,8 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
-id: aasdf,
-renderable: TankFrameSniper.png,
+id: TankFramePic1,
+renderable: Frame1.png,
 xPos: 150,
 yPos: 150,
 zPos: 19,
@@ -57,8 +57,8 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
-id: asdff,
-renderable: TankFrameHeavy.png,
+id: TankFramePic2,
+renderable: Frame2.png,
 xPos: -150,
 yPos: -100,
 zPos: 19,
@@ -71,8 +71,8 @@ renderType: overlay,
 imageFrames: 1;
 
 gameObjectType: FullscreenObj,
-id: asdf,
-renderable: TankFrameArtillery.png,
+id: TankFramePic3,
+renderable: Frame3.png,
 xPos: 150,
 yPos: -100,
 zPos: 19,

@@ -12,6 +12,8 @@ public:
 	//runs whenever a message is received by GameSystem
 	void sceneHandleMessage(Msg * msg);
 
+	void PopulateTable(const std::vector<std::string> & vec);
+
 	//code that runs once when  scene is loaded goes here
 	void startScene();
 };
