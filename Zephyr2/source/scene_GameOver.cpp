@@ -112,15 +112,30 @@ void Scene_GameOver::sceneHandleMessage(Msg * msg)
 
 void Scene_GameOver::PopulateTable(const std::vector<std::string> & vec)
 {
-	size_t count = 4, which = 1;
+	int count = 4, which = 1;
+	if (gameSystem->win)
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverHeader" + to_string(1) + ",1,Win" + ".png"), gameSystem);
+	else
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverHeader" + to_string(1) + ",1,Lose" + ".png"), gameSystem);
+
 	for (std::vector<std::string>::const_iterator it = vec.begin(); it != vec.end(); ++it)
 	{
 		if (it->compare("player1") == 0) which = 1;
 		else if(it->compare("player2") == 0) which = 2;
 		else if (it->compare("player3") == 0) which = 3;
 		else if (it->compare("player4") == 0) which = 4;
+		else if (it->compare("Here") == 0)
+		{
+			FullscreenObj * arrow = gameSystem->findFullscreenObject("GameOverArrow");
+			if (count > 2)
+				arrow->y = (((count - 2) / 2) * -50) - 25;
+			if (count <= 2)
+				arrow->y = (((count - 3) / 2) * -50) + 25;
+			arrow->postPostionMsg();
+			continue;
+		}
 
-		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverPlace" + to_string(count) + ",1,player" + to_string(which) + "_tag" + ".png"), gameSystem);
+		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverPlace" + to_string(count) + ",1,Player" + to_string(which) + ".png"), gameSystem);
 		count--;
 	}
 }

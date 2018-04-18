@@ -174,4 +174,6 @@ public:
 
 	std::vector<std::string> _gameOverList;
 
+	bool win = false;
+
 };

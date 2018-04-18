@@ -62,6 +62,7 @@ public:
 	//the action point cost of the current action. -1 if action not allowed
 	//bool validMove = false;
 	int moveCost = -1;
+	std::size_t _playersOut = 0;
 
 
 	//the local player tank object

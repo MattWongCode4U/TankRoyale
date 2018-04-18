@@ -133,9 +133,7 @@ void Scene_MainMenu::sceneHandleMessage(Msg * msg) {
 				}
 			}
 		}
-		if (it == gameSystem->gameObjects.end() &&
-			   (gameSystem->markerPosition == 1 || gameSystem->markerPosition == 2 ||
-				gameSystem->markerPosition == 3 || gameSystem->markerPosition == 0)) 
+		if (it == gameSystem->gameObjects.end() && (gameSystem->markerPosition != -1)) 
 		{
 			change = true;
 			gameSystem->markerPosition = -1;

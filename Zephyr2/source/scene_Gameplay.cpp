@@ -18,7 +18,7 @@ void Scene_Gameplay::startScene() {
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
 	gameSystem->_gameOverList = std::vector<std::string>();
-	
+	_playersOut = 0;
 	validActionsOverlay = gameSystem->findGridObject("validActionsOverlay");
 	
 	//gameSystem->reticle = gameSystem->findGridObject("reticle");
@@ -792,38 +792,42 @@ void Scene_Gameplay::checkAOEReticle() {
 
 void Scene_Gameplay::checkPlayers()
 {
-	if (playerTank == nullptr) return;
+	if (playerTank == nullptr || gameSystem->win) return;
 
 	if (!playerTank->outOfMatch && playerTank->health <= 0)
 	{
 		playerTank->outOfMatch = true;
+		gameSystem->_gameOverList.emplace_back("Here");
 		gameSystem->_gameOverList.emplace_back(playerTank->id);
 		loadGameOverMenu();
 	}
-	else
+	for (int i = 1; i < 5; i++)
 	{
-		int count = 0;
-		for (int i = 1; i < 5; i++)
+		TankObject * t;
+		if (t = gameSystem->findTankObject(std::string("player" + to_string(i))))
 		{
-			TankObject * t;
-			if (t = gameSystem->findTankObject(std::string("player" + to_string(i))))
+			if (!t->outOfMatch && t->health <= 0)
 			{
-				if (t->outOfMatch)
-					count++;
-				else if (!t->outOfMatch && t->health <= 0)
-				{
-					t->outOfMatch = true;
-					count++;
-					gameSystem->_gameOverList.emplace_back(t->id);
-				}
+				t->outOfMatch = true;
+				_playersOut++;
+				gameSystem->_gameOverList.emplace_back(t->id);
+			}
+			else if (!t->outOfMatch && playerTank->outOfMatch && _playersOut == 2)
+			{
+				_playersOut++;
+				gameSystem->_gameOverList.emplace_back(t->id);
+				loadGameOverMenu();
 			}
 		}
-		if (gameSystem->_gameOverList.size() == 3)
-		{
-			playerTank->outOfMatch = true;
-			gameSystem->_gameOverList.emplace_back(playerTank->id);
-			loadGameOverMenu();
-		}
+	}
+
+	if (!playerTank->outOfMatch && _playersOut == 3)
+	{
+		playerTank->outOfMatch = true;
+		gameSystem->_gameOverList.emplace_back("Here");
+		gameSystem->_gameOverList.emplace_back(playerTank->id);
+		loadGameOverMenu();
+		gameSystem->win = true;
 	}
 }
 
