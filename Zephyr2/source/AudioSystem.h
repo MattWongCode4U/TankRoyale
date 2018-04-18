@@ -15,8 +15,8 @@
 #define ARTILLERY_SHOT_SFX "Assets/Sfx/Explosion.mp3"
 #define MOVEMENT_SFX "Assets/Sfx/HoverSound.mp3"
 #define BUTTON_SELECT_SFX "Assets/Sfx/GUI_Select.mp3"
-#define GAMEPLAY_SND "Assets/Sfx/IGT.mp3"
-#define MENU_SND "Assets/Sfx/LastDawn.mp3"
+#define GAMEPLAY_SND "Assets/Sfx/LastDawn.mp3"
+#define MENU_SND "Assets/Sfx/IGT.mp3"
 
 class AudioSystem : public System
 {

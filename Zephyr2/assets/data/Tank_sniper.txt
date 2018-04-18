@@ -15,4 +15,5 @@ renderType: object3d,
 imageFrames: 1,
 gridX: -2,
 gridY: 3,
-health: 100
+health: 100,
+collisionsEnabled: 1

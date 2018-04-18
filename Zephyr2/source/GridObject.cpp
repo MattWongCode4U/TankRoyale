@@ -53,12 +53,23 @@ void GridObject::updateWorldCoords(int frameDelay) {
 		setPosition(newX, vertDist * gridY, z);
 	else
 		moveTowards(newX, newY, z, zRotation, frameDelay);
-	//x = newX;
-	//y = vertDist * gridY;
-	//z = z;
 }
 
+vect2 GridObject::gridToWorlPos(int gridX, int gridY) {
+	float hexHeight = hexSize * 2.0f; //height of a single hex tile
+	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
+	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
 
+	vect2 v;
+	v.x= hexWidth * gridX;
+
+	if (gridY % 2 != 0) {
+		v.x += hexWidth / 2;
+	}
+	v.y = vertDist * (float)gridY;
+
+	return v;
+}
 
 int GridObject::getAxisOrientation(GridObject* g) {
 	//if no grid object specified, find orientation for this object

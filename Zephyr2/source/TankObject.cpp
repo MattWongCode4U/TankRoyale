@@ -53,8 +53,12 @@ void TankObject::shoot(int targetX, int targetY) {
 		if (TankObject* tank = dynamic_cast<TankObject*>(go)) {
 			if (gameSystemUtil->getGridDistance(targetX, targetY, tank->gridX, tank->gridY) <= affectedRadius) {
 				tank->takeDamage(damage);
-				if (tank->health <= 0)
+				if (tank->health <= 0) {
 					gameSystemUtil->postMessageToBus(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"));
+					tank->renderable = "crater.png";
+					tank->collisionsEnabled = false;
+				}
+					
 			}
 		}
 	}
@@ -78,18 +82,20 @@ void TankObject::createhpBar() {
 //updates the hpBar
 void TankObject::updatehpBar() {
 	//set bar width
-	hpBar->width*= ((float)health / maxHealth);
+	if (hpBar != nullptr) {
+		hpBar->width *= ((float)health / maxHealth);
 
-	//set color
-	if ((float)health / maxHealth < .3f)
-		hpBar->renderable = "red_hpbar";
-	else if ((float)health / maxHealth < .5f)
-		hpBar->renderable = "orange_hpbar";
-	else if ((float)health / maxHealth > .8f)
-		hpBar->renderable = "green_hpbar";
+		//set color
+		if ((float)health / maxHealth < .3f)
+			hpBar->renderable = "red_hpbar";
+		else if ((float)health / maxHealth < .5f)
+			hpBar->renderable = "orange_hpbar";
+		else if ((float)health / maxHealth > .8f)
+			hpBar->renderable = "green_hpbar";
 
-	//post updated information message for the renderer
-	hpBar->postPostionMsg();
+		//post updated information message for the renderer
+		hpBar->postPostionMsg();
+	}
 }
 
 //checks if the targeted move action is valid for this tankObject

@@ -1,6 +1,8 @@
 #include "GameSystem.h"
 
 GameSystem::GameSystem(MessageBus* mbus) : System(mbus) {
+	//creates the root for the collision quad tree
+	quadTreeRoot = new quadTreeNode(0, 0, 200);
 }
 
 
@@ -48,6 +50,9 @@ GameObject* GameSystem::makeGameObject(string fileName) {
 	}
 	else if (gameObjectType.compare("Tank_Sniper") == 0) {
 		g = new Tank_Sniper(gameObjDataMap, this);
+	}
+	else if (gameObjectType.compare("Projectile") == 0) {
+		g = new Projectile(gameObjDataMap, this);
 	}
 	return g;
 }
@@ -101,6 +106,9 @@ void GameSystem::addGameObjects(string fileName) {
 		else if (gameObjectType.compare("Tank_Sniper") == 0) {
 			g = new Tank_Sniper(gameObjDataMap, this);
 		}
+		else if (gameObjectType.compare("Projectile") == 0) {
+			g = new Projectile(gameObjDataMap, this);
+		}
 
 		if (g != NULL) {
 			createGameObject(g);
@@ -148,21 +156,23 @@ void GameSystem::createGameObject(GameObject* g) {
 		<< g->animationDelay << ","
 		<< (int)g->animateOnce;
 	//<< g->renderable;
-	// maybe add the rest of the variables into the oss as well, but can decide later depending on
-	// what physics needs
 
 	msgBus->postMessage(new Msg(GO_ADDED, oss.str()), this);
 
-	//set the object's parent
+	//set the object's parent if there is one
 	if (g->parentId != "") {
 		for (GameObject* p : gameObjects) {
 			if (p->id == g->parentId) {
 				g->setParent(p);
-				//g->offsetPosition(p->x, p->y, p->z, p->zRotation);
-				//g->offsetPosition(0, 0, 0, 0);
 			}
 		}
 	}
+
+	//add to the collisions quad tree, if colliisons are enabled
+	if (g->collisionsEnabled==1)
+		insertIntoQuadTree(quadTreeRoot, g);
+	
+		
 }
 
 
@@ -182,8 +192,10 @@ void GameSystem::startSystemLoop() {
 		}
 		currentGameTime = thisTime + timeFrame;
 
-
 		handleMsgQ();
+
+		//handle collisions using the quad tree
+		handleCollisions();
 
 		/////////////////////////////////////////////////////////////////////
 		//							OK to Run							   //
@@ -409,8 +421,10 @@ void  GameSystem::loadScene(SceneType _scene){
 	case INSTRUCTION_MENU:
 		scene = new Scene_InstructionsMenu(msgBus, this);
 		break;
+	case GAME_OVER:
+		scene = new Scene_GameOver(msgBus, this);
+		break;
 	}
-
 	scene->startScene();
 }
 
@@ -652,4 +666,121 @@ int GameSystem::onAxis(int x1, int y1, int x2, int y2, int range) {
 	}
 
 	return -1; //Not on any axis or in range
+}
+
+//check if there is a collisiion between the two Gameobjects
+//gameObject hitboxes are currently rectangular, with no rotation. 
+bool GameSystem::checkCollision(GameObject* a, GameObject* b) {
+	float aWidth = 1;
+	float aLength = 1;
+	float bWidth = 1;
+	float bLength =1;
+
+	if ((a->x + aWidth >= b->x - bWidth)
+		&& (a->x - aWidth <= b->x + bWidth)
+		&& (a->y + aLength >= b->y - bLength)
+		&& (a->y - aLength <= b->y + bLength)) {
+		b->onCollide(a);
+		return true;
+
+
+	//if ((a->x + a->width >= b->x - b->width)
+	//	&& (a->x - a->width <= b->x + b->width)
+	//	&& (a->y + a->length >= b->y - b->length)
+	//	&& (a->y - a->length <= b->y + b->length)) {
+	//	b->onCollide(a);
+	//	return true;
+	}
+		
+	return false;
+}
+
+//collision between a collision quadTree node and a gameobject
+//gameObject hitboxes are currently rectangular, with no rotation. Nodes are always square, with no rotation
+bool GameSystem::checkCollision(quadTreeNode* a, GameObject* b) {
+	if ((a->x + a->size >= b->x - b->width)
+		&& (a->x - a->size <= b->x + b->width)
+		&& (a->y + a->size >= b->y - b->length)
+		&& (a->y - a->size <= b->y + b->length))
+		return true;
+	return false;
+}
+
+//inset the gameObject into the collision quad tree
+void GameSystem::insertIntoQuadTree(quadTreeNode* root, GameObject* g) {
+	bool gInNode = checkCollision(root, g);
+	if (gInNode) {
+		root->isEmpty = false;
+		root->containedObjects.push_back(g);
+
+		//if there this is a leaf node check if it neads to be extended
+		if (root->isLeaf && root->size > 8 && root->containedObjects.size()>1) {
+			root->isLeaf = false;
+			root->childNodes[0] = new quadTreeNode(root->x - root->size / 2, root->y + root->size / 2, root->size / 2);
+			root->childNodes[1] = new quadTreeNode(root->x + root->size / 2, root->y + root->size / 2, root->size / 2);
+			root->childNodes[2] = new quadTreeNode(root->x - root->size / 2, root->y - root->size / 2, root->size / 2);
+			root->childNodes[3] = new quadTreeNode(root->x + root->size / 2, root->y - root->size / 2, root->size / 2);
+		}
+		if (!root->isLeaf)
+			for (quadTreeNode* q : root->childNodes)
+				insertIntoQuadTree(q, g);
+	}
+}
+
+//remove the object from the collision quad tree
+void GameSystem::removeFromQuadTree(quadTreeNode* root, GameObject* g) {
+	for (GameObject* cg : root->containedObjects) {
+		if (cg == g) {
+			root->containedObjects.erase(remove(root->containedObjects.begin(), root->containedObjects.end(), g), root->containedObjects.end());
+			if (!root->isLeaf) {
+				for (quadTreeNode* c : root->childNodes)
+					removeFromQuadTree(c, g);
+			}
+		}
+	}
+}
+
+//check if the the GameObject is colliding with anything, using the quadTree 
+//returns true if there has been any collisions
+bool GameSystem::checkTreeCollision(quadTreeNode* root, GameObject* g) {
+	bool hitNode = checkCollision(root, g);
+
+	if (hitNode && !root->isEmpty && root->isLeaf &&root->containedObjects.size() > 1) {
+		for (GameObject* cg : root->containedObjects) {
+			if (cg != g && checkCollision(cg, g))
+				return true;
+		}
+	}
+
+	//if hit root node and not empty check children
+	if (hitNode && !root->isEmpty && !root->isLeaf && root->containedObjects.size() > 1) {
+		for (quadTreeNode* q : root->childNodes) {
+			if (checkTreeCollision(q, g))
+				return true;
+		}
+	}
+	return false;
+}
+
+//clears the all objects from the collision quad tree
+void GameSystem::clearQuadTree(quadTreeNode* root) {
+	if (root == nullptr)
+		return;
+
+	for (quadTreeNode* q : root->childNodes) {
+		clearQuadTree(q);
+	}
+	delete root;
+	return;
+}
+
+void GameSystem::handleCollisions() {
+	for (GameObject* g : gameObjects) {
+		if (g->collisionsEnabled) {
+			removeFromQuadTree(quadTreeRoot, g);
+			insertIntoQuadTree(quadTreeRoot, g);
+
+			checkTreeCollision(quadTreeRoot, g);
+		}
+	}
 }

@@ -17,7 +17,8 @@ void Scene_Gameplay::startScene() {
 	gameSystem->levelLoaded = 2;
 	Msg* m = new Msg(LEVEL_LOADED, "2");
 	msgBus->postMessage(m, gameSystem);
-	
+	gameSystem->_gameOverList = std::vector<std::string>();
+	_playersOut = 0;
 	validActionsOverlay = gameSystem->findGridObject("validActionsOverlay");
 	
 	//gameSystem->reticle = gameSystem->findGridObject("reticle");
@@ -26,7 +27,7 @@ void Scene_Gameplay::startScene() {
 		g->parentId = gameSystem->reticle->id;
 		gameSystem->createGameObject(g);
 		actionIndicator = g;
-		}
+	}
 	setActionType(ROTATEPOS);
 		
 	msgBus->postMessage(new Msg(READY_TO_START_GAME, gameSystem->tankClass), gameSystem);
@@ -72,6 +73,7 @@ void Scene_Gameplay::sceneUpdate() {
 	else if (framesSinceTurnStart == 400) {//actions animation done, return control to player
 		//setActionType(ActionType);
 	}
+	checkPlayers();
 	framesSinceTurnStart++;
 }
 
@@ -109,7 +111,10 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		//messages to be read in both active and inactive game state
 		switch (msg->type) {
 		case NETWORK_R_START_TURN:
-			gameActive = true;
+			if (playerTank != nullptr && playerTank->outOfMatch)
+				gameActive = false;
+			else
+				gameActive = true;
 			OutputDebugString("RECEVIED NETWORK_R_START_TURN... INPUT UNBLOCKED\n");
 			updateActionOrigin(playerTank);
 
@@ -348,7 +353,6 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				actionBarId2 = "actionBar" + to_string(gameSystem->currentAction + 2);
 			}
 			
-
 			for (GameObject* g : gameSystem->gameObjects) {
 				if (g->id == indicatorId) {
 					indicator = (GridObject*)g;
@@ -451,7 +455,14 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 		
 		case KEY_ESC_RELEASED:
 			// Pause the game (lock control, display 2 buttons)
-			loadPauseMenu();
+			if (!playerTank->outOfMatch)
+			{
+				loadPauseMenu();
+			}
+			else
+			{
+				loadGameOverMenu();
+			}
 			gameActive = false;
 			break;
 		default:
@@ -482,21 +493,51 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 					if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
 						(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
 					{
-						if (g->id.compare("PauseMenuItem3") == 0)
+						if (!playerTank->outOfMatch)
 						{
-							// Load main menu
-							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
-							gameSystem->loadScene(MAIN_MENU);
-							change = true;
-							break;
-						} else if (g->id.compare("PauseMenuItem4") == 0)
+							if (g->id.compare("PauseMenuItem3") == 0)
+							{
+								// Load main menu
+								msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+								gameSystem->loadScene(MAIN_MENU);
+								change = true;
+								break;
+							}
+							else if (g->id.compare("PauseMenuItem4") == 0)
+							{
+								// unload game objects from pause menu
+								msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+								unloadPauseMenuObjects();
+								// continue game
+								gameActive = true;
+								break;
+							}
+						}
+						else
 						{
-							// unload game objects from pause menu
-							msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
-							unloadPauseMenuObjects();
-							// continue game
-							gameActive = true;
-							break;
+							if (g->id.compare("GameOverMenuItem3") == 0)
+							{
+								// Load main menu
+								msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+								gameSystem->loadScene(GAME_OVER);
+								std::string msgData;
+								for (std::string s : gameSystem->_gameOverList)
+								{
+									msgData += s + ',';
+								}
+								msgBus->postMessage(new Msg(PASS_LEADERBOARD, msgData), gameSystem);
+								change = true;
+								break;
+							}
+							else if (g->id.compare("GameOverMenuItem4") == 0)
+							{
+								// unload game objects from pause menu
+								msgBus->postMessage(new Msg(BUTTON_SELECT_SOUND), gameSystem);
+								unloadGameOverMenuObjects();
+								// continue game
+								gameActive = true;
+								break;
+							}
 						}
 					}
 				}
@@ -508,7 +549,14 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 			case KEY_ESC_RELEASED:
 				// resume gameplay
 				// basically button 1
-				unloadPauseMenuObjects();
+				if (!playerTank->outOfMatch)
+				{
+					unloadPauseMenuObjects();
+				}
+				else
+				{
+					unloadGameOverMenuObjects();
+				}
 				gameActive = true;
 				break;
 			case MOUSE_MOVE:
@@ -521,31 +569,68 @@ void Scene_Gameplay::sceneHandleMessage(Msg * msg) {
 				x -= width / 2; y -= length / 2;
 				y = -y;
 				bool change = false;
-
-				for (GameObject *g : gameSystem->gameObjects)
+				auto it = gameSystem->gameObjects.begin();
+				for (; it != gameSystem->gameObjects.end(); ++it)
 				{
-					if ((x < g->x + (g->width / 2) && x > g->x - (g->width / 2)) &&
-						(y < g->y + (g->length / 2) && y > g->y - (g->length / 2)))
+					if ((x < (*it)->x + ((*it)->width / 2) && x >(*it)->x - ((*it)->width / 2)) &&
+						(y < (*it)->y + ((*it)->length / 2) && y >(*it)->y - ((*it)->length / 2)))
 					{
-						if (g->id.compare("PauseMenuItem3") == 0 && gameSystem->markerPosition != 2)
+						if (playerTank != nullptr && !playerTank->outOfMatch)
 						{
-							gameSystem->markerPosition = 3; change = true;
+							if ((*it)->id.compare("PauseMenuItem3") == 0)
+							{
+								gameSystem->markerPosition = 3; change = true;
+								break;
+							}
+							else if ((*it)->id.compare("PauseMenuItem4") == 0)
+							{
+								gameSystem->markerPosition = 4; change = true;
+								break;
+							}
 						}
-						else if (g->id.compare("PauseMenuItem4") == 0 && gameSystem->markerPosition != 4)
+						else
 						{
-							gameSystem->markerPosition = 4; change = true;
+							if ((*it)->id.compare("GameOverMenuItem3") == 0)
+							{
+								gameSystem->markerPosition = 3; change = true;
+								break;
+							}
+							else if ((*it)->id.compare("GameOverMenuItem4") == 0)
+							{
+								gameSystem->markerPosition = 4; change = true;
+								break;
+							}
 						}
 					}
 				}
 
+				if (it == gameSystem->gameObjects.end() && (gameSystem->markerPosition == 3 || gameSystem->markerPosition == 4))
+				{
+					change = true;
+					gameSystem->markerPosition = 0;
+				}
+
 				if (change) {
 					for (int i = 3; i < 5; i++) {
-						if (i == gameSystem->markerPosition) {
-							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+						if (!playerTank->outOfMatch)
+						{
+							if (i == gameSystem->markerPosition) {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+							}
+							else {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+							}
 						}
-						else {
-							msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "PauseMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+						else
+						{
+							if (i == gameSystem->markerPosition) {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverMenuItem" + to_string(i) + ",1,MenuItemSelected" + to_string(gameSystem->markerPosition) + ".png"), gameSystem);
+							}
+							else {
+								msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, "GameOverMenuItem" + to_string(i) + ",1,MenuItem" + to_string(i) + ".png"), gameSystem);
+							}
 						}
+						
 					}
 				}
 				break;
@@ -705,6 +790,47 @@ void Scene_Gameplay::checkAOEReticle() {
 	}
 };
 
+void Scene_Gameplay::checkPlayers()
+{
+	if (playerTank == nullptr || gameSystem->win) return;
+
+	if (!playerTank->outOfMatch && playerTank->health <= 0)
+	{
+		playerTank->outOfMatch = true;
+		gameSystem->_gameOverList.emplace_back("Here");
+		gameSystem->_gameOverList.emplace_back(playerTank->id);
+		loadGameOverMenu();
+	}
+	for (int i = 1; i < 5; i++)
+	{
+		TankObject * t;
+		if (t = gameSystem->findTankObject(std::string("player" + to_string(i))))
+		{
+			if (!t->outOfMatch && t->health <= 0)
+			{
+				t->outOfMatch = true;
+				_playersOut++;
+				gameSystem->_gameOverList.emplace_back(t->id);
+			}
+			else if (!t->outOfMatch && playerTank->outOfMatch && _playersOut == 2)
+			{
+				_playersOut++;
+				gameSystem->_gameOverList.emplace_back(t->id);
+				loadGameOverMenu();
+			}
+		}
+	}
+
+	if (!playerTank->outOfMatch && _playersOut == 3)
+	{
+		playerTank->outOfMatch = true;
+		gameSystem->_gameOverList.emplace_back("Here");
+		gameSystem->_gameOverList.emplace_back(playerTank->id);
+		loadGameOverMenu();
+		gameSystem->win = true;
+	}
+}
+
 void Scene_Gameplay::setPlayerTank(std::string playerID) {
 	if (playerTank != nullptr) {
 		msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, playerTank->id + ",1,sciFiTank2.png,"), gameSystem);
@@ -717,7 +843,7 @@ void Scene_Gameplay::setPlayerTank(std::string playerID) {
 
 				string debugS = "PLAYER POINTER SET TO: " + playerID + "\n";
 				OutputDebugString(debugS.c_str());
-		}
+			}
 	}
 }
 
@@ -729,6 +855,18 @@ void Scene_Gameplay::unloadPauseMenuObjects() {
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem3"));
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("PauseMenuItem4"));
 	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("Frame"));
+}
+
+
+void Scene_Gameplay::loadGameOverMenu() {
+	gameSystem->addGameObjects("gameover_menu.txt");
+}
+
+void Scene_Gameplay::unloadGameOverMenuObjects() {
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("GameOverMenuItem3"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("GameOverMenuItem4"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("Frame"));
+	gameSystem->deleteGameObject(gameSystem->findFullscreenObject("GameOverHeader1"));
 }
 
 void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
@@ -748,7 +886,7 @@ void Scene_Gameplay::sendNetworkActionMsg(ActionTypes actionType) {
 void Scene_Gameplay::updateActionOrigin(GridObject* newOrigin) {
 	if (newOrigin == nullptr) return;
 
-	queuedOrientation = (queuedOrientation + 360) % 360;
+	//queuedOrientation = (queuedOrientation + 360) % 360;
 
 	actionOrigin = newOrigin;
 
@@ -760,11 +898,8 @@ void Scene_Gameplay::updateActionOrigin(GridObject* newOrigin) {
 	validActionsOverlay->gridY = newOrigin->gridY;
 	validActionsOverlay->updateWorldCoords();
 
-	
-
-	
-	
 }
+
 void Scene_Gameplay::playShotSfx(std::string objectType) {
 	if (objectType == "Tank_Scout") {
 		msgBus->postMessage(new Msg(REGULAR_SHOT_SOUND), gameSystem);

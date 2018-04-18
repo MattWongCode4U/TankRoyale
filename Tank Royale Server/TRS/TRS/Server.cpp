@@ -100,7 +100,7 @@ bool Server::acceptNewClient(unsigned int & id) {
 		// make new client object and add it to the client list
 		// clients.push_back(new Client(client_id, ClientSocket));
 
-		bool inserted = false;
+		bool inserted = false;		
 		for (auto & l : lobbies) {
 			if (!l->full) {
 				l->players.push_back(new Client(client_id, ClientSocket));
@@ -109,6 +109,7 @@ bool Server::acceptNewClient(unsigned int & id) {
 				if (l->players.size() == 4) {
 					l->full = true;
 				}
+
 				printf("Now Inserted\n");
 
 				break;

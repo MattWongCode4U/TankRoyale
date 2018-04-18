@@ -66,6 +66,11 @@ GameObject::GameObject(map <string, string> paramsMap, GameSystemUtil* _gameSyst
 		else
 			smoothness = 0.5f;
 
+		if (!(paramsMap.find("collisionsEnabled") == paramsMap.end()))
+			collisionsEnabled = stoi(paramsMap.find("collisionsEnabled")->second);
+		else
+			collisionsEnabled = 0;
+
 	}
 	catch (const exception& e) {
 		cout << e.what(); // information from length_error printed
@@ -110,13 +115,11 @@ void GameObject::lateUpdate() {
 
 }
 
+//called by the checkColliision() in gameSystem. 
+//should get called every frame that the object is colliding with another object 
+//only used by objects with the collisions enabled flag set to true
 void GameObject::onCollide(GameObject* otherObj) {
-	//OutputDebugString(id.c_str());
-	//OutputDebugString( " COLLIDED WITH " );
-	//OutputDebugString(otherObj->id.c_str());
-	//OutputDebugString("\n");
-
-	//objData->toDestroyVector.push_back(this);
+	//TODO: handle collision effects here
 }
 
 //sets the object's (x,y) position to the coordinates specified by the vector2 parameter
@@ -215,8 +218,8 @@ void GameObject::moveTowards(float targetX, float targetY, float targetZ, float 
 	offsetX = (targetX-x) / (float)frames;
 	offsetY = (targetY-y) / (float)frames;
 	offsetZ = (targetZ-z) / (float)frames;
-	float newRotation = std::fmod((turnZ - zRotation),360);
-	rotationOffsetZ = newRotation / (float)frames;
+	//float newRotation = std::fmod((turnZ - zRotation),360);
+	rotationOffsetZ = (turnZ - zRotation) / (float)frames;
 }
 
 
