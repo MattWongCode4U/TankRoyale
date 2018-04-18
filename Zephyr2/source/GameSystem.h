@@ -55,34 +55,57 @@ struct quadTreeNode {
 	};
 };
 
+//identifies the the scene, or level of the game. corresponds to a Scene_ class
 enum SceneType { MAIN_MENU, LOBBY_MENU, GAMEPLAY, SETTINGS_MENU, INSTRUCTION_MENU, GAME_OVER };
 
+//handles scene and game objects
 class GameSystem : public System, GameSystemUtil {
 public:
+	//the minimum length of a GameSystem frame in milliseconds. 
+	//used in system clocking so that fast systems don't run too fast and hog resources
+	const int timeFrame = 20;
+
+	//The gameObjects in the scene
+	std::vector<GameObject*> gameObjects;
+
+	//the currently loaded scene
+	Scene* scene;
+
 	GameSystem(MessageBus* mbus);
 	~GameSystem();
 
 	void handleMessage(Msg * msg);
 
 	void startSystemLoop();
-	//void startTestLevel();
+
+	//reads gameobjects from a file. instantiates them and adds them to the list of active objects
 	void addGameObjects(string fileName);
+
+	//reads a gameObject from a file instantiates it, and returns it. Doesn't actually add the gameobject to the game
 	GameObject* GameSystem::makeGameObject(string fileName);
+
+	//save the current state of the game. Not currently used by TankRoyale
 	void saveToFIle(string fileName);
+
+	//adds the GameObject passed in to the scene.
 	void createGameObject(GameObject* g);
+
+	//broadcasts a message to other systems, telling them this object is removed from play
 	void gameObjectRemoved(GameObject* g);
-	std::vector<GameObject*> gameObjects;
 
 	//closes the old scene and opens a new one 
 	void  loadScene(SceneType _scene);
+
+	//removes all objects from the scene, and broadcasts a message letting other systems know the object is removed
 	void removeAllGameObjects();
-	void deleteGameObject(string id);
+
+	//removes a gameobject from the gameObjects vector, and deletes it
+	void deleteGameObject(std::string id);
 	void deleteGameObject(GameObject* go);
 	std::vector<GameObject*>* getGameObjectsVector();
-	int getGridDistance(int aX, int aY, int bX, int bY);//gets the distance between 2 points on the hex grid
 
-	//deal damage in a straight line from the origin position along an axis
-	//void dealLineDamage(int _originX, int _originY, int length, int axis, int damage);
+	//gets the distance between 2 points on the hex grid
+	int getGridDistance(int aX, int aY, int bX, int bY);
 
 	//returns true if the two points are on the same specified axis
 	//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
@@ -99,7 +122,10 @@ public:
 	//handles the collisions using the quad tree
 	void handleCollisions();
 
+	//check if a GameObject is colliding with another
 	bool checkCollision(GameObject* a, GameObject* b);
+
+	//check if a GameObject is colliding with a quad tree node. used to populate the quad tree
 	bool checkCollision(quadTreeNode* a, GameObject* b);
 
 	//inset the gameObject into the collision quad tree
@@ -118,30 +144,21 @@ public:
 	//the root node of the collision quad tree
 	quadTreeNode* quadTreeRoot;
 
-	//the currently loaded scene
-	Scene* scene;
-
-	const int timeFrame = 20;
-	
-
-	// -1	= no level loaded
-	// 0	= Main Menu
-	// 1	= Settings
-	// 2	= In Game
-	// 3	= Game Over
-	// 4	= Instructions
+	//the currently loaded level. May be replaced by the SceneTpe enum
 	int levelLoaded = -1;
 
 	// The position of the marker, goes from 0 to 2, 0 being the top
 	int markerPosition = 0;
 	int markerPositionPrime = 0;
 
+	//player score
 	int score = 0;
 
-	std::string clientID = "defaultClientID";//the id of the client on the server
+	//the id of the client on the server
+	std::string clientID = "defaultClientID";
 
-	//void setPlayerTank(std::string playerID);
 
+	//find a GameObject by its id
 	GameObject* findGameObject(std::string objectID);
 	TankObject* findTankObject(std::string objectID);
 	GridObject* findGridObject(std::string objectID);
@@ -156,7 +173,8 @@ public:
 	//send a message with updated object position
 	void sendUpdatePosMessage(GameObject* g);
 
-	int currentAction = 0;//the current action that is being set
+	//the current turn action that is being set
+	int currentAction = 0;
 
 	vector<string> actionsToExecute; //the actions to be executed this turn. Received from the network system
 
@@ -168,12 +186,16 @@ public:
 	//maximumNumber of actions per turn
 	int maxActions = 4;
 
+	//the player's class
 	std::string tankClass = "heavy";
 	
+	//message pointer used in sustem message handling functions
 	Msg *m;
 
+	//State the game to be used by gameOver scene. Lists players and their ranking in the match
 	std::vector<std::string> _gameOverList;
 
+	//did the current player win the match?
 	bool win = false;
 
 };
