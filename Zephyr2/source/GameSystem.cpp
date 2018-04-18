@@ -126,8 +126,7 @@ void GameSystem::saveToFIle(string fileName) {
 	writeToFile(fileName, output);
 }
 
-// This function adds a created game object to the main list, and posts a message to the render
-// and physics systems so that they can add it to their list as well
+//adds the GameObject passed in to the scene.
 void GameSystem::createGameObject(GameObject* g) {
 	//check if object id already exists
 	for (GameObject* obj : gameObjects) {
@@ -171,11 +170,7 @@ void GameSystem::createGameObject(GameObject* g) {
 	//add to the collisions quad tree, if colliisons are enabled
 	if (g->collisionsEnabled==1)
 		insertIntoQuadTree(quadTreeRoot, g);
-	
-		
 }
-
-
 
 void GameSystem::startSystemLoop() {
 	//clocks for limiting gameloop speed
@@ -196,10 +191,6 @@ void GameSystem::startSystemLoop() {
 
 		//handle collisions using the quad tree
 		handleCollisions();
-
-		/////////////////////////////////////////////////////////////////////
-		//							OK to Run							   //
-		/////////////////////////////////////////////////////////////////////
 
 		m = new Msg(EMPTY_MESSAGE, "");
 
@@ -284,6 +275,7 @@ void GameSystem::handleMessage(Msg *msg) {
 	scene->sceneHandleMessage(msg);
 }
 
+//sends a mesage to other systems that the object position has been updated
 void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	std::ostringstream oss;
 	Msg* mm = new Msg(EMPTY_MESSAGE, "");
@@ -308,22 +300,7 @@ void GameSystem::sendUpdatePosMessage(GameObject* g) {
 	msgBus->postMessage(mm, this);
 }
 
-//converts grid coordinates to world coordinates
-//Vector2 GameSystem::gridToWorldCoord(int gridX, int gridY) {
-//	float hexHeight = hexSize * 2.0f; //height of a single hex tile
-//	float vertDist = hexHeight * 3.0f / 4.0f;//verticle distance between tile center points
-//	float hexWidth = sqrt(3.0f) / 2.0f * hexHeight;//width of a single tile. Also the horizontal distance bewteen 2 tiles
-//
-//	Vector2 worldPos;
-//
-//	worldPos.x = hexWidth * gridX;
-//	worldPos.y = vertDist * gridY;
-//	if (gridY % 2 != 0) 
-//		worldPos.x += hexWidth / 2;
-//
-//	return worldPos;
-//}
-
+//Sets the countdown timer display. to the passed in int
 void GameSystem::displayTimeLeft(int time) {
 	int p0, p1;
 	if (time < 0) {
@@ -349,6 +326,7 @@ void GameSystem::displayTimeLeft(int time) {
 	msgBus->postMessage(m, this);
 }
 
+//gets a pointer to the bject that matches the gameobject id
 GameObject* GameSystem::findGameObject(std::string objectID) {
 	GameObject* obj = nullptr;
 	for (GameObject* g : gameObjects) {
@@ -359,6 +337,8 @@ GameObject* GameSystem::findGameObject(std::string objectID) {
 	}
 	return obj;
 }
+
+//gets a pointer to the bject that matches the gameobject id
 TankObject* GameSystem::findTankObject(std::string objectID) {
 	TankObject* tank = nullptr;
 	for (GameObject *g : gameObjects) {
@@ -373,6 +353,8 @@ TankObject* GameSystem::findTankObject(std::string objectID) {
 	}
 	return nullptr;
 }
+
+//gets a pointer to the bject that matches the gameobject id
 GridObject* GameSystem::findGridObject(std::string objectID) {
 	GridObject* obj = nullptr;
 	for (GameObject* g : gameObjects) {
@@ -383,6 +365,8 @@ GridObject* GameSystem::findGridObject(std::string objectID) {
 	}
 	return obj;
 }
+
+//gets a pointer to the bject that matches the gameobject id
 FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 	FullscreenObj* obj = nullptr;
 	for (GameObject* g : gameObjects) {
@@ -394,7 +378,7 @@ FullscreenObj* GameSystem::findFullscreenObject(std::string objectID) {
 	return obj;
 }
 
-
+//clears the current scene and loads a new one
 void  GameSystem::loadScene(SceneType _scene){
 	
 	//calling destructor on the old scene just in case. 
@@ -450,43 +434,6 @@ int GameSystem::getGridDistance(int aX, int aY, int bX, int bY) {
 	return (abs(aXCube - bXCube) + abs(aYCube - bYCube) + abs(aZCube - bZCube)) / 2;
 }
 
-//Position of tank firing: _originX, _originY
-//how many tiles the shot can go: length
-//axis: 0=r 1=l 2=ur 3=dl 4=ul 5=dr
-/*void GameSystem::dealLineDamage(int _originX, int _originY, int length, int axis, int damage) {
-	vector<TankObject *> thingsHit; //list of things hit
-
-	for (GameObject *go : gameSystem->gameObjects) { //look through all gameobjects
-		if (go->getObjectType() == "TankObject") {
-			TankObject* tank = (TankObject*)go;
-			if (sameAxisShot(axis, _originX, _originY, tank->gridX, tank->gridY, length)) { //if on same axis and in range
-				thingsHit.push_back(tank); //add things that are in firing range along the axis to the list
-			}
-		}
-	}
-
-	//Find the first thing hit from the list
-	if (thingsHit.size() > 0) {
-		TankObject* currClosestTank = nullptr;
-		int dist = -1;
-		for (TankObject* t : thingsHit) {
-			OutputDebugString((t->id).c_str());
-			OutputDebugString(" hit\n");
-			if (dist < getGridDistance(_originX, _originY, t->gridX, t->gridY)) {
-				dist = getGridDistance(_originX, _originY, t->gridX, t->gridY);
-				currClosestTank = t;
-			}
-		}
-
-		//deal damage to closest tank;
-		if (currClosestTank != nullptr) {
-			currClosestTank->health -= damage;
-			if (currClosestTank->health <= 0)
-				msgBus->postMessage(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"), gameSystem);
-			//updatePlayerHealthBar(currClosestTank->id);//move this to tankObject
-		}
-	}
-}*/
 
 bool GameSystem::sameAxisShot(int axis, int x1, int y1, int x2, int y2, int length) {
 	bool result = false;
