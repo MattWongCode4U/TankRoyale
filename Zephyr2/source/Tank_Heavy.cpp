@@ -30,14 +30,22 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 	vector<GameObject*>* gameObjects = gameSystemUtil->getGameObjectsVector();
 
 
-	//create explosion Object
-	GridObject* go = (GridObject*)gameSystemUtil->makeGameObject("explostion.txt");
-	go->id = "explosion" + to_string(rand());
-	go->gridX = targetX;
-	go->gridY = targetY;
-	gameSystemUtil->createGameObject(go);
-	go->updateWorldCoords();
-	go->moveTowards(this->x, this->y, this->z, 0, 60);
+	//create projectile Object
+	Projectile* p = (Projectile*)gameSystemUtil->makeGameObject("projectile.txt");
+	p->id = "projectile" + to_string(rand());
+	p->x = x;
+	p->y = y;
+
+	p->firingTank = this;
+
+	vect2 v = gridToWorlPos(targetX, targetY);
+	p->targetX = v.x;
+	p->targetY = v.y;
+	p->speed = 1.2;
+	p->range = 40;
+	p->calculateVelocity();
+	gameSystemUtil->createGameObject(p);
+
 
 	vector<TankObject *> thingsHit; //list of things hit
 	int axis = gameSystemUtil->onAxis(gridX, gridY, targetX, targetY, range);

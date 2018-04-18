@@ -51,6 +51,9 @@ GameObject* GameSystem::makeGameObject(string fileName) {
 	else if (gameObjectType.compare("Tank_Sniper") == 0) {
 		g = new Tank_Sniper(gameObjDataMap, this);
 	}
+	else if (gameObjectType.compare("Projectile") == 0) {
+		g = new Projectile(gameObjDataMap, this);
+	}
 	return g;
 }
 
@@ -102,6 +105,9 @@ void GameSystem::addGameObjects(string fileName) {
 		}
 		else if (gameObjectType.compare("Tank_Sniper") == 0) {
 			g = new Tank_Sniper(gameObjDataMap, this);
+		}
+		else if (gameObjectType.compare("Projectile") == 0) {
+			g = new Projectile(gameObjDataMap, this);
 		}
 
 		if (g != NULL) {
@@ -665,12 +671,25 @@ int GameSystem::onAxis(int x1, int y1, int x2, int y2, int range) {
 //check if there is a collisiion between the two Gameobjects
 //gameObject hitboxes are currently rectangular, with no rotation. 
 bool GameSystem::checkCollision(GameObject* a, GameObject* b) {
-	if ((a->x + a->width >= b->x - b->width)
-		&& (a->x - a->width <= b->x + b->width)
-		&& (a->y + a->length >= b->y - b->length)
-		&& (a->y - a->length <= b->y + b->length)) {
+	float aWidth = 1;
+	float aLength = 1;
+	float bWidth = 1;
+	float bLength =1;
+
+	if ((a->x + aWidth >= b->x - bWidth)
+		&& (a->x - aWidth <= b->x + bWidth)
+		&& (a->y + aLength >= b->y - bLength)
+		&& (a->y - aLength <= b->y + bLength)) {
 		b->onCollide(a);
 		return true;
+
+
+	//if ((a->x + a->width >= b->x - b->width)
+	//	&& (a->x - a->width <= b->x + b->width)
+	//	&& (a->y + a->length >= b->y - b->length)
+	//	&& (a->y - a->length <= b->y + b->length)) {
+	//	b->onCollide(a);
+	//	return true;
 	}
 		
 	return false;

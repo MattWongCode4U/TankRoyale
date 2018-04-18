@@ -1,5 +1,6 @@
 #pragma once
 #include "GridObject.h"
+#include "Projectile.h"
 
 const int TANK_MAX_HEALTH = 100;
 

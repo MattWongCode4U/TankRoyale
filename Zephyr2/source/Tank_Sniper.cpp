@@ -23,13 +23,21 @@ void Tank_Sniper::shoot(int targetX, int targetY) {
 	int aYCube = -aXCube - aZCube;
 	vector<GameObject*>* gameObjects = gameSystemUtil->getGameObjectsVector();
 
-	//create explosion Object
-	GridObject* go = (GridObject*)gameSystemUtil->makeGameObject("explostion.txt");
-	go->id = "explosion" + to_string(rand());
-	go->gridX = targetX;
-	go->gridY = targetY;
-	gameSystemUtil->createGameObject(go);
-	go->updateWorldCoords();
+	//create projectile Object
+	Projectile* p = (Projectile*)gameSystemUtil->makeGameObject("projectile.txt");
+	p->id = "projectile" + to_string(rand());
+	p->x = x;
+	p->y = y;
+
+	p->firingTank = this;
+
+	vect2 v = gridToWorlPos(targetX, targetY);
+	p->targetX = v.x;
+	p->targetY = v.y;
+	p->speed = 1.5f;
+	p->range = 75;
+	p->calculateVelocity();
+	gameSystemUtil->createGameObject(p);
 
 	vector<TankObject *> thingsHit; //list of things hit
 	int axis = gameSystemUtil->onAxis(gridX, gridY, targetX, targetY, range);
