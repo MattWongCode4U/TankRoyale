@@ -53,8 +53,12 @@ void TankObject::shoot(int targetX, int targetY) {
 		if (TankObject* tank = dynamic_cast<TankObject*>(go)) {
 			if (gameSystemUtil->getGridDistance(targetX, targetY, tank->gridX, tank->gridY) <= affectedRadius) {
 				tank->takeDamage(damage);
-				if (tank->health <= 0)
+				if (tank->health <= 0) {
 					gameSystemUtil->postMessageToBus(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"));
+					renderable = "crater.png";
+					collisionsEnabled = false;
+				}
+					
 			}
 		}
 	}
