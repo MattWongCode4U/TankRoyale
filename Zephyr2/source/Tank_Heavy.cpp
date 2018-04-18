@@ -76,8 +76,13 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 		//deal damage to closest tank;
 		if (currClosestTank != nullptr) {
 			currClosestTank->takeDamage(damage);
-			if (currClosestTank->health <= 0)
+			if (currClosestTank->health <= 0) {
 				gameSystemUtil->postMessageToBus(new Msg(UPDATE_OBJ_SPRITE, currClosestTank->id + ",1,crater.png,"));
+				currClosestTank->collisionsEnabled = false;
+				currClosestTank->renderable = "crater.png";
+			}
+				
+
 		}
 	}
 }

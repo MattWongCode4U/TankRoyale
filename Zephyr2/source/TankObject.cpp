@@ -55,8 +55,8 @@ void TankObject::shoot(int targetX, int targetY) {
 				tank->takeDamage(damage);
 				if (tank->health <= 0) {
 					gameSystemUtil->postMessageToBus(new Msg(UPDATE_OBJ_SPRITE, tank->id + ",1,crater.png,"));
-					renderable = "crater.png";
-					collisionsEnabled = false;
+					tank->renderable = "crater.png";
+					tank->collisionsEnabled = false;
 				}
 					
 			}
