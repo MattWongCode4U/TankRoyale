@@ -37,6 +37,7 @@ void Tank_Heavy::shoot(int targetX, int targetY) {
 	go->gridY = targetY;
 	gameSystemUtil->createGameObject(go);
 	go->updateWorldCoords();
+	go->moveTowards(this->x, this->y, this->z, 0, 60);
 
 	vector<TankObject *> thingsHit; //list of things hit
 	int axis = gameSystemUtil->onAxis(gridX, gridY, targetX, targetY, range);
