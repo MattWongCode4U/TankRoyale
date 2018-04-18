@@ -2,6 +2,11 @@
 #include "GameObject.h"
 #include "GridVector3.h"
 
+struct vect2 {
+	float x;
+	float y;
+};
+
 class GridObject : public GameObject {
 public:
 	GridObject(map<string, string> params, GameSystemUtil* _gameSystemUtil);
@@ -31,7 +36,7 @@ public:
 	//gets the grid orientation of the  specified gridObject object (0-5)
 	int getAxisOrientation(GridObject* g = 0);
 
-
+	vect2 gridToWorlPos(int gridX, int gridY);
 
 	//object's position in in grid coordinates
 	int gridX;

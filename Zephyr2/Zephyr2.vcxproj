@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{E2BCECD4-83CF-44C8-B1FB-BADB764955C4}</ProjectGuid>
     <RootNamespace>Zephyr2</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -184,6 +184,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="source\Msg.cpp" />
     <ClCompile Include="source\NetworkSystem.cpp" />
     <ClCompile Include="source\GlobalPrefs.cpp" />
+    <ClCompile Include="source\Projectile.cpp" />
     <ClCompile Include="source\renderer\OBJImport.cpp" />
     <ClCompile Include="source\renderer\RenderPipeline.cpp" />
     <ClCompile Include="source\renderer\RenderWrapper.cpp" />
@@ -219,6 +220,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\Msg.h" />
     <ClInclude Include="source\NetworkHelpers.h" />
     <ClInclude Include="source\NetworkSystem.h" />
+    <ClInclude Include="source\Projectile.h" />
     <ClInclude Include="source\renderer\Cube.h" />
     <ClInclude Include="source\GlobalPrefs.h" />
     <ClInclude Include="source\renderer\OBJImport.h" />
@@ -228,6 +230,7 @@ xcopy /y /e /i "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="source\renderer\RenderPipeline.h" />
     <ClInclude Include="source\renderer\RenderWrapper.h" />
     <ClInclude Include="source\renderer\Shaders.h" />
+    <ClInclude Include="source\renderer\Sort.h" />
     <ClInclude Include="source\RenderSystem.h" />
     <ClInclude Include="source\Scene.h" />
     <ClInclude Include="source\scene_GameOver.h" />

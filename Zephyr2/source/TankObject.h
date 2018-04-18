@@ -1,5 +1,6 @@
 #pragma once
 #include "GridObject.h"
+#include "Projectile.h"
 
 const int TANK_MAX_HEALTH = 100;
 
@@ -50,6 +51,9 @@ public:
 	string moveOverlayRenderable = "range_Move.png";
 	float shootOverlaySize = 60;
 	float moveOverlaySize = 20;
+
+	// Check if still in game
+	bool outOfMatch = false;
 
 	//int getAxisOrientation();
 
