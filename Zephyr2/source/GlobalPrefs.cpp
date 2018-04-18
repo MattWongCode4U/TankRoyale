@@ -37,7 +37,7 @@ float GlobalPrefs::aMasterVolume = 0.75f;
 //*****LOAD METHOD
 void GlobalPrefs::load()
 {
-	//this is going to be "fun" in a language without reflection
+	//this is going to be "fun" in a language without reflection (although we could maybe have used a library?)
 	//the other option would be to use a map, but then we're back to being stringly typed...
 
 	std::map<std::string, std::string> dataMap;
@@ -95,6 +95,8 @@ void GlobalPrefs::load()
 	//assign audio settings
 	assignFloat(aMasterVolume, "aMasterVolume", dataMap);
 }
+
+//shorthand methods for parsing values
 
 void GlobalPrefs::assignBool(bool & dest, const std::string & key, const std::map<std::string, std::string>& input)
 {
